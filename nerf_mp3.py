@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert MP3 files to half their original bitrate using ffmpeg with parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -45,7 +42,9 @@ def check_ffmpeg():
         subprocess.run(["ffmpeg", "-version"], capture_output=True, check=True)
         subprocess.run(["ffprobe", "-version"], capture_output=True, check=True)
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print(f"{Colors.RED}✗ ffmpeg/ffprobe is required but not installed.{Colors.END}")
+        print(
+            f"{Colors.RED}✗ ffmpeg/ffprobe is required but not installed.{Colors.END}"
+        )
         sys.exit(1)
 
 
@@ -71,7 +70,15 @@ def format_duration(seconds: float) -> str:
 def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
     try:
         result = subprocess.run(
-            ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(mp3_file)],
+            [
+                "ffprobe",
+                "-v",
+                "quiet",
+                "-print_format",
+                "json",
+                "-show_format",
+                str(mp3_file),
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -88,7 +95,13 @@ def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
                 estimated_bitrate = int((size * 8) / (duration * 1000))
                 return estimated_bitrate, size
             return None, None
-    except (subprocess.CalledProcessError, json.JSONDecodeError, KeyError, ValueError, OSError):
+    except (
+        subprocess.CalledProcessError,
+        json.JSONDecodeError,
+        KeyError,
+        ValueError,
+        OSError,
+    ):
         return None, None
 
 
@@ -180,11 +193,17 @@ def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
 
 
 def print_file_result(stat: ConversionStats, index: int, total: int):
-    status_icon = f"{Colors.GREEN}✓{Colors.END}" if stat.success else f"{Colors.RED}✗{Colors.END}"
+    status_icon = (
+        f"{Colors.GREEN}✓{Colors.END}" if stat.success else f"{Colors.RED}✗{Colors.END}"
+    )
     if stat.success:
         size_saved = stat.original_size - stat.new_size
-        size_percent = (size_saved / stat.original_size * 100) if stat.original_size > 0 else 0
-        print(f"{Colors.CLEAR_LINE}{status_icon} [{index}/{total}] {Colors.CYAN}{stat.file_path}{Colors.END}")
+        size_percent = (
+            (size_saved / stat.original_size * 100) if stat.original_size > 0 else 0
+        )
+        print(
+            f"{Colors.CLEAR_LINE}{status_icon} [{index}/{total}] {Colors.CYAN}{stat.file_path}{Colors.END}"
+        )
         print(
             f"  {Colors.DIM}{fsz(stat.original_size)} → {fsz(stat.new_size)} "
             f"({Colors.GREEN}-{size_percent:.1f}%{Colors.END}) | "
@@ -192,7 +211,9 @@ def print_file_result(stat: ConversionStats, index: int, total: int):
             f"{format_duration(stat.duration)}{Colors.END}"
         )
     else:
-        print(f"{Colors.CLEAR_LINE}{status_icon} [{index}/{total}] {Colors.RED}{stat.file_path}{Colors.END}")
+        print(
+            f"{Colors.CLEAR_LINE}{status_icon} [{index}/{total}] {Colors.RED}{stat.file_path}{Colors.END}"
+        )
         print(f"  {Colors.RED}Error: {stat.error_message}{Colors.END}")
 
 
@@ -212,7 +233,9 @@ def print_final_summary(stats: list[ConversionStats], total_duration: float):
         print(f"\n{Colors.BOLD}Space saved:{Colors.END}")
         print(f"  Before: {fsz(total_original)}")
         print(f"  After:  {fsz(total_new)}")
-        print(f"  Saved:  {Colors.GREEN}{fsz(total_saved)} ({total_saved / total_original * 100:.1f}%){Colors.END}")
+        print(
+            f"  Saved:  {Colors.GREEN}{fsz(total_saved)} ({total_saved / total_original * 100:.1f}%){Colors.END}"
+        )
     print(f"\n{Colors.BOLD}Total time:{Colors.END} {format_duration(total_duration)}")
     print(f"{'─' * 42}")
 
@@ -221,7 +244,9 @@ def find_mp3_files(directories: list[Path]) -> list[Path]:
     mp3_files = []
     for directory in directories:
         if not directory.exists():
-            print(f"{Colors.YELLOW}Warning: Directory not found: {directory}{Colors.END}")
+            print(
+                f"{Colors.YELLOW}Warning: Directory not found: {directory}{Colors.END}"
+            )
             continue
         if not directory.is_dir():
             print(f"{Colors.YELLOW}Warning: Not a directory: {directory}{Colors.END}")
@@ -243,11 +268,16 @@ def process_directory(directory: Path, max_workers: int = 4):
     if not mp3_files:
         print(f"{Colors.YELLOW}No MP3 files found in {directory}{Colors.END}")
         return
-    print(f"{Colors.BOLD}Found {len(mp3_files)} MP3 file(s) in {directory}{Colors.END}\n")
+    print(
+        f"{Colors.BOLD}Found {len(mp3_files)} MP3 file(s) in {directory}{Colors.END}\n"
+    )
     stats = []
     start_time = time.time()
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(convert_single_file, mp3_file, directory): mp3_file for mp3_file in mp3_files}
+        future_to_file = {
+            executor.submit(convert_single_file, mp3_file, directory): mp3_file
+            for mp3_file in mp3_files
+        }
         for i, future in enumerate(as_completed(future_to_file), 1):
             stat = future.result()
             stats.append(stat)
@@ -288,7 +318,9 @@ Examples:
         default=min(4, os.cpu_count() or 1),
         help="Number of parallel workers (default: min(4, CPU cores))",
     )
-    parser.add_argument("--no-color", action="store_true", help="Disable colored output")
+    parser.add_argument(
+        "--no-color", action="store_true", help="Disable colored output"
+    )
     args = parser.parse_args()
     if args.no_color:
         for attr in dir(Colors):

@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to run git pull on all git repositories recursively.
-If a repo has no remote, create a new public repo on GitHub and set it as origin.
-Requires: pip install gitpython requests python-dotenv
-"""
 
 from __future__ import annotations
 
@@ -30,7 +25,10 @@ def find_git_repos(root_path: Path) -> list[Path]:
 
 def create_github_repo(repo_name: str, github_token: str) -> str | None:
     url = "https://api.github.com/user/repos"
-    headers = {"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}
+    headers = {
+        "Authorization": f"token {github_token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
     data = {
         "name": repo_name,
         "description": f"Repository for {repo_name}",
@@ -82,7 +80,9 @@ def setup_remote_and_push(repo: Repo, repo_path: Path, remote_url: str) -> bool:
             print(f"   🔗 Added remote 'origin': {remote_url}")
         print("   📤 Pushing to GitHub...")
         current_branch = repo.active_branch.name
-        repo.remotes.origin.push(refspec=f"{current_branch}:{current_branch}", set_upstream=True)
+        repo.remotes.origin.push(
+            refspec=f"{current_branch}:{current_branch}", set_upstream=True
+        )
         print(f"   ✅ Pushed branch '{current_branch}' to GitHub")
         return True
     except GitCommandError as e:
@@ -107,7 +107,10 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
             except GitCommandError as e:
                 if "merge conflict" in str(e).lower():
                     return False, "Merge conflicts detected"
-                return (False, f"Pull failed: {e.stderr.strip() if e.stderr else str(e)}")
+                return (
+                    False,
+                    f"Pull failed: {e.stderr.strip() if e.stderr else str(e)}",
+                )
         else:
             print(f"\n📁 {rel_path} (no remote configured)")
             print(f"   Creating GitHub repository: {repo_path.name}")

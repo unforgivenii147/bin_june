@@ -18,7 +18,19 @@ def gsz(path: str | Path) -> int:
     return total
 
 
-EXT = [".java", ".c", ".cpp", ".cxx", ".cc", ".h", ".hh", ".hpp", ".hxx", ".js", ".json"]
+EXT = [
+    ".java",
+    ".c",
+    ".cpp",
+    ".cxx",
+    ".cc",
+    ".h",
+    ".hh",
+    ".hpp",
+    ".hxx",
+    ".js",
+    ".json",
+]
 
 
 def process_file(path):

@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Translate non-English comments, docstrings, and print() strings in Python files.
-Uses pycld2 for fast language detection.
-Optimized for Python 3.12.
-"""
 
 from __future__ import annotations
 
@@ -84,15 +79,23 @@ def translate_text(text: str) -> str:
         return text
 
 
-def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[int, int]]]:
+def get_node_positions(
+    tree: ast.AST,
+) -> tuple[set[tuple[int, int]], set[tuple[int, int]]]:
     print_positions = set()
     docstring_positions = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and (node.func.id == "print"):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and (node.func.id == "print")
+        ):
             for arg in node.args:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                     print_positions.add((arg.lineno, arg.col_offset))
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)) and (
+        if isinstance(
+            node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)
+        ) and (
             node.body
             and isinstance(node.body[0], ast.Expr)
             and isinstance(node.body[0].value, ast.Constant)
@@ -150,8 +153,12 @@ def process_file(path: Path) -> bool:
                     translated = translate_text(inner)
                     label = "docstring" if is_doc else "print-str"
                     logger.info("  [%s] %s -> %s", label, inner, translated)
-                    escaped = translated.replace("\\", "\\\\").replace(quote, f"\\{quote}")
-                    replacements.append((start_offset, end_offset, f"{quote}{escaped}{quote}"))
+                    escaped = translated.replace("\\", "\\\\").replace(
+                        quote, f"\\{quote}"
+                    )
+                    replacements.append(
+                        (start_offset, end_offset, f"{quote}{escaped}{quote}")
+                    )
     if not replacements:
         return False
     replacements.sort(key=lambda x: x[0], reverse=True)
@@ -178,11 +185,17 @@ def worker(path_str: str) -> None:
 
 
 def main() -> None:
-    files = [str(p) for p in Path(".").rglob("*.py") if not any(part in SKIP_DIRS for part in p.parts)]
+    files = [
+        str(p)
+        for p in Path(".").rglob("*.py")
+        if not any(part in SKIP_DIRS for part in p.parts)
+    ]
     if not files:
         logger.info("No Python files found.")
         return
-    logger.info("Found %d files. Processing with %d workers...", len(files), MAX_WORKERS)
+    logger.info(
+        "Found %d files. Processing with %d workers...", len(files), MAX_WORKERS
+    )
     with multiprocessing.Pool(processes=MAX_WORKERS) as pool:
         pool.map(worker, files)
     logger.info("Done.")

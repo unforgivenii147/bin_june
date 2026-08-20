@@ -64,7 +64,9 @@ def strip_file(file_path) -> None:
 
 
 def main() -> None:
-    files = [os.path.join(r, f) for r, _, fs in os.walk(".") for f in fs if f.endswith(".py")]
+    files = [
+        os.path.join(r, f) for r, _, fs in os.walk(".") for f in fs if f.endswith(".py")
+    ]
     if not files:
         return
     print(f"Applying anchored query processing to {len(files)} files...")

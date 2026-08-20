@@ -103,14 +103,22 @@ def gather_files(inputs) -> list[Path]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Strip comments and docstrings using Tree-Sitter safely.")
-    parser.add_argument("paths", nargs="*", help="Target files or directories to process. Defaults to '.' if empty.")
+    parser = argparse.ArgumentParser(
+        description="Strip comments and docstrings using Tree-Sitter safely."
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="Target files or directories to process. Defaults to '.' if empty.",
+    )
     args = parser.parse_args()
     targets = gather_files(args.paths)
     if not targets:
         print("No target Python source files detected.")
         sys.exit(0)
-    print(f"Queue loaded. Processing {len(targets)} target files via Parallel Pipeline...")
+    print(
+        f"Queue loaded. Processing {len(targets)} target files via Parallel Pipeline..."
+    )
     with ProcessPoolExecutor() as executor:
         futures = {executor.submit(process_file, target): target for target in targets}
         for future in as_completed(futures):

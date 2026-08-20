@@ -27,8 +27,16 @@ def load_env_file(env_path):
 
 def create_github_repo(token, repo_name, description, public=True):
     url = "https://api.github.com/user/repos"
-    headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-    data = {"name": repo_name, "description": description, "public": public, "auto_init": True}
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    data = {
+        "name": repo_name,
+        "description": description,
+        "public": public,
+        "auto_init": True,
+    }
     response = requests.post(url, headers=headers, json=data)
     if response.status_code == 201:
         repo_info = response.json()
@@ -59,7 +67,9 @@ def main():
         print("Error: GITHUB_TOKEN not found in ~/.env")
         print("Please add: GITHUB_TOKEN=your_github_token_here")
         sys.exit(1)
-    result = create_github_repo(token=token, repo_name=repo_name, description=readme_description, public=True)
+    result = create_github_repo(
+        token=token, repo_name=repo_name, description=readme_description, public=True
+    )
     if result:
         print(f"\n✨ Repository ready at: {result['html_url']}")
     else:

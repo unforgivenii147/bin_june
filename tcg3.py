@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Termux script creator - Creates executable scripts from clipboard content.
-"""
 
 from __future__ import annotations
 
@@ -14,12 +11,18 @@ TERMUX_SHEBANGS = {
     "bash": "#!/data/data/com.termux/files/usr/bin/bash",
     "sh": "#!/data/data/com.termux/files/usr/bin/sh",
 }
-SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin", Path.home() / ".local" / "bin"}
+SCRIPT_DIRS = {
+    Path.home() / "bin",
+    Path.home() / "bashbin",
+    Path.home() / ".local" / "bin",
+}
 
 
 def get_clipboard_content() -> str:
     try:
-        result = subprocess.run(["termux-clipboard-get"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["termux-clipboard-get"], capture_output=True, text=True, check=True
+        )
         return result.stdout
     except subprocess.CalledProcessError as e:
         print(f"Failed to read clipboard: {e}", file=sys.stderr)
@@ -36,9 +39,7 @@ def detect_script_type(content: str) -> str:
     if first_line.startswith("#!"):
         if "python" in first_line.lower():
             return "python"
-        elif "bash" in first_line.lower():
-            return "bash"
-        elif "sh" in first_line.lower():
+        elif "bash" in first_line.lower() or "sh" in first_line.lower():
             return "bash"
     preview = content[:500].lower()
     python_indicators = [
@@ -88,9 +89,7 @@ def get_shebang_from_filename(filename: str) -> str | None:
     suffix = path.suffix.lower()
     if suffix in [".py", ".pyw"]:
         return "python"
-    elif suffix in [".sh", ".bash"]:
-        return "bash"
-    elif suffix in [".rb", ".pl", ".js", ".go", ".rs"]:
+    elif suffix in [".sh", ".bash"] or suffix in [".rb", ".pl", ".js", ".go", ".rs"]:
         return "bash"
     return None
 

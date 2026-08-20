@@ -1,13 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-folderize_images.py
-Recursively find all image files in the current directory,
-group them by (width, height), and move them into folders
-named after their resolution.
-If a resolution group contains only a single image, that image
-is moved into an "other" folder instead.
-Uses pathlib for all filesystem operations.
-"""
 
 from __future__ import annotations
 
@@ -20,7 +11,17 @@ try:
 except ImportError:
     print("Error: This script requires Pillow. Install it with: pip install Pillow")
     exit(1)
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp", ".ico"}
+IMAGE_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".bmp",
+    ".tiff",
+    ".tif",
+    ".webp",
+    ".ico",
+}
 
 
 def collect_images(root: Path):

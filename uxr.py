@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Parallel Archive Extractor
-Extracts archives recursively in current directory using joblib parallelism.
-Supported: .gz, .xz, .zip, .whl, .br, .zst, .7z, and tarballs (.tar.gz, .tar.xz, etc.)
-"""
 
 from __future__ import annotations
 
@@ -68,7 +63,12 @@ class ArchiveExtractor:
             "RESET": "\x1b[0m",
         }
         color = colors.get(status.upper(), colors["RESET"])
-        icon = {"SUCCESS": "✅", "FAILED": "❌", "SKIPPED": "⏭️", "PROCESSING": "🔄"}.get(status.upper(), "➡️")
+        icon = {
+            "SUCCESS": "✅",
+            "FAILED": "❌",
+            "SKIPPED": "⏭️",
+            "PROCESSING": "🔄",
+        }.get(status.upper(), "➡️")
         msg = f"{icon} {archive.name:<40} [{status:<8}]"
         if details:
             msg += f" {details}"
@@ -179,13 +179,20 @@ class ArchiveExtractor:
                     except Exception as e:
                         temp_path.unlink()
                         if self.verbose:
-                            self._print_status(archive, "FAILED", f"Tar extraction from .zst failed: {e}")
+                            self._print_status(
+                                archive,
+                                "FAILED",
+                                f"Tar extraction from .zst failed: {e}",
+                            )
                         return False
             else:
                 output_file = output_dir / output_name
                 with open(archive, "rb") as f_in:
                     dctx = zstd.ZstdDecompressor()
-                    with dctx.stream_reader(f_in) as reader, open(output_file, "wb") as f_out:
+                    with (
+                        dctx.stream_reader(f_in) as reader,
+                        open(output_file, "wb") as f_out,
+                    ):
                         copy_chunks(reader, f_out)
                 return True
         except Exception as e:
@@ -212,7 +219,7 @@ class ArchiveExtractor:
             return archive, False, f"Unsupported format: {archive.suffix}"
         stem = archive.stem
         if str(archive).endswith(".tar.zst"):
-            stem = archive.stem[:-4] if archive.stem.endswith(".tar") else archive.stem
+            stem = archive.stem.removesuffix(".tar")
         elif format_type.startswith("tar_") and stem.endswith(".tar"):
             stem = stem[:-4]
         output_dir = archive.parent / stem
@@ -268,11 +275,16 @@ class ArchiveExtractor:
         print(f"📦 Found {len(archives)} archive(s) to process")
         print(f"⚡ Using {n_jobs if n_jobs > 0 else 'all'} CPU core(s)\n")
         if any(str(a).endswith(".zst") for a in archives) and zstd is None:
-            print("⚠️  Warning: zstandard library not installed. Install with: pip install zstandard")
+            print(
+                "⚠️  Warning: zstandard library not installed. Install with: pip install zstandard"
+            )
         if any(str(a).endswith(".br") for a in archives) and brotli_decompress is None:
-            print("⚠️  Warning: brotli library not installed. Install with: pip install brotli")
+            print(
+                "⚠️  Warning: brotli library not installed. Install with: pip install brotli"
+            )
         results = Parallel(n_jobs=n_jobs, prefer="threads")(
-            delayed(self.extract_single)(archive) for archive in tqdm(archives, desc="Extracting")
+            delayed(self.extract_single)(archive)
+            for archive in tqdm(archives, desc="Extracting")
         )
         for archive, success, error in results:
             self.stats["processed"] += 1
@@ -309,11 +321,31 @@ class ArchiveExtractor:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Extract archive files recursively with parallel processing")
-    parser.add_argument("-d", "--dir", default=".", help="Root directory to search (default: current)")
-    parser.add_argument("-k", "--keep", action="store_true", help="Keep original archive files after extraction")
-    parser.add_argument("-q", "--quiet", action="store_true", help="Reduce verbosity (only show summary)")
-    parser.add_argument("-j", "--jobs", type=int, default=-1, help="Number of parallel jobs (-1 for all cores)")
+    parser = argparse.ArgumentParser(
+        description="Extract archive files recursively with parallel processing"
+    )
+    parser.add_argument(
+        "-d", "--dir", default=".", help="Root directory to search (default: current)"
+    )
+    parser.add_argument(
+        "-k",
+        "--keep",
+        action="store_true",
+        help="Keep original archive files after extraction",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Reduce verbosity (only show summary)",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=-1,
+        help="Number of parallel jobs (-1 for all cores)",
+    )
     args = parser.parse_args()
     root_dir = Path(args.dir).resolve()
     if not root_dir.exists():

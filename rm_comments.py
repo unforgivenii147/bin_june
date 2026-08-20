@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove comments from non-binary files recursively.
-Targets files using '#' for comments (like config files, scripts, etc.)
-Supports inline comments and updates files in-place.
-"""
 
 from __future__ import annotations
 
@@ -11,7 +6,6 @@ import argparse
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional, Set, Tuple
 
 try:
     from binaryornot.check import is_binary
@@ -67,7 +61,7 @@ EXCLUDE_EXTENSIONS = {
 }
 
 
-def remove_comments_from_content(content: str) -> Tuple[str, int]:
+def remove_comments_from_content(content: str) -> tuple[str, int]:
     lines = content.split("\n")
     modified_lines = []
     removed_count = 0
@@ -135,7 +129,7 @@ def is_hidden(file_path: Path) -> bool:
     return any(part.startswith(".") for part in file_path.parts)
 
 
-def process_file(file_path: Path) -> Tuple[Path, int, Optional[str], bool]:
+def process_file(file_path: Path) -> tuple[Path, int, str | None, bool]:
     try:
         if is_binary(str(file_path)):
             return file_path, 0, None, True
@@ -153,7 +147,10 @@ def process_file(file_path: Path) -> Tuple[Path, int, Optional[str], bool]:
 
 
 def find_target_files(
-    root_dir: Path, include_hidden: bool = False, exclude_dirs: Set[str] | None = None, ignore_extensions: bool = True
+    root_dir: Path,
+    include_hidden: bool = False,
+    exclude_dirs: set[str] | None = None,
+    ignore_extensions: bool = True,
 ) -> list:
     if exclude_dirs is None:
         exclude_dirs = {
@@ -193,22 +190,42 @@ def find_target_files(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Remove comments from non-binary files using # comment syntax")
-    parser.add_argument(
-        "directory", nargs="?", default=".", help="Root directory to process (default: current directory)"
+    parser = argparse.ArgumentParser(
+        description="Remove comments from non-binary files using # comment syntax"
     )
     parser.add_argument(
-        "--include-hidden", action="store_true", help="Include hidden files and directories (starting with .)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory to process (default: current directory)",
     )
     parser.add_argument(
-        "--no-ignore-extensions", action="store_true", help="Process files with typically ignored extensions"
+        "--include-hidden",
+        action="store_true",
+        help="Include hidden files and directories (starting with .)",
     )
-    parser.add_argument("--exclude-dirs", nargs="+", help="Additional directories to exclude")
     parser.add_argument(
-        "--max-workers", type=int, default=None, help="Maximum number of parallel workers (default: CPU count)"
+        "--no-ignore-extensions",
+        action="store_true",
+        help="Process files with typically ignored extensions",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
-    parser.add_argument("--verbose", action="store_true", help="Show detailed processing information")
+    parser.add_argument(
+        "--exclude-dirs", nargs="+", help="Additional directories to exclude"
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=None,
+        help="Maximum number of parallel workers (default: CPU count)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without making changes",
+    )
+    parser.add_argument(
+        "--verbose", action="store_true", help="Show detailed processing information"
+    )
     args = parser.parse_args()
     root_dir = Path(args.directory).resolve()
     if not root_dir.exists():
@@ -256,9 +273,12 @@ def main():
     files_changed = 0
     files_with_errors = 0
     binary_files = 0
-    print(f"\nProcessing files in parallel...")
+    print("\nProcessing files in parallel...")
     with ProcessPoolExecutor(max_workers=args.max_workers) as executor:
-        future_to_file = {executor.submit(process_file, file_path): file_path for file_path in target_files}
+        future_to_file = {
+            executor.submit(process_file, file_path): file_path
+            for file_path in target_files
+        }
         completed = 0
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
@@ -268,9 +288,13 @@ def main():
                 if was_binary:
                     binary_files += 1
                     if args.verbose:
-                        print(f"[{completed}/{len(target_files)}] Skipped binary: {path.relative_to(root_dir)}")
+                        print(
+                            f"[{completed}/{len(target_files)}] Skipped binary: {path.relative_to(root_dir)}"
+                        )
                 elif error:
-                    print(f"[{completed}/{len(target_files)}] Error: {path.relative_to(root_dir)}: {error}")
+                    print(
+                        f"[{completed}/{len(target_files)}] Error: {path.relative_to(root_dir)}: {error}"
+                    )
                     files_with_errors += 1
                 elif removed > 0:
                     print(
@@ -280,12 +304,16 @@ def main():
                     files_changed += 1
                 else:
                     if args.verbose:
-                        print(f"[{completed}/{len(target_files)}] No changes: {path.relative_to(root_dir)}")
+                        print(
+                            f"[{completed}/{len(target_files)}] No changes: {path.relative_to(root_dir)}"
+                        )
             except Exception as e:
-                print(f"[{completed}/{len(target_files)}] Unexpected error: {file_path}: {e}")
+                print(
+                    f"[{completed}/{len(target_files)}] Unexpected error: {file_path}: {e}"
+                )
                 files_with_errors += 1
     print(f"\n{'=' * 42}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Files scanned: {len(target_files)}")
     print(f"  Binary files skipped: {binary_files}")
     print(f"  Files changed: {files_changed}")

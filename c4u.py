@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-PyPI Package Update Checker with Multiprocessing & Resume Capability
-- Checks installed packages against PyPI for updates
-- Saves results to pkgs_state.json with resume support
-- Generates requirements.txt for upgradable packages
-- Uses multiprocessing for concurrent API queries (Linux/Termux)
-"""
 
 from __future__ import annotations
 
@@ -27,7 +20,9 @@ def setup_logging(verbose: bool = True) -> logging.Logger:
     console_handler.setLevel(logging.DEBUG if verbose else logging.INFO)
     file_handler = logging.FileHandler("pkg_updater.log")
     file_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("[%(asctime)s] %(levelname)-8s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    formatter = logging.Formatter(
+        "[%(asctime)s] %(levelname)-8s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+    )
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
@@ -66,8 +61,13 @@ class PackageStateManager:
             try:
                 with open(self.state_file) as f:
                     raw_state = json.load(f)
-                self.state = {name: PackageInfo.from_dict(data) for name, data in raw_state.items()}
-                logger.info(f"✓ Resumed state: {len(self.state)} packages loaded from {self.state_file}")
+                self.state = {
+                    name: PackageInfo.from_dict(data)
+                    for name, data in raw_state.items()
+                }
+                logger.info(
+                    f"✓ Resumed state: {len(self.state)} packages loaded from {self.state_file}"
+                )
             except (json.JSONDecodeError, KeyError) as e:
                 logger.error(f"✗ Failed to load state: {e}. Starting fresh.")
                 self.state = {}
@@ -92,7 +92,13 @@ class PackageStateManager:
 
 def get_installed_packages() -> list[tuple[str, str]]:
     try:
-        result = run(["pip", "list", "--format=json"], capture_output=True, text=True, check=True, timeout=30)
+        result = run(
+            ["pip", "list", "--format=json"],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
+        )
         packages = json.loads(result.stdout)
         logger.info(f"✓ Found {len(packages)} installed packages")
         return [(p["name"], p["version"]) for p in packages]
@@ -101,7 +107,9 @@ def get_installed_packages() -> list[tuple[str, str]]:
         sys.exit(1)
 
 
-def query_pypi(package_name: str, installed_version: str, retries: int = 2) -> PackageInfo:
+def query_pypi(
+    package_name: str, installed_version: str, retries: int = 2
+) -> PackageInfo:
     import requests
 
     url = f"https://pypi.org/pypi/{package_name}/json"
@@ -119,7 +127,9 @@ def query_pypi(package_name: str, installed_version: str, retries: int = 2) -> P
             pkg_info.latest_version = latest_version
             pkg_info.upgradable = _is_upgradable(installed_version, latest_version)
             status = "🔄 upgradable" if pkg_info.upgradable else "✓ up-to-date"
-            logger.debug(f"{status:20} | {package_name:30} {installed_version} → {latest_version}")
+            logger.debug(
+                f"{status:20} | {package_name:30} {installed_version} → {latest_version}"
+            )
             return pkg_info
         except requests.exceptions.Timeout:
             if attempt < retries - 1:
@@ -170,11 +180,17 @@ def main() -> None:
     if not pending:
         logger.info("✓ All packages already checked. Skipping PyPI queries.")
     else:
-        pending_packages = [(name, next(v for n, v in installed if n == name)) for name in pending]
+        pending_packages = [
+            (name, next(v for n, v in installed if n == name)) for name in pending
+        ]
         num_workers = min(cpu_count(), 8)
         logger.info(f"🔄 Spawning {num_workers} workers to query PyPI...")
         with Pool(processes=num_workers) as pool:
-            results = pool.starmap(query_pypi, pending_packages, chunksize=max(1, len(pending_packages) // num_workers))
+            results = pool.starmap(
+                query_pypi,
+                pending_packages,
+                chunksize=max(1, len(pending_packages) // num_workers),
+            )
         for pkg_info in results:
             state_manager.update_package(pkg_info)
         logger.info(f"✓ Completed {len(results)} PyPI queries")
@@ -183,8 +199,10 @@ def main() -> None:
     if upgradable:
         req_file = Path("requirements_upgradable.txt")
         with open(req_file, "w") as f:
-            for pkg in sorted(upgradable, key=lambda x: x.pkgname):
-                f.write(f"{pkg.pkgname}=={pkg.latest_version}\n")
+            f.writelines(
+                f"{pkg.pkgname}=={pkg.latest_version}\n"
+                for pkg in sorted(upgradable, key=lambda x: x.pkgname)
+            )
         logger.info(f"📝 {len(upgradable)} upgradable packages saved to {req_file}")
     else:
         logger.info("✓ All packages are up-to-date!")

@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Convert .info files to .md using info command and remove originals."""
 
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path

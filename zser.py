@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-zser_optimized_by_gemini.py – Parallel Zstandard compressor/decompressor.
-Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
-"""
 
 from __future__ import annotations
 
@@ -40,9 +36,15 @@ SKIP_EXTS: Final[frozenset[str]] = frozenset(
         ".webm",
     }
 )
-SKIP_DIRS: Final[frozenset[str]] = frozenset({".git", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"})
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {".git", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
+)
 MAX_WORKERS: Final[int] = max(1, multiprocessing.cpu_count())
-logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 logger = logging.getLogger(__name__)
 
 
@@ -79,7 +81,12 @@ def compress_file(path: Path, level: int = 21) -> dict:
         compressed = cctx.compress(data)
         dst.write_bytes(compressed)
         path.unlink()
-        return {"status": "ok", "path": str(path), "original": size, "compressed": len(compressed)}
+        return {
+            "status": "ok",
+            "path": str(path),
+            "original": size,
+            "compressed": len(compressed),
+        }
     except Exception as e:
         dst.unlink(missing_ok=True)
         return {"status": "error", "path": str(path), "error": str(e)}
@@ -110,7 +117,11 @@ def decompress_file(path: Path) -> dict:
                     "decompressed": len(decompressed),
                 }
             except Exception as e:
-                return {"status": "error", "path": str(path), "error": f"tar extract: {e}"}
+                return {
+                    "status": "error",
+                    "path": str(path),
+                    "error": f"tar extract: {e}",
+                }
         path.unlink()
         return {
             "status": "ok",
@@ -136,18 +147,27 @@ def compress_dir(path: Path, level: int = 21) -> dict:
         orig_size = get_dir_size(path)
         zst_path.write_bytes(compressed)
         shutil.rmtree(path)
-        return {"status": "ok", "path": str(path), "original": orig_size, "compressed": len(compressed)}
+        return {
+            "status": "ok",
+            "path": str(path),
+            "original": orig_size,
+            "compressed": len(compressed),
+        }
     except Exception as e:
         zst_path.unlink(missing_ok=True)
         return {"status": "error", "path": str(path), "error": str(e)}
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="zser – modern parallel Zstandard compressor")
+    parser = argparse.ArgumentParser(
+        description="zser – modern parallel Zstandard compressor"
+    )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", default=True)
     group.add_argument("-d", "--decompress", action="store_true")
-    parser.add_argument("-l", "--level", type=int, default=21, help="Compression level (1-22)")
+    parser.add_argument(
+        "-l", "--level", type=int, default=21, help="Compression level (1-22)"
+    )
     parser.add_argument("-w", "--workers", type=int, default=MAX_WORKERS)
     parser.add_argument("-p", "--path", type=Path, default=Path.cwd())
     parser.add_argument("--no-dirs", action="store_true")
@@ -158,7 +178,9 @@ def main() -> int:
         return 1
     initial_size = get_dir_size(target)
     mode = "decompress" if args.decompress else "compress"
-    logger.info(f"zser - {mode} | {target} | workers={args.workers} | size={fsize(initial_size)}")
+    logger.info(
+        f"zser - {mode} | {target} | workers={args.workers} | size={fsize(initial_size)}"
+    )
     if args.decompress:
         files = list(target.glob(f"*{ZST_EXT}"))
         if not files:
@@ -172,13 +194,19 @@ def main() -> int:
                     logger.info(f"  ✓ {Path(res['path']).name}")
     else:
         if not args.no_dirs:
-            dirs = [p for p in target.iterdir() if p.is_dir() and p.name not in SKIP_DIRS]
+            dirs = [
+                p for p in target.iterdir() if p.is_dir() and p.name not in SKIP_DIRS
+            ]
             for d in dirs:
                 logger.info(f"  dir  {d.name}...")
                 res = compress_dir(d, args.level)
                 if res["status"] == "ok":
-                    logger.info(f"    ✓ {fsize(res['original'])} → {fsize(res['compressed'])}")
-        files = [p for p in target.iterdir() if p.is_file() and p.suffix not in SKIP_EXTS]
+                    logger.info(
+                        f"    ✓ {fsize(res['original'])} → {fsize(res['compressed'])}"
+                    )
+        files = [
+            p for p in target.iterdir() if p.is_file() and p.suffix not in SKIP_EXTS
+        ]
         if files:
             with ProcessPoolExecutor(max_workers=args.workers) as pool:
                 futures = [pool.submit(compress_file, f, args.level) for f in files]
@@ -191,7 +219,9 @@ def main() -> int:
         else:
             logger.info("Nothing to compress")
     final_size = get_dir_size(target)
-    logger.info(f"\nFinal size: {fsize(final_size)} (saved {fsize(initial_size - final_size)})")
+    logger.info(
+        f"\nFinal size: {fsize(final_size)} (saved {fsize(initial_size - final_size)})"
+    )
     return 0
 
 

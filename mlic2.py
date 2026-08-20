@@ -103,7 +103,9 @@ def is_text_file(filepath: Path) -> bool:
                 sample = f.read(1024)
                 if not sample:
                     return True
-                text_chars = sum(1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13))
+                text_chars = sum(
+                    1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13)
+                )
                 return text_chars / len(sample) > 0.8
         except OSError:
             return False
@@ -128,7 +130,9 @@ def read_file_content(filepath: Path) -> tuple[Path, list[str], str]:
         return filepath, [], ""
 
 
-def find_multiline_blocks(text: str, min_lines: int = 3) -> dict[str, list[tuple[int, str]]]:
+def find_multiline_blocks(
+    text: str, min_lines: int = 3
+) -> dict[str, list[tuple[int, str]]]:
     lines = text.splitlines()
     if len(lines) < min_lines:
         return {}
@@ -165,7 +169,9 @@ def find_multiline_blocks(text: str, min_lines: int = 3) -> dict[str, list[tuple
     return dict(blocks)
 
 
-def scan_file(filepath: Path, min_lines: int = 3) -> dict[str, list[tuple[Path, int, str]]]:
+def scan_file(
+    filepath: Path, min_lines: int = 3
+) -> dict[str, list[tuple[Path, int, str]]]:
     if not is_text_file(filepath):
         return {}
     filepath, _lines, text = read_file_content(filepath)
@@ -174,7 +180,9 @@ def scan_file(filepath: Path, min_lines: int = 3) -> dict[str, list[tuple[Path, 
     blocks = find_multiline_blocks(text, min_lines)
     result = {}
     for block, occurrences in blocks.items():
-        result[block] = [(filepath, line_no, context) for line_no, context in occurrences]
+        result[block] = [
+            (filepath, line_no, context) for line_no, context in occurrences
+        ]
     return result
 
 
@@ -185,7 +193,12 @@ def collect_multiline_repeats(
         num_workers = mp.cpu_count()
     text_files = []
     for filepath in root.rglob("*"):
-        if filepath.is_file() and is_text_file(filepath) and not filepath.is_symlink() and ".git" not in filepath.parts:
+        if (
+            filepath.is_file()
+            and is_text_file(filepath)
+            and not filepath.is_symlink()
+            and ".git" not in filepath.parts
+        ):
             text_files.append(filepath)
     if not text_files:
         return {}
@@ -202,7 +215,9 @@ def collect_multiline_repeats(
         file_occurrences = defaultdict(list)
         for filepath, line_no, context in occurrences:
             file_occurrences[filepath].append((line_no, context))
-        if len(file_occurrences) >= 2 or any(len(occ) >= 2 for occ in file_occurrences.values()):
+        if len(file_occurrences) >= 2 or any(
+            len(occ) >= 2 for occ in file_occurrences.values()
+        ):
             filtered[block] = occurrences
     return filtered
 
@@ -221,7 +236,9 @@ def report(repeated: dict[str, list[tuple[Path, int, str]]]) -> None:
         print("-" * 42)
 
 
-def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: Path) -> None:
+def save_to_file(
+    repeated: dict[str, list[tuple[Path, int, str]]], output_file: Path
+) -> None:
     if not repeated:
         return
     try:

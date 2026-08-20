@@ -1,112 +1,176 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+
 import argparse
-import concurrent.futures
 import os
 import tokenize
 import warnings
+from collections.abc import Iterator
 from pathlib import Path
 
-from dh import get_pyfiles
+
+def walk_python_files(root: Path) -> Iterator[Path]:
+    for directory, _, filenames in os.walk(root):
+        directory_path = Path(directory)
+
+        for filename in filenames:
+            path = directory_path / filename
+            if path.is_symlink() or ".git" in path.parts:
+                continue
+            if path.suffix == ".py":
+                yield path
 
 
-def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
-    result = {"path": file_path, "has_issues": False, "fixed": False, "messages": []}
+def process_file(file_path: Path, auto_fix: bool = False) -> dict:
+    result = {
+        "path": file_path,
+        "has_issues": False,
+        "fixed": False,
+        "messages": [],
+    }
+
     try:
-        content_bytes = file_path.read_bytes()
-    except Exception as e:
-        result["messages"].append(f"Error reading file: {e}")
+        source_bytes = file_path.read_bytes()
+    except Exception as exc:
+        result["messages"].append(f"Error reading file: {exc}")
         return result
+
     with warnings.catch_warnings(record=True) as caught_warnings:
         warnings.simplefilter("always", SyntaxWarning)
+
         try:
-            compile(content_bytes, str(file_path), "exec")
-        except SyntaxError as se:
-            if "invalid escape sequence" in str(se):
+            compile(source_bytes, str(file_path), "exec")
+        except SyntaxError as exc:
+            if "invalid escape sequence" in str(exc):
                 result["has_issues"] = True
-                result["messages"].append(f"Line {se.lineno}: SyntaxError: {se.msg}")
+                result["messages"].append(f"Line {exc.lineno}: SyntaxError: {exc.msg}")
             else:
                 return result
-        for w in caught_warnings:
-            if issubclass(w.category, SyntaxWarning) and "invalid escape sequence" in str(w.message):
-                result["has_issues"] = True
-                line_no = getattr(w, "lineno", "Unknown")
-                result["messages"].append(f"Line {line_no}: SyntaxWarning: {w.message}")
-    if result["has_issues"] and auto_fix:
-        try:
-            modified_tokens = []
-            is_modified = False
-            with file_path.open("rb") as f:
-                tokens = list(tokenize.tokenize(f.readline))
-            for tok in tokens:
-                if tok.type == tokenize.STRING:
-                    text = tok.string
-                    prefix = ""
-                    for char in text:
-                        if char.lower() in "frub":
-                            prefix += char
-                        else:
-                            break
-                    actual_str = text[len(prefix) :]
-                    if "\\" in actual_str and "r" not in prefix.lower():
-                        with warnings.catch_warnings(record=True) as token_warnings:
-                            warnings.simplefilter("always", SyntaxWarning)
-                            try:
-                                compile(f"_{prefix}{actual_str}", "<string>", "exec")
-                            except (SyntaxError, SyntaxWarning):
-                                pass
-                            if any("invalid escape sequence" in str(tw.message) for tw in token_warnings):
-                                new_prefix = "r" + prefix
-                                tok = tok._replace(string=f"{new_prefix}{actual_str}")
-                                is_modified = True
-                modified_tokens.append(tok)
-            if is_modified:
-                fixed_bytes = tokenize.untokenize(modified_tokens)
-                file_path.write_bytes(fixed_bytes)
-                result["fixed"] = True
-        except Exception as e:
-            result["messages"].append(f"Error while fixing: {e}")
+
+    for warning in caught_warnings:
+        if issubclass(
+            warning.category, SyntaxWarning
+        ) and "invalid escape sequence" in str(warning.message):
+            result["has_issues"] = True
+            line_number = getattr(warning, "lineno", "Unknown")
+            result["messages"].append(
+                f"Line {line_number}: SyntaxWarning: {warning.message}"
+            )
+
+    if not result["has_issues"] or not auto_fix:
+        return result
+
+    try:
+        modified_tokens = []
+        source_modified = False
+
+        with file_path.open("rb") as source_file:
+            tokens = tokenize.tokenize(source_file.readline)
+            tokens = list(tokens)
+
+        for token in tokens:
+            if token.type != tokenize.STRING:
+                modified_tokens.append(token)
+                continue
+
+            string_text = token.string
+
+            prefix_end = 0
+            while (
+                prefix_end < len(string_text)
+                and string_text[prefix_end].lower() in "frub"
+            ):
+                prefix_end += 1
+
+            prefix = string_text[:prefix_end]
+            literal = string_text[prefix_end:]
+
+            if "\\" not in literal or "r" in prefix.lower():
+                modified_tokens.append(token)
+                continue
+
+            causes_invalid_escape = False
+
+            with warnings.catch_warnings(record=True) as token_warnings:
+                warnings.simplefilter("always", SyntaxWarning)
+
+                try:
+                    compile(
+                        f"_{prefix}{literal}",
+                        "<string>",
+                        "exec",
+                    )
+                except SyntaxError:
+                    pass
+
+            for warning in token_warnings:
+                if issubclass(
+                    warning.category, SyntaxWarning
+                ) and "invalid escape sequence" in str(warning.message):
+                    causes_invalid_escape = True
+                    break
+
+            if causes_invalid_escape:
+                new_string = f"r{prefix}{literal}"
+                token = token._replace(string=new_string)
+                source_modified = True
+
+            modified_tokens.append(token)
+
+        if source_modified:
+            fixed_source = tokenize.untokenize(modified_tokens)
+            file_path.write_bytes(fixed_source)
+            result["fixed"] = True
+
+    except Exception as exc:
+        result["messages"].append(f"Error while fixing: {exc}")
+
     return result
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Recursively scan and fix Python files for invalid escape sequences.")
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Recursively scan and optionally fix Python files containing invalid escape sequences."
+        )
+    )
     parser.add_argument(
         "-a",
         "--auto-fix",
         action="store_true",
-        help="Automatically fix issues by converting offending string literals to raw strings.",
+        help=(
+            "Automatically fix invalid escape sequences by converting affected string literals to raw strings."
+        ),
     )
     args = parser.parse_args()
-    cwd = Path.cwd()
-    py_files = get_pyfiles(cwd)
-    script_path = Path(__file__).resolve()
-    py_files = [f for f in py_files if f.resolve() != script_path]
-    cpu_cores = os.cpu_count() or 1
-    print(f"🔍 Found {len(py_files)} Python files.")
-    print(f"⚡ Processing using {cpu_cores} parallel workers...")
-    if args.auto_fix:
-        print("🛠️  Auto-fix mode is enabled (-a).")
-    print("-" * 42)
+
+    root = Path.cwd()
     issues_count = 0
     fixed_count = 0
-    with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_cores) as executor:
-        futures = {executor.submit(check_and_fix_file, f, args.auto_fix): f for f in py_files}
-        for future in concurrent.futures.as_completed(futures):
-            res = future.result()
-            if res["has_issues"]:
-                issues_count += 1
-                status = "[🔧 FIXED]" if res["fixed"] else "[⚠️  ISSUE]"
-                print(f"{status} {res['path']}")
-                for msg in res["messages"]:
-                    print(f"   -> {msg}")
-                if res["fixed"]:
-                    fixed_count += 1
-                print()
+
+    for file_path in walk_python_files(root):
+        print(f"Processing {file_path}")
+
+        result = process_file(file_path, auto_fix=args.auto_fix)
+
+        if not result["has_issues"]:
+            continue
+
+        issues_count += 1
+        status = "[FIXED]" if result["fixed"] else "[ISSUE]"
+        print(f"{status} {file_path}")
+
+        for message in result["messages"]:
+            print(f"  -> {message}")
+
+        if result["fixed"]:
+            fixed_count += 1
+
     print("=" * 42)
-    print(f"📊 Summary:")
-    print(f"   Files with invalid escape sequences: {issues_count}")
+    print("Summary:")
+    print(f"  Files with invalid escape sequences: {issues_count}")
+
     if args.auto_fix:
-        print(f"   Files successfully auto-fixed:     {fixed_count}")
+        print(f"  Files successfully auto-fixed:      {fixed_count}")
 
 
 if __name__ == "__main__":

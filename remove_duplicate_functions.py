@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Remove duplicate functions from Python files based on content hash."""
 
 from __future__ import annotations
 
@@ -12,7 +11,6 @@ from pathlib import Path
 
 
 def normalize_function_body(lines, start_idx, end_idx):
-    """Extract and normalize function body lines."""
     body_lines = lines[start_idx:end_idx]
     if not body_lines:
         return ""
@@ -24,10 +22,9 @@ def normalize_function_body(lines, start_idx, end_idx):
 
 
 def compute_function_hash(filepath, func_node):
-    """Compute hash of function signature + body, ignoring decorators."""
     try:
         lines = filepath.read_text().splitlines(keepends=True)
-    except Exception as e:
+    except Exception:
         return None
     start_line = func_node.lineno - 1
     end_line = func_node.end_lineno
@@ -46,7 +43,6 @@ def compute_function_hash(filepath, func_node):
 
 
 def extract_top_level_functions(filepath):
-    """Parse file and extract top-level functions with metadata."""
     try:
         tree = ast.parse(filepath.read_text(), filename=str(filepath))
     except SyntaxError:
@@ -68,7 +64,6 @@ def extract_top_level_functions(filepath):
 
 
 def process_target_file(target_path, ref_hashes, apply=False):
-    """Process single target file and return results."""
     funcs = extract_top_level_functions(target_path)
     if funcs is None or not funcs:
         return {"file": target_path, "status": "skipped", "duplicates": []}
@@ -93,19 +88,26 @@ def process_target_file(target_path, ref_hashes, apply=False):
             for dup in duplicates:
                 start = dup["lineno"] - 1
                 end = dup["end_lineno"]
-                while start > 0 and (lines[start - 1].strip().startswith("@") or lines[start - 1].strip() == ""):
+                while start > 0 and (
+                    lines[start - 1].strip().startswith("@")
+                    or lines[start - 1].strip() == ""
+                ):
                     start -= 1
                 del lines[start:end]
                 removed.append(dup["name"])
             target_path.write_text("".join(lines))
             return {"file": target_path, "status": "updated", "duplicates": removed}
         except Exception as e:
-            return {"file": target_path, "status": "error", "error": str(e), "duplicates": []}
+            return {
+                "file": target_path,
+                "status": "error",
+                "error": str(e),
+                "duplicates": [],
+            }
     return {"file": target_path, "status": "found", "duplicates": duplicates}
 
 
 def expand_input_paths(inputs):
-    """Expand files and directories to list of .py files."""
     py_files = set()
     if not inputs:
         py_files.update(Path(".").rglob("*.py"))
@@ -130,23 +132,27 @@ def main():
         "  %(prog)s -a ref.py target.py  # actually remove",
     )
     parser.add_argument("reference", help="Reference file (functions to keep)")
-    parser.add_argument("inputs", nargs="*", help="Target files/directories (default: .)")
-    parser.add_argument("-a", "--apply", action="store_true", help="Apply changes (default: dry-run)")
+    parser.add_argument(
+        "inputs", nargs="*", help="Target files/directories (default: .)"
+    )
+    parser.add_argument(
+        "-a", "--apply", action="store_true", help="Apply changes (default: dry-run)"
+    )
     args = parser.parse_args()
     ref_path = Path(args.reference)
     if not ref_path.exists():
         print(f"❌ Reference file not found: {ref_path}")
         sys.exit(1)
     if ref_path.suffix != ".py":
-        print(f"❌ Reference must be a .py file")
+        print("❌ Reference must be a .py file")
         sys.exit(1)
     print(f"📖 Analyzing reference: {ref_path}")
     ref_funcs = extract_top_level_functions(ref_path)
     if ref_funcs is None:
-        print(f"❌ Failed to parse reference file")
+        print("❌ Failed to parse reference file")
         sys.exit(1)
     if not ref_funcs:
-        print(f"⚠️  No functions found in reference")
+        print("⚠️  No functions found in reference")
         sys.exit(1)
     ref_hashes = {info["hash"]: info["name"] for info in ref_funcs.values()}
     print(f"  Found {len(ref_hashes)} functions")
@@ -161,7 +167,9 @@ def main():
     total_duplicates = 0
     total_updated = 0
     with ThreadPoolExecutor(max_workers=8) as executor:
-        results = executor.map(lambda f: process_target_file(f, ref_hashes, args.apply), target_files)
+        results = executor.map(
+            lambda f: process_target_file(f, ref_hashes, args.apply), target_files
+        )
         for result in results:
             if result["status"] == "skipped":
                 print(f"⊘  {result['file']}")
@@ -182,7 +190,7 @@ def main():
         print(f"✅ Removed {total_updated} duplicate(s)")
     else:
         print(f"ℹ️  Found {total_duplicates} duplicate function(s)")
-        print(f"   Run with -a/--apply to remove")
+        print("   Run with -a/--apply to remove")
 
 
 if __name__ == "__main__":

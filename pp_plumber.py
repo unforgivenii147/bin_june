@@ -23,11 +23,12 @@ def extract_pages_from_pdf_plumber(pdf_path, n_jobs=4):
     output_dir = pdf_path.parent / pdf_path.stem
     output_dir.mkdir(exist_ok=True)
 
-    # Get total pages
     with pdfplumber.open(pdf_path) as pdf:
         total_pages = len(pdf.pages)
 
-    pages_data = [(page_num, pdf_path, output_dir) for page_num in range(1, total_pages + 1)]
+    pages_data = [
+        (page_num, pdf_path, output_dir) for page_num in range(1, total_pages + 1)
+    ]
 
     page_results = Parallel(n_jobs=n_jobs, backend="threading")(
         delayed(extract_single_page_plumber)(page_data) for page_data in pages_data

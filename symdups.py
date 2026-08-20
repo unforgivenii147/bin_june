@@ -123,18 +123,37 @@ def reverse_symlinks(backup_file: str = BACKUP_FILE) -> bool:
             restored_count += 1
         except OSError as e:
             print(f"[ERROR] Restoring {symlink_path}: {e}")
-    backup_renamed = f"{backup_file}.restored.{datetime.now(tz=UTC).strftime('%Y%m%d_%H%M%S')}"
+    backup_renamed = (
+        f"{backup_file}.restored.{datetime.now(tz=UTC).strftime('%Y%m%d_%H%M%S')}"
+    )
     Path(backup_file).rename(backup_renamed)
     print(f"[INFO] Backup file renamed to: {backup_renamed}")
     return True
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Find duplicate files and replace with symlinks (reversible)")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
-    parser.add_argument("--reverse", action="store_true", help="Reverse previous symlinking operation")
-    parser.add_argument("--backup-file", default=BACKUP_FILE, help=f"Backup file path (default: {BACKUP_FILE})")
+    parser = argparse.ArgumentParser(
+        description="Find duplicate files and replace with symlinks (reversible)"
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without making changes",
+    )
+    parser.add_argument(
+        "--reverse", action="store_true", help="Reverse previous symlinking operation"
+    )
+    parser.add_argument(
+        "--backup-file",
+        default=BACKUP_FILE,
+        help=f"Backup file path (default: {BACKUP_FILE})",
+    )
     args = parser.parse_args()
     if args.reverse:
         reverse_symlinks(args.backup_file)
@@ -144,7 +163,9 @@ def main() -> None:
             print("\n[INFO] No duplicates found!")
             return
         print(f"\n[INFO] Found {len(duplicates)} groups of duplicates")
-        print(f"[INFO] Total duplicate files: {sum(len(files) - 1 for files in duplicates.values())}")
+        print(
+            f"[INFO] Total duplicate files: {sum(len(files) - 1 for files in duplicates.values())}"
+        )
         if args.dry_run:
             print("\n[INFO] [DRY RUN MODE - No changes will be made]")
         create_symlinks(duplicates, dry_run=args.dry_run)

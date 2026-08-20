@@ -35,7 +35,10 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
                 from black import TargetVersion as _tv
                 from black import format_str
 
-                code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
+                code = format_str(
+                    original_code,
+                    mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120),
+                )
             case "autopep":
                 from autopep8 import fix_code as fix_with_autopep
 
@@ -49,14 +52,19 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
                 from black import TargetVersion as _tv
                 from black import format_str
 
-                code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
+                code = format_str(
+                    original_code,
+                    mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120),
+                )
         after = len(code)
         dsz = abs(before - after)
         etime = pff()
         if dsz:
             path.write_text(code, encoding="utf-8")
             ratio = dsz / before * 100
-            cprint(f"({format_time(etime - stime)}) | {fsz(dsz)} | {ratio:.1f}%", "cyan")
+            cprint(
+                f"({format_time(etime - stime)}) | {fsz(dsz)} | {ratio:.1f}%", "cyan"
+            )
             return True
         else:
             print(f"{path.name} ", end=" ")
@@ -70,7 +78,9 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
 
 def main() -> None:
     global MODE
-    p = argparse.ArgumentParser(description="Fast Python API-based formatter (Lazy Loading)")
+    p = argparse.ArgumentParser(
+        description="Fast Python API-based formatter (Lazy Loading)"
+    )
     p.add_argument("-b", "--black", action="store_true", help="Use black style")
     p.add_argument("-a", "--autopep", action="store_true", help="Use autopep8 style")
     p.add_argument("-i", "--isort", action="store_true", help="Sort imports")

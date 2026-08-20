@@ -101,7 +101,9 @@ def main():
         if target.is_symlink():
             continue
         if target.is_file():
-            if not any(part in SKIP_DIRS for part in target.parts) and is_python_script(target):
+            if not any(part in SKIP_DIRS for part in target.parts) and is_python_script(
+                target
+            ):
                 files_to_process.append((target, root))
         elif target.is_dir():
             for path in target.rglob("*"):

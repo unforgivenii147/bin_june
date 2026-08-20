@@ -22,9 +22,14 @@ def check_dist_info_safely(dist_info_path):
             with open(top_level_path, encoding="utf-8") as tlf:
                 top_levels = [line.strip() for line in tlf if line.strip()]
                 if len(top_levels) > 1:
-                    return (True, f"Multi-folder package detected ({', '.join(top_levels)})")
+                    return (
+                        True,
+                        f"Multi-folder package detected ({', '.join(top_levels)})",
+                    )
         except Exception as e:
-            print(f"  Warning: Couldn't read top_level.txt for {dist_info_path.name}: {e}")
+            print(
+                f"  Warning: Couldn't read top_level.txt for {dist_info_path.name}: {e}"
+            )
     record_path = dist_info_path / "RECORD"
     if record_path.exists():
         try:
@@ -49,23 +54,33 @@ def create_loader_stub(pkg_name, site_packages):
     stub_content = f"""import sys\nfrom pathlib import Path\n\nZIP_DIR = Path(r"{site_packages.absolute()}")\nZIP_PATH = str(ZIP_DIR / "{pkg_name}.zip")\n\nif ZIP_PATH not in sys.path:\n    sys.path.insert(0, ZIP_PATH)\n\nmodule = __import__("{pkg_name}")\nsys.modules["{pkg_name}"] = module\n\n# Edge Case Fix: Support running via 'python -m {pkg_name}'\nif __name__ == "__main__" and {has_main}:\n    import importlib.util\n    import runpy\n    \n    # Locate and execute the __main__.py file safely inside the zip archive\n    spec = importlib.util.find_spec("{pkg_name}.__main__")\n    if spec and spec.origin:\n        runpy.run_path(spec.origin, run_name="__main__")\n"""
     with open(stub_path, "w", encoding="utf-8") as f:
         f.write(stub_content)
-    print(f"  Created loader stub: {pkg_name}.py (with __main__ execution hook: {has_main})")
+    print(
+        f"  Created loader stub: {pkg_name}.py (with __main__ execution hook: {has_main})"
+    )
 
 
 def process_package(pkg_name, site_packages):
     pkg_dir = site_packages / pkg_name
-    if not pkg_dir.is_dir() or pkg_name.endswith((".dist-info", ".egg-info", "__pycache__")):
+    if not pkg_dir.is_dir() or pkg_name.endswith(
+        (".dist-info", ".egg-info", "__pycache__")
+    ):
         return False
     if "-" in pkg_name or "_" in pkg_name:
         return False
     if not (pkg_dir / "__init__.py").exists():
-        print(f"Skipped: {pkg_name} (Missing __init__.py - likely a shared namespace package)")
+        print(
+            f"Skipped: {pkg_name} (Missing __init__.py - likely a shared namespace package)"
+        )
         return False
     print(f"Checking: {pkg_name}...")
     dist_info_prefix = pkg_name.lower().replace("-", "_")
     corresponding_dist = None
     for dist in site_packages.iterdir():
-        if dist.is_dir() and dist.name.lower().startswith(dist_info_prefix) and dist.name.endswith(".dist-info"):
+        if (
+            dist.is_dir()
+            and dist.name.lower().startswith(dist_info_prefix)
+            and dist.name.endswith(".dist-info")
+        ):
             corresponding_dist = dist
             break
     if corresponding_dist:
@@ -74,7 +89,9 @@ def process_package(pkg_name, site_packages):
             print(f"  Skipped: {pkg_name} -> {reason}")
             return False
     else:
-        print(f"  Warning: No .dist-info found for {pkg_name}. Proceeding cautiously...")
+        print(
+            f"  Warning: No .dist-info found for {pkg_name}. Proceeding cautiously..."
+        )
     print(f"  Processing: {pkg_name}...")
     compileall.compile_dir(pkg_dir, quiet=1, legacy=True)
     import zipfile

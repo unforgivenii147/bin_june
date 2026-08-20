@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Advanced script to download English subtitles with multiple providers.
-"""
 
 from __future__ import annotations
 
@@ -13,7 +10,9 @@ import babelfish
 from subliminal import download_best_subtitles, save_subtitles
 from subliminal.video import scan_video
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -54,5 +53,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python subtitle_downloader.py <movie.mkv> [output_dir]")
         sys.exit(1)
-    success = download_subtitles_advanced(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
+    success = download_subtitles_advanced(
+        sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None
+    )
     sys.exit(0 if success else 1)

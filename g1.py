@@ -20,8 +20,7 @@ def get_github_client(token: str | None = None) -> Github:
 
 def parse_repo_url(txt: str) -> tuple[str, str]:
     txt = txt.strip()
-    if txt.endswith(".git"):
-        txt = txt[:-4]
+    txt = txt.removesuffix(".git")
     if txt.startswith("git@github.com:"):
         txt = txt.replace("git@github.com:", "")
     if txt.startswith(("http://", "https://")):
@@ -82,7 +81,9 @@ def clone_repo(clone_url: str, branch: str) -> None:
         "--progress",
     ]
     try:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
+        )
         for line in process.stderr:
             line = line.strip()
             if "Receiving objects:" in line or "Resolving deltas:" in line:
@@ -112,7 +113,11 @@ def init_submodules() -> None:
         return
     try:
         print("[INFO] Initializing and updating submodules...")
-        subprocess.run(["git", "submodule", "update", "--init", "--recursive"], check=True, capture_output=True)
+        subprocess.run(
+            ["git", "submodule", "update", "--init", "--recursive"],
+            check=True,
+            capture_output=True,
+        )
         print("[INFO] Submodules updated successfully.")
     except subprocess.CalledProcessError as e:
         raise Exception(f"Submodule update failed: {e}")
@@ -163,7 +168,9 @@ def main() -> None:
     except Exception as e:
         if "not found" in str(e).lower() or "fatal:" in str(e):
             alt_branch = "master" if default_branch == "main" else "main"
-            print(f"[WARNING] Branch '{default_branch}' failed, trying '{alt_branch}'...")
+            print(
+                f"[WARNING] Branch '{default_branch}' failed, trying '{alt_branch}'..."
+            )
             try:
                 clone_repo(clone_url, alt_branch)
             except Exception as e2:

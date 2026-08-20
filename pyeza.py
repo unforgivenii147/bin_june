@@ -69,7 +69,9 @@ def get_git_status_for_dir(path: str) -> dict[str, dict[str, str]]:
 
 
 class Entry:
-    def __init__(self, path: str, name: str, stat_obj, link_target=None, git=None) -> None:
+    def __init__(
+        self, path: str, name: str, stat_obj, link_target=None, git=None
+    ) -> None:
         self.path = path
         self.name = name
         self.stat = stat_obj
@@ -227,7 +229,11 @@ def print_entries(entries: list[Entry], args: Namespace) -> None:
                 "mode": mode_to_string(e.stat.st_mode),
                 "mtime": e.stat.st_mtime,
                 "git": e.git,
-                "type": "dir" if stat.S_ISDIR(e.stat.st_mode) else "link" if stat.S_ISLNK(e.stat.st_mode) else "file",
+                "type": "dir"
+                if stat.S_ISDIR(e.stat.st_mode)
+                else "link"
+                if stat.S_ISLNK(e.stat.st_mode)
+                else "file",
             }
             for e in entries
         ]

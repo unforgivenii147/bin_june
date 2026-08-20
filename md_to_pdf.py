@@ -147,7 +147,9 @@ def convert_md_to_pdf(input_path_str: str):
         print(f"❌ Error: The file '{input_path_str}' does not exist.")
         sys.exit(1)
     if input_file.suffix.lower() not in (".md", ".markdown"):
-        print(f"⚠️  Warning: '{input_path_str}' does not have a standard Markdown extension.")
+        print(
+            f"⚠️  Warning: '{input_path_str}' does not have a standard Markdown extension."
+        )
     output_pdf = input_file.with_suffix(".pdf")
     print(f"📖 Reading: {input_file.name}")
     try:
@@ -172,7 +174,9 @@ def convert_md_to_pdf(input_path_str: str):
         html_doc = weasyprint.HTML(string=full_html, base_url=str(input_file.parent))
         css_doc = weasyprint.CSS(string=CSS_TEMPLATE)
         html_doc.write_pdf(target=output_pdf, stylesheets=[css_doc])
-        print(f"✅ Success! PDF saved beside markdown file at:\n   👉 {output_pdf.resolve()}")
+        print(
+            f"✅ Success! PDF saved beside markdown file at:\n   👉 {output_pdf.resolve()}"
+        )
     except Exception as e:
         print(f"❌ WeasyPrint Compilation Error: {e}")
         sys.exit(1)

@@ -1,23 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Find and organize duplicate images in the current directory into subfolders.
-Same image content detection works even with different resolutions.
-Method:
-- Compute a perceptual hash (phash) after resizing/normalizing images.
-- Group images by hash (near-duplicates caught with a configurable threshold).
-- Move duplicate groups into numbered subfolders (duplicates_001, duplicates_002, etc).
-- Use multiprocessing for parallel hash computation.
-- Use OpenCV (cv2) for faster image loading and processing.
-Usage:
-  python find_dupes.py
-Optional:
-  Set environment variables:
-    DUP_HASH_THRESHOLD (default: 4)
-    NUM_WORKERS (default: CPU count)
-    VERBOSE (default: 1, set to 0 to suppress detailed output)
-    OUTPUT_DIR_PREFIX (default: "duplicates")
-    DRY_RUN (default: 0, set to 1 to preview without moving files)
-"""
 
 from __future__ import annotations
 
@@ -121,7 +102,10 @@ def get_file_info(file_path: Path) -> str:
 
 
 def move_duplicates_to_folders(
-    groups: list[list[str]], current_dir: Path, output_prefix: str, dry_run: bool = False
+    groups: list[list[str]],
+    current_dir: Path,
+    output_prefix: str,
+    dry_run: bool = False,
 ) -> tuple[int, int]:
     folders_created = 0
     files_moved = 0
@@ -147,7 +131,9 @@ def move_duplicates_to_folders(
                     log_verbose(f"Moved: {filename} → {folder_name}/")
                     files_moved += 1
                 else:
-                    log_verbose(f"[DRY RUN] Would move: {filename} → {folder_name}/", "INFO")
+                    log_verbose(
+                        f"[DRY RUN] Would move: {filename} → {folder_name}/", "INFO"
+                    )
                     files_moved += 1
             except Exception as e:
                 log_verbose(f"Failed to move {filename}: {e}", "ERROR")
@@ -206,12 +192,18 @@ def main():
         log_action(f"\n{'=' * 42}")
         log_action("[DRY RUN] Preview of operations:")
         log_action(f"{'=' * 42}\n")
-    folders_created, files_moved = move_duplicates_to_folders(groups, current_dir, output_prefix, dry_run=dry_run)
+    folders_created, files_moved = move_duplicates_to_folders(
+        groups, current_dir, output_prefix, dry_run=dry_run
+    )
     log_action(f"\n{'=' * 42}")
     if dry_run:
-        log_action(f"[DRY RUN] Would create {folders_created} folder(s) and move {files_moved} file(s)")
+        log_action(
+            f"[DRY RUN] Would create {folders_created} folder(s) and move {files_moved} file(s)"
+        )
     else:
-        log_action(f"✓ Created {folders_created} folder(s) and moved {files_moved} file(s)")
+        log_action(
+            f"✓ Created {folders_created} folder(s) and moved {files_moved} file(s)"
+        )
     total_dupes = sum(len(g) for g in groups)
     log_action(f"Summary: {len(groups)} group(s), {total_dupes} duplicate file(s)")
     log_action(f"{'=' * 42}\n")

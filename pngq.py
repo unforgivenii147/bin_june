@@ -25,7 +25,7 @@ def process_file(path: str | Path) -> None:
         after = gsz(path)
         rrs(path, before, after)
         return
-    except Exception as e:
+    except Exception:
         return
 
 

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-zstder_optimized_by_gemini.py — Recursive Zstandard compression/decompression tool.
-Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
-"""
 
 from __future__ import annotations
 
@@ -29,13 +25,19 @@ LEVEL_LARGE: Final[int] = 9
 ZSTD_EXT: Final[str] = ".zst"
 DEFAULT_THREADS: Final[int] = 4
 WORKERS: Final[int] = max(1, multiprocessing.cpu_count())
-logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 logger = logging.getLogger(__name__)
 
 
 def choose_level(path: Path) -> int:
     try:
-        return LEVEL_LARGE if path.stat().st_size > LARGE_FILE_THRESHOLD else LEVEL_DEFAULT
+        return (
+            LEVEL_LARGE if path.stat().st_size > LARGE_FILE_THRESHOLD else LEVEL_DEFAULT
+        )
     except OSError:
         return LEVEL_DEFAULT
 
@@ -51,7 +53,9 @@ def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int)
     return f"[{icon}] {name} ({elapsed_ms:.0f}ms) {ratio_str(before, after)}"
 
 
-def compress_file(src: Path, dry_run: bool, verbose: bool, level: int = 21, threads: int = 4) -> dict:
+def compress_file(
+    src: Path, dry_run: bool, verbose: bool, level: int = 21, threads: int = 4
+) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     dst = src.with_suffix(src.suffix + ZSTD_EXT)
     if dst.exists():
@@ -60,7 +64,9 @@ def compress_file(src: Path, dry_run: bool, verbose: bool, level: int = 21, thre
     effective_level = level if level is not None else choose_level(src)
     if dry_run:
         result["ok"] = True
-        result["line"] = f"[dry-run] {src.name} → {dst.name} (level {effective_level}, threads {threads})"
+        result["line"] = (
+            f"[dry-run] {src.name} → {dst.name} (level {effective_level}, threads {threads})"
+        )
         return result
     t0 = time.perf_counter()
     try:
@@ -75,7 +81,9 @@ def compress_file(src: Path, dry_run: bool, verbose: bool, level: int = 21, thre
         result["ok"] = True
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
         if verbose:
-            result["msg"] = f"  → {dst.name} ({fsz(before)} → {fsz(after)}, level {effective_level}, {threads} threads)"
+            result["msg"] = (
+                f"  → {dst.name} ({fsz(before)} → {fsz(after)}, level {effective_level}, {threads} threads)"
+            )
     except Exception as exc:
         elapsed_ms = (time.perf_counter() - t0) * 1000
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
@@ -127,7 +135,9 @@ def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Union[Path, None]:
         with tarfile.open(tar_path, "w") as tf:
             tf.add(subdir, arcname=subdir.name)
         if verbose:
-            logger.info(f"  tarred {subdir.name}/ → {tar_path.name} ({fsz(tar_path.stat().st_size)})")
+            logger.info(
+                f"  tarred {subdir.name}/ → {tar_path.name} ({fsz(tar_path.stat().st_size)})"
+            )
         return tar_path
     except Exception as exc:
         logger.error(f"  ERROR tarring {subdir}: {exc}")
@@ -164,7 +174,9 @@ def run_parallel(tasks: list[Path], worker_fn, extra_kwargs: dict) -> tuple[int,
     return (ok, err)
 
 
-def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, threads: int) -> None:
+def do_compress(
+    root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, threads: int
+) -> None:
     start = time.perf_counter()
     if tar_subdirs:
         subdirs = [p for p in root.iterdir() if p.is_dir() and p.name not in SKIP_DIRS]
@@ -178,13 +190,24 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
         tar_files = [tp for _, tp in tar_paths]
         if tar_files:
             if verbose:
-                logger.info(f"Compressing {len(tar_files)} .tar archive(s) at level {LEVEL_LARGE} …")
+                logger.info(
+                    f"Compressing {len(tar_files)} .tar archive(s) at level {LEVEL_LARGE} …"
+                )
             run_parallel(
                 tar_files,
                 compress_file,
-                {"dry_run": dry_run, "verbose": verbose, "level": LEVEL_LARGE, "threads": threads},
+                {
+                    "dry_run": dry_run,
+                    "verbose": verbose,
+                    "level": LEVEL_LARGE,
+                    "threads": threads,
+                },
             )
-            compressed = {tp for tp in tar_files if tp.with_suffix(tp.suffix + ZSTD_EXT).exists() or dry_run}
+            compressed = {
+                tp
+                for tp in tar_files
+                if tp.with_suffix(tp.suffix + ZSTD_EXT).exists() or dry_run
+            }
             for sd, tp in tar_paths:
                 if tp in compressed:
                     remove_subdir(sd, dry_run, verbose)
@@ -192,19 +215,31 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
         if loose:
             if verbose:
                 logger.info(f"Compressing {len(loose)} loose file(s) …")
-            run_parallel(loose, compress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
+            run_parallel(
+                loose,
+                compress_file,
+                {"dry_run": dry_run, "verbose": verbose, "threads": threads},
+            )
     else:
         files = [
             p
             for p in root.rglob("*")
-            if p.is_file() and p.suffix != ZSTD_EXT and (not any(part in SKIP_DIRS for part in p.parts))
+            if p.is_file()
+            and p.suffix != ZSTD_EXT
+            and (not any(part in SKIP_DIRS for part in p.parts))
         ]
         if not files:
             logger.info("No files to compress.")
             return
         if verbose:
-            logger.info(f"Compressing {len(files)} file(s) with {WORKERS} processes × {threads} zstd threads each …")
-        ok, err = run_parallel(files, compress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
+            logger.info(
+                f"Compressing {len(files)} file(s) with {WORKERS} processes × {threads} zstd threads each …"
+            )
+        ok, err = run_parallel(
+            files,
+            compress_file,
+            {"dry_run": dry_run, "verbose": verbose, "threads": threads},
+        )
         elapsed = time.perf_counter() - start
         logger.info(f"\nDone — {ok} compressed, {err} error(s) [{elapsed:.2f}s]")
         return
@@ -220,7 +255,9 @@ def do_decompress(root: Path, dry_run: bool, verbose: bool) -> None:
         return
     if verbose:
         logger.info(f"Decompressing {len(files)} file(s) with {WORKERS} workers …")
-    ok, err = run_parallel(files, decompress_file, {"dry_run": dry_run, "verbose": verbose})
+    ok, err = run_parallel(
+        files, decompress_file, {"dry_run": dry_run, "verbose": verbose}
+    )
     elapsed = time.perf_counter() - start
     logger.info(f"\nDone — {ok} decompressed, {err} error(s) [{elapsed:.2f}s]")
 
@@ -232,18 +269,33 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("-c", "--compress", action="store_true", help="Compress files (default)")
-    mode.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
-    parser.add_argument("-t", "--tar-subdirs-first", action="store_true", help="Tar subdirs before compressing.")
+    mode.add_argument(
+        "-c", "--compress", action="store_true", help="Compress files (default)"
+    )
+    mode.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress files"
+    )
+    parser.add_argument(
+        "-t",
+        "--tar-subdirs-first",
+        action="store_true",
+        help="Tar subdirs before compressing.",
+    )
     parser.add_argument(
         "--threads",
         type=int,
         default=DEFAULT_THREADS,
         help=f"zstd intra-file compression threads (default: {DEFAULT_THREADS}).",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    parser.add_argument("-n", "--dry-run", action="store_true", help="Do not modify files")
-    parser.add_argument("directory", nargs="?", default=".", help="Root directory (default: current)")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose output"
+    )
+    parser.add_argument(
+        "-n", "--dry-run", action="store_true", help="Do not modify files"
+    )
+    parser.add_argument(
+        "directory", nargs="?", default=".", help="Root directory (default: current)"
+    )
     args = parser.parse_args()
     root = Path(args.directory).resolve()
     if not root.is_dir():
@@ -257,7 +309,9 @@ def main() -> None:
         logger.info(f"Threads : {args.threads} (zstd) × {WORKERS} processes")
         logger.info("")
     if compress:
-        do_compress(root, args.tar_subdirs_first, args.dry_run, args.verbose, args.threads)
+        do_compress(
+            root, args.tar_subdirs_first, args.dry_run, args.verbose, args.threads
+        )
     else:
         if args.tar_subdirs_first:
             logger.warning("Note: --tar-subdirs-first ignored during decompression.")

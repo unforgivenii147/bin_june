@@ -52,7 +52,10 @@ def get_or_create_remote(repo):
 
 def create_github_repo():
     url = "https://api.github.com/user/repos"
-    headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github.v3+json",
+    }
     data = {"name": REPO_NAME, "private": False, "auto_init": False}
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 422:

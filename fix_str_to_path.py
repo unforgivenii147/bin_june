@@ -30,7 +30,9 @@ def add_path_statement(file_path: str) -> bool:
                 for j in range(i - 1, -1, -1):
                     if re.match(r"^\s*def process_file\(", modified_lines[j]):
                         func_line = modified_lines[j]
-                        function_indent = re.match(r"^(\s*)", func_line).group(1) + "    "
+                        function_indent = (
+                            re.match(r"^(\s*)", func_line).group(1) + "    "
+                        )
                         break
             current_indent = re.match(r"^(\s*)", line).group(1)
             if current_indent.startswith(function_indent.rstrip()) and stripped:
@@ -44,7 +46,9 @@ def add_path_statement(file_path: str) -> bool:
             file.writelines(modified_lines)
         return True
     else:
-        print(f"Skipping {file_path}: No process_file function found or already has the line")
+        print(
+            f"Skipping {file_path}: No process_file function found or already has the line"
+        )
         return False
 
 
@@ -54,15 +58,15 @@ def add_path_statement_simple(file_path: str) -> bool:
     if "path=Path(path)" in content or "path = Path(path)" in content:
         print(f"Skipping {file_path}: path=Path(path) already exists")
         return False
-    pattern = (
-        "(def process_file\\([^:]*:)\\s*\\n\\s*(?:\"\"\"[\\s\\S]*?\"\"\"|\\'\\'\\'[\\s\\S]*?\\'\\'\\')\\s*\\n?\\s*"
-    )
+    pattern = "(def process_file\\([^:]*:)\\s*\\n\\s*(?:\"\"\"[\\s\\S]*?\"\"\"|\\'\\'\\'[\\s\\S]*?\\'\\'\\')\\s*\\n?\\s*"
 
     def replacement(match):
         full_match = match.group(0)
         func_line = match.group(1)
         indent = re.match(r"^(\s*)", func_line).group(1) + "    "
-        return f"{func_line}\n{indent}path = Path(path)\n" + full_match[len(func_line) :]
+        return (
+            f"{func_line}\n{indent}path = Path(path)\n" + full_match[len(func_line) :]
+        )
 
     new_content = re.sub(pattern, replacement, content, count=1)
     if new_content == content:
@@ -83,7 +87,9 @@ def add_path_statement_simple(file_path: str) -> bool:
 
 def process_directory() -> None:
     cwd = os.getcwd()
-    python_files = [f for f in os.listdir(cwd) if f.endswith(".py") and os.path.isfile(f)]
+    python_files = [
+        f for f in os.listdir(cwd) if f.endswith(".py") and os.path.isfile(f)
+    ]
     if not python_files:
         print("No Python files found in current directory")
         return
@@ -92,9 +98,7 @@ def process_directory() -> None:
     modified_count = 0
     for file_name in python_files:
         file_path = os.path.join(cwd, file_name)
-        if add_path_statement_simple(file_path):
-            modified_count += 1
-        elif add_path_statement(file_path):
+        if add_path_statement_simple(file_path) or add_path_statement(file_path):
             modified_count += 1
     print("-" * 42)
     print(f"Modified {modified_count} file(s)")

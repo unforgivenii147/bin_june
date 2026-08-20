@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Find repeated multiline strings in text files recursively.
-Supports parallel processing, removal, and saving of found strings.
-"""
 
 from __future__ import annotations
 
@@ -98,7 +94,9 @@ def find_files(directory: Path, extensions: set[str] | None = None) -> list[Path
     return files
 
 
-def process_file(args: tuple[Path, int, int]) -> tuple[Path, dict[str, list[tuple[int, int]]]]:
+def process_file(
+    args: tuple[Path, int, int],
+) -> tuple[Path, dict[str, list[tuple[int, int]]]]:
     file_path, min_lines, min_chars = args
     strings = find_multiline_strings(file_path, min_lines, min_chars)
     return file_path, strings
@@ -134,7 +132,9 @@ def find_repeated_strings(
         half_threshold = total_files / 2
         repeated = {k: v for k, v in repeated.items() if len(v) >= half_threshold}
         if repeated:
-            print(f"Filtered to strings appearing in at least 50% of files ({int(half_threshold)} files)")
+            print(
+                f"Filtered to strings appearing in at least 50% of files ({int(half_threshold)} files)"
+            )
         else:
             print("No strings found that appear in at least 50% of files")
     return repeated
@@ -190,7 +190,10 @@ def remove_strings_from_files(
     return modified_files, skipped_files
 
 
-def save_strings_to_file(repeated_strings: dict[str, list[tuple[Path, list[tuple[int, int]]]]], output_file: Path):
+def save_strings_to_file(
+    repeated_strings: dict[str, list[tuple[Path, list[tuple[int, int]]]]],
+    output_file: Path,
+):
     try:
         with open(output_file, "w", encoding="utf-8") as f:
             f.write("Repeated Multiline Strings Report\n")
@@ -206,8 +209,15 @@ def save_strings_to_file(repeated_strings: dict[str, list[tuple[Path, list[tuple
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Find repeated multiline strings in text files recursively")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to search (default: current directory)")
+    parser = argparse.ArgumentParser(
+        description="Find repeated multiline strings in text files recursively"
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to search (default: current directory)",
+    )
     parser.add_argument(
         "-r",
         "--remove",
@@ -238,8 +248,17 @@ def main():
         default=MIN_CHARS,
         help=f"Minimum number of characters for a multiline string (default: {MIN_CHARS})",
     )
-    parser.add_argument("--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)")
-    parser.add_argument("--extensions", nargs="+", help="File extensions to process (e.g., .txt .md .py)")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count)",
+    )
+    parser.add_argument(
+        "--extensions",
+        nargs="+",
+        help="File extensions to process (e.g., .txt .md .py)",
+    )
     args = parser.parse_args()
     directory = Path(args.directory)
     if not directory.exists():
@@ -256,7 +275,9 @@ def main():
 
         find_files = find_files_with_ext
     if args.half:
-        print("Filtering: Only strings appearing in at least 50% of files will be shown")
+        print(
+            "Filtering: Only strings appearing in at least 50% of files will be shown"
+        )
     repeated = find_repeated_strings(
         directory,
         min_lines=args.min_lines,
@@ -295,13 +316,19 @@ def main():
             print("\nRemoving all repeated strings from files...")
         validate = not args.no_validate
         if validate:
-            print("Python syntax validation enabled. Use --no-validate to skip validation.")
-        modified_files, skipped_files = remove_strings_from_files(repeated, string_numbers, validate)
+            print(
+                "Python syntax validation enabled. Use --no-validate to skip validation."
+            )
+        modified_files, skipped_files = remove_strings_from_files(
+            repeated, string_numbers, validate
+        )
         if modified_files:
             print(f"\nSuccessfully modified {len(modified_files)} file(s).")
         if skipped_files:
             print(f"Skipped {len(skipped_files)} file(s) due to syntax errors.")
-            print("These files were NOT modified. Review the strings manually or use --no-validate.")
+            print(
+                "These files were NOT modified. Review the strings manually or use --no-validate."
+            )
 
 
 if __name__ == "__main__":

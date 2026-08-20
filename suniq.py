@@ -63,7 +63,9 @@ def process_lines(lines: list[str], start_idx, end_idx, unique=False, comments=T
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Sort lines in a file within a given line range.")
+    parser = argparse.ArgumentParser(
+        description="Sort lines in a file within a given line range."
+    )
     parser.add_argument("filename", help="Path to file")
     parser.add_argument("start_line", type=int, help="Start line (1-based)")
     parser.add_argument("end_line", type=int, help="End line (1-based, inclusive)")
@@ -105,7 +107,9 @@ def main() -> None:
             lines, start_idx, end_idx, unique=args.unique, comments=args.comments
         )
         new_lines = lines[:start_idx] + rebuilt_slice + lines[end_idx:]
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as tmp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, encoding="utf-8"
+        ) as tmp_file:
             tmp_file.writelines(new_lines)
             temp_name = tmp_file.name
         shutil.move(temp_name, file_path)

@@ -18,7 +18,9 @@ def get_pypi_json(package: str, timeout: int = 10) -> dict | None:
         return None
 
 
-def find_wheel_url(package_data: dict, python_version: str = "3.12") -> tuple[str, int] | None:
+def find_wheel_url(
+    package_data: dict, python_version: str = "3.12"
+) -> tuple[str, int] | None:
     releases = package_data.get("releases", {})
     if not releases:
         return None
@@ -51,8 +53,12 @@ def find_wheel_url(package_data: dict, python_version: str = "3.12") -> tuple[st
     return best_wheel["url"], best_wheel["size"]
 
 
-def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk_size: int = 8192) -> tuple[bool, str]:
-    print(f"  📥 Downloading {destination.name} ({expected_size / 1024 / 1024:.2f} MB)...")
+def download_file(
+    url: str, destination: pathlib.Path, expected_size: int, chunk_size: int = 8192
+) -> tuple[bool, str]:
+    print(
+        f"  📥 Downloading {destination.name} ({expected_size / 1024 / 1024:.2f} MB)..."
+    )
     try:
         with urllib.request.urlopen(url) as response:
             total_size = int(response.headers.get("content-length", expected_size))
@@ -69,20 +75,28 @@ def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk
                         f"    ⬇ {downloaded / 1024 / 1024:.2f} MB / {total_size / 1024 / 1024:.2f} MB ({percent:.1f}%)",
                         end="\r",
                     )
-            print(f"    ✅ Downloaded {destination.name} ({downloaded / 1024 / 1024:.2f} MB)")
+            print(
+                f"    ✅ Downloaded {destination.name} ({downloaded / 1024 / 1024:.2f} MB)"
+            )
             return True, ""
     except Exception as e:
         return False, f"Failed: {e!s}"
 
 
-def download_package(package: str, wheels_dir: pathlib.Path, python_version: str = "3.12") -> tuple[str, bool, str]:
+def download_package(
+    package: str, wheels_dir: pathlib.Path, python_version: str = "3.12"
+) -> tuple[str, bool, str]:
     print(f"🔍 Fetching info for: {package}")
     package_data = get_pypi_json(package)
     if not package_data:
         return package, False, "Failed to fetch package info from PyPI"
     wheel_info = find_wheel_url(package_data, python_version)
     if not wheel_info:
-        return (package, False, "No compatible wheel found for Python " + python_version)
+        return (
+            package,
+            False,
+            "No compatible wheel found for Python " + python_version,
+        )
     url, size = wheel_info
     filename = url.split("/")[-1]
     destination = wheels_dir / filename
@@ -96,10 +110,16 @@ def download_package(package: str, wheels_dir: pathlib.Path, python_version: str
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Download Python packages from PyPI as wheels")
+    parser = argparse.ArgumentParser(
+        description="Download Python packages from PyPI as wheels"
+    )
     parser.add_argument("packages", nargs="+", help="Package name(s) to download")
-    parser.add_argument("--python", default="3.12", help="Python version (default: 3.12)")
-    parser.add_argument("--workers", type=int, default=4, help="Number of download workers (default: 4)")
+    parser.add_argument(
+        "--python", default="3.12", help="Python version (default: 3.12)"
+    )
+    parser.add_argument(
+        "--workers", type=int, default=4, help="Number of download workers (default: 4)"
+    )
     parser.add_argument(
         "--output",
         type=pathlib.Path,
@@ -111,7 +131,10 @@ def main():
     wheels_dir.mkdir(parents=True, exist_ok=True)
     print(f"📁 Saving wheels to: {wheels_dir}\n")
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
-        futures = {executor.submit(download_package, pkg, wheels_dir, args.python): pkg for pkg in args.packages}
+        futures = {
+            executor.submit(download_package, pkg, wheels_dir, args.python): pkg
+            for pkg in args.packages
+        }
         success_count = 0
         for future in concurrent.futures.as_completed(futures):
             package, success, message = future.result()
@@ -119,7 +142,9 @@ def main():
                 success_count += 1
             else:
                 print(f"  ⚠️  {package}: {message}")
-    print(f"\n✅ Downloaded {success_count}/{len(args.packages)} packages successfully.")
+    print(
+        f"\n✅ Downloaded {success_count}/{len(args.packages)} packages successfully."
+    )
 
 
 if __name__ == "__main__":

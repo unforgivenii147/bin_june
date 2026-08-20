@@ -40,7 +40,9 @@ def file_matches_exclude(file_path: Path, excluded_exts: set[str] | None) -> boo
     return file_path.suffix.lower() in excluded_exts
 
 
-def safe_copy_file(src: Path, dst_root: Path, rel_path: Path, errors: list[str]) -> None:
+def safe_copy_file(
+    src: Path, dst_root: Path, rel_path: Path, errors: list[str]
+) -> None:
     try:
         dst_path = dst_root / rel_path
         dst_path.parent.mkdir(parents=True, exist_ok=True)
@@ -79,14 +81,15 @@ class ChangeHandler(FileSystemEventHandler):
             return Path(p.name)
 
     def _should_process(self, src_path: Path) -> bool:
-        if src_path.exists() and src_path.is_file():
-            if self.allowed_exts is not None and not file_matches_extensions(src_path, self.allowed_exts):
+        if src_path.exists() and src_path.is_file() or not src_path.exists():
+            if self.allowed_exts is not None and not file_matches_extensions(
+                src_path, self.allowed_exts
+            ):
                 return False
-            return not (self.excluded_exts is not None and file_matches_exclude(src_path, self.excluded_exts))
-        elif not src_path.exists():
-            if self.allowed_exts is not None and not file_matches_extensions(src_path, self.allowed_exts):
-                return False
-            return not (self.excluded_exts is not None and file_matches_exclude(src_path, self.excluded_exts))
+            return not (
+                self.excluded_exts is not None
+                and file_matches_exclude(src_path, self.excluded_exts)
+            )
         return False
 
     def _queue(self, src_path: Path, reason: str) -> None:
@@ -130,7 +133,9 @@ class ChangeHandler(FileSystemEventHandler):
                         if dst_file.exists():
                             try:
                                 dst_file.unlink()
-                                print(f"  → removed from destination: /{rel_path.as_posix()}")
+                                print(
+                                    f"  → removed from destination: /{rel_path.as_posix()}"
+                                )
                             except Exception as e:
                                 msg = f"[delete-error] {dst_file}\n{e}"
                                 self._errors.append(msg)
@@ -178,7 +183,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=str(Path.cwd()),
         help="Folder to watch (default: current working directory).",
     )
-    p.add_argument("-c", "--copy", action="store_true", help="Copy changed/created files to destination.")
+    p.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy changed/created files to destination.",
+    )
     p.add_argument(
         "-d",
         "--dest",

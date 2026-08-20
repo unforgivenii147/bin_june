@@ -19,7 +19,9 @@ def convert_to_png(file_path: str) -> bool:
         return True
     output_path = path.with_suffix(".png")
     if output_path.exists():
-        response = input(f"'{output_path.name}' exists. Overwrite? (y/n): ").strip().lower()
+        response = (
+            input(f"'{output_path.name}' exists. Overwrite? (y/n): ").strip().lower()
+        )
         if response != "y":
             return False
     try:
@@ -31,9 +33,15 @@ def convert_to_png(file_path: str) -> bool:
             b, g, r, a = cv2.split(img)
             white_bg = np.full(img.shape[:2], 255, dtype=np.uint8)
             alpha = a.astype(float) / 255.0
-            img_b = (b.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)).astype(np.uint8)
-            img_g = (g.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)).astype(np.uint8)
-            img_r = (r.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)).astype(np.uint8)
+            img_b = (
+                b.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)
+            ).astype(np.uint8)
+            img_g = (
+                g.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)
+            ).astype(np.uint8)
+            img_r = (
+                r.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)
+            ).astype(np.uint8)
             final_img = cv2.merge((img_b, img_g, img_r))
         else:
             final_img = img

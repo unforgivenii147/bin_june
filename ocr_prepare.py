@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Image Preprocessing for Tesseract OCR
-Processes images in-place to optimize them for Tesseract OCR.
-Supports multiple files/folders with parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -14,7 +9,9 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 try:
     import cv2
@@ -41,7 +38,9 @@ def process_image_cv2(image_path: Path) -> bool:
             return False
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        thresh = cv2.adaptiveThreshold(
+            blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+        )
         denoised = cv2.fastNlMeansDenoising(thresh, None, 10, 7, 21)
         cv2.imwrite(str(image_path), denoised)
         return True
@@ -101,7 +100,9 @@ def find_images(paths: list[Path], recursive: bool = False) -> list[Path]:
     return unique_files
 
 
-def process_images_parallel(image_files: list[Path], max_workers: int | None = None) -> dict:
+def process_images_parallel(
+    image_files: list[Path], max_workers: int | None = None
+) -> dict:
     if not image_files:
         logger.warning("No image files found to process")
         return {"success": 0, "failed": 0}
@@ -110,7 +111,9 @@ def process_images_parallel(image_files: list[Path], max_workers: int | None = N
     logger.info(f"Processing {len(image_files)} images using {max_workers} workers")
     results = {"success": 0, "failed": 0}
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_path = {executor.submit(process_image, path): path for path in image_files}
+        future_to_path = {
+            executor.submit(process_image, path): path for path in image_files
+        }
         for future in as_completed(future_to_path):
             path = future_to_path[future]
             try:
@@ -134,13 +137,27 @@ def main():
         epilog="\nExamples:\n  %(prog)s image1.png image2.jpg     # Process specific files\n  %(prog)s /path/to/folder           # Process images in folder\n  %(prog)s -r /path/to/folder        # Process images recursively\n  %(prog)s                           # Process all images in current directory\n  %(prog)s -r                        # Process all images recursively\n        ",
     )
     parser.add_argument(
-        "paths", nargs="*", type=Path, help="Files or folders to process (if empty, process current directory)"
+        "paths",
+        nargs="*",
+        type=Path,
+        help="Files or folders to process (if empty, process current directory)",
     )
-    parser.add_argument("-r", "--recursive", action="store_true", help="Process subdirectories recursively")
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)"
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="Process subdirectories recursively",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose logging"
+    )
     args = parser.parse_args()
     if args.verbose:
         logger.setLevel(logging.DEBUG)

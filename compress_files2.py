@@ -89,11 +89,17 @@ def get_files_to_process(root_dir: Path, compress: bool) -> Generator[Path, None
     if compress:
         for file in root_dir.rglob("*"):
             if file.is_file() and not should_exclude(file):
-                if file.suffix.lower() not in ARCHIVE_EXTENSIONS and not is_media_file(file):
+                if file.suffix.lower() not in ARCHIVE_EXTENSIONS and not is_media_file(
+                    file
+                ):
                     yield file
     else:
         for file in root_dir.rglob("*"):
-            if file.is_file() and not should_exclude(file) and file.suffix.lower() == ".xz":
+            if (
+                file.is_file()
+                and not should_exclude(file)
+                and file.suffix.lower() == ".xz"
+            ):
                 yield file
 
 
@@ -113,12 +119,20 @@ def compress_file(
         if remove_orig:
             filepath.unlink()
             space_freed = original_size
-        return (filepath, True, f"Compressed to {output_path.name}", original_size, space_freed)
+        return (
+            filepath,
+            True,
+            f"Compressed to {output_path.name}",
+            original_size,
+            space_freed,
+        )
     except Exception as e:
         return filepath, False, f"Error: {e!s}", 0, 0
 
 
-def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, bool, str, int, int]:
+def decompress_file(
+    filepath: Path, remove_orig: bool = True
+) -> tuple[Path, bool, str, int, int]:
     try:
         if filepath.suffix.lower() != ".xz":
             return filepath, False, "Error: Not an .xz file", 0, 0
@@ -133,7 +147,13 @@ def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, boo
         if remove_orig:
             filepath.unlink()
             space_freed = compressed_size
-        return (filepath, True, f"Decompressed to {output_path.name}", compressed_size, space_freed)
+        return (
+            filepath,
+            True,
+            f"Decompressed to {output_path.name}",
+            compressed_size,
+            space_freed,
+        )
     except Exception as e:
         return filepath, False, f"Error: {e!s}", 0, 0
 
@@ -146,7 +166,9 @@ def format_bytes(bytes_val: int) -> str:
     return f"{bytes_val:.2f} PB"
 
 
-def process_files(root_dir: Path, compress: bool, preset: int, threads: int, remove_orig: bool = True):
+def process_files(
+    root_dir: Path, compress: bool, preset: int, threads: int, remove_orig: bool = True
+):
     action = "Compressing" if compress else "Decompressing"
     print(f"{action} files in {root_dir}...")
     print(f"Preset: {preset}, Threads: {threads}")
@@ -166,9 +188,13 @@ def process_files(root_dir: Path, compress: bool, preset: int, threads: int, rem
         processed += 1
         pct = processed / total_files * 100
         if compress:
-            filepath, success, message, orig_size, space_freed = compress_file(filepath, preset, threads, remove_orig)
+            filepath, success, message, orig_size, space_freed = compress_file(
+                filepath, preset, threads, remove_orig
+            )
         else:
-            filepath, success, message, orig_size, space_freed = decompress_file(filepath, remove_orig)
+            filepath, success, message, orig_size, space_freed = decompress_file(
+                filepath, remove_orig
+            )
         status = "✓" if success else "✗"
         rel_path = filepath.relative_to(root_dir)
         print(f"[{pct:5.1f}%] {processed}/{total_files} {status} {rel_path}: {message}")
@@ -204,8 +230,15 @@ def main():
               - Media: .mp4, .mkv, .mp3, .jpg, .png, .pdf, .exe, etc.
         """),
     )
-    parser.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no -d specified)")
-    parser.add_argument("-d", "--decompress", action="store_true", help="Decompress .xz files")
+    parser.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files (default if no -d specified)",
+    )
+    parser.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress .xz files"
+    )
     parser.add_argument(
         "--preset",
         type=int,
@@ -213,7 +246,12 @@ def main():
         choices=range(10),
         help="Compression preset 0-9 (default: 9)",
     )
-    parser.add_argument("--threads", type=int, default=4, help="Threads per compression job (default: 4)")
+    parser.add_argument(
+        "--threads",
+        type=int,
+        default=4,
+        help="Threads per compression job (default: 4)",
+    )
     parser.add_argument(
         "--keep-orig",
         action="store_true",

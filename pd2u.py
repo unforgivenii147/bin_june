@@ -16,7 +16,7 @@ def is_binary(path: Path) -> bool:
             return False
         if b"\x00" in chunk:
             return True
-        return any((b in BINARY_BYTES for b in chunk))
+        return any(b in BINARY_BYTES for b in chunk)
     except Exception:
         return True
 

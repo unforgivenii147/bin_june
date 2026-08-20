@@ -39,11 +39,15 @@ def folderize_by_extension(cwd: Path):
             target_path = target_dir / file_path.name
             counter = 1
             while target_path.exists():
-                target_path = target_dir / f"{file_path.stem}_{counter}{file_path.suffix}"
+                target_path = (
+                    target_dir / f"{file_path.stem}_{counter}{file_path.suffix}"
+                )
                 counter += 1
             with contextlib.suppress(BaseException):
                 shutil.move(str(file_path), str(target_path))
-    for dir_path in sorted(root_path.glob("**/*"), key=lambda p: len(p.parts), reverse=True):
+    for dir_path in sorted(
+        root_path.glob("**/*"), key=lambda p: len(p.parts), reverse=True
+    ):
         if dir_path.is_dir() and dir_path != root_path:
             with contextlib.suppress(OSError):
                 dir_path.rmdir()
@@ -55,7 +59,9 @@ def folderize_by_extension(cwd: Path):
         total_size += stats["total_size"]
         ext_display = ext if ext else "no_extension"
         size_str = get_size_str(stats["total_size"])
-        print(f"{ext_display:<15} : {stats['count']:4} file{'s' if stats['count'] != 1 else ' '}  {size_str:>8}")
+        print(
+            f"{ext_display:<15} : {stats['count']:4} file{'s' if stats['count'] != 1 else ' '}  {size_str:>8}"
+        )
     print("-" * 42)
     print(f"{'TOTAL':<15} : {total_files:4} files  {get_size_str(total_size):>8}")
     print("-" * 42)

@@ -22,7 +22,9 @@ def extract_subtitles(video_path) -> None:
         "csv=p=0",
         video_path,
     ]
-    subs_output = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
+    subs_output = subprocess.run(
+        ffprobe_cmd, capture_output=True, text=True, check=True
+    )
     subs = subs_output.stdout.strip().split("\n")
     if not subs or (len(subs) == 1 and subs[0] == ""):
         print("No subtitle streams found.")
@@ -34,7 +36,15 @@ def extract_subtitles(video_path) -> None:
             lang = "und"
         out_filename = f"{basename}.sub{count}.{lang}.srt"
         print(f"Extracting subtitle stream {index} -> {out_filename}")
-        ffmpeg_cmd = ["ffmpeg", "-y", "-i", video_path, "-map", f"0:s:{count}", out_filename]
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-y",
+            "-i",
+            video_path,
+            "-map",
+            f"0:s:{count}",
+            out_filename,
+        ]
         subprocess.run(ffmpeg_cmd, check=True, capture_output=True)
         count += 1
     print("Done.")

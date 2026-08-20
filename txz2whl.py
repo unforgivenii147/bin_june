@@ -23,7 +23,10 @@ def process_file(path: str | Path) -> None:
         print(f"[SKIP] {target.name} already exists")
         target = unique_path(target)
     try:
-        with tarfile.open(path, "r:xz") as tf, zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        with (
+            tarfile.open(path, "r:xz") as tf,
+            zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as zf,
+        ):
             for member in tf.getmembers():
                 if member.isdir():
                     continue
@@ -39,7 +42,9 @@ def process_file(path: str | Path) -> None:
 def main() -> None:
     args = sys.argv[1:]
     cwd = Path().cwd()
-    files = [Path(arg) for arg in args] if args else get_files(cwd, ext=[".tar.xz", ".txz"])
+    files = (
+        [Path(arg) for arg in args] if args else get_files(cwd, ext=[".tar.xz", ".txz"])
+    )
     if len(files) == 1:
         process_file(files[0])
         sys.exit(1)

@@ -28,7 +28,12 @@ def extract_filename(url: str, headers: dict[str, str] | None = None) -> str:
     if headers:
         cd = headers.get("Content-Disposition", "")
         if cd:
-            match = re.search(r"filename\*?=(?:UTF-8" ')?"?([^";]+)"?', cd, re.IGNORECASE)
+            match = re.search(
+                r"filename\*?=(?:UTF-8"
+                ')?"?([^";]+)"?',
+                cd,
+                re.IGNORECASE,
+            )
             if match:
                 return sanitize_filename(match.group(1))
     parsed = urllib.parse.urlparse(url)
@@ -130,13 +135,25 @@ Examples:
     )
     parser.add_argument("url", help="URL to download")
     parser.add_argument("-o", "--output", help="Output file or directory")
-    parser.add_argument("--timeout", type=float, default=30.0, help="Timeout in seconds (default: 30)")
-    parser.add_argument("--resume", action="store_true", help="Resume partial downloads")
-    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress progress bar")
+    parser.add_argument(
+        "--timeout", type=float, default=30.0, help="Timeout in seconds (default: 30)"
+    )
+    parser.add_argument(
+        "--resume", action="store_true", help="Resume partial downloads"
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress progress bar"
+    )
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
     args = parser.parse_args()
     try:
-        download(args.url, output=args.output, timeout=args.timeout, resume=args.resume, quiet=args.quiet)
+        download(
+            args.url,
+            output=args.output,
+            timeout=args.timeout,
+            resume=args.resume,
+            quiet=args.quiet,
+        )
     except RuntimeError as e:
         print(f"❌ {e}", file=sys.stderr)
         sys.exit(1)

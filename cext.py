@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Python Code Entity Extractor
-Extracts classes, functions, methods, and constants from Python files and archives.
-"""
 
 from __future__ import annotations
 
@@ -203,7 +199,9 @@ class EntityVisitor(ast.NodeVisitor):
                 self.visit_ClassDef(child)
         self._class_stack.pop()
 
-    def _visit_method(self, node: ast.FunctionDef | ast.AsyncFunctionDef, class_name: str) -> None:
+    def _visit_method(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef, class_name: str
+    ) -> None:
         method_source = self._slice(node)
         full_name = f"{class_name}_{node.name}"
         imports_for_method = detect_needed_imports(method_source)
@@ -289,7 +287,9 @@ def extract_imports_tree_sitter(source: str) -> list[str]:
         return []
 
 
-def parse_python_source(source: str, virtual_path: str) -> tuple[list[Entity], list[str]]:
+def parse_python_source(
+    source: str, virtual_path: str
+) -> tuple[list[Entity], list[str]]:
     try:
         tree = ast.parse(source, filename=virtual_path)
     except SyntaxError as exc:
@@ -312,7 +312,7 @@ def _looks_like_python(data: bytes) -> bool:
     head = data[:512]
     if b"#!/usr/bin/env python" in head or b"#!/usr/bin/python" in head:
         return True
-    return any((kw in head for kw in (b"import ", b"def ", b"class ", b"if __name__")))
+    return any(kw in head for kw in (b"import ", b"def ", b"class ", b"if __name__"))
 
 
 def read_py_file(path: Path) -> str | None:
@@ -349,7 +349,9 @@ def process_zip_archive(archive_path: Path) -> list[tuple[list[Entity], list[str
                     try:
                         data = zf.read(member)
                         is_py = _looks_like_python(data)
-                        source = data.decode("utf-8", errors="replace") if is_py else None
+                        source = (
+                            data.decode("utf-8", errors="replace") if is_py else None
+                        )
                     except Exception:
                         continue
                 else:
@@ -370,7 +372,10 @@ def _open_tar(archive_path: Path) -> tarfile.TarFile | None:
     try:
         if suffix.endswith((".zst", ".tar.zst")):
             if not HAS_ZSTD:
-                print(f"  [warn] zstd not available, skipping {archive_path}", file=sys.stderr)
+                print(
+                    f"  [warn] zstd not available, skipping {archive_path}",
+                    file=sys.stderr,
+                )
                 return None
             raw = zstd.decompress(archive_path.read_bytes())
             return tarfile.open(fileobj=io.BytesIO(raw))
@@ -417,14 +422,21 @@ def process_archive(archive_path: Path) -> list[tuple[list[Entity], list[str]]]:
 
 def _is_archive(path: Path) -> bool:
     name = path.name.lower()
-    return any((name.endswith(ext) for ext in (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar")))
+    return any(
+        name.endswith(ext)
+        for ext in (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar")
+    )
 
 
 def discover_files(root: Path) -> tuple[list[Path], list[Path]]:
     py_files: list[Path] = []
     archives: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS and (not Path(dirpath, d).is_symlink())]
+        dirnames[:] = [
+            d
+            for d in dirnames
+            if d not in SKIP_DIRS and (not Path(dirpath, d).is_symlink())
+        ]
         for fname in filenames:
             fpath = Path(dirpath) / fname
             if fpath.is_symlink():
@@ -480,7 +492,10 @@ def write_entity(entity: Entity, output_dir: Path) -> Path | None:
     stem = _safe_filename(entity.full_name)
     out_path = _unique_path(subdir, stem)
     header = f"# Source: {entity.source_path}\n\n"
-    all_imports = sorted(set(entity.imports), key=lambda s: 0 if s.startswith(("import ", "from ")) else 1)
+    all_imports = sorted(
+        set(entity.imports),
+        key=lambda s: 0 if s.startswith(("import ", "from ")) else 1,
+    )
     import_block = "\n".join(all_imports)
     if import_block:
         import_block += "\n\n"
@@ -531,8 +546,15 @@ def report(entities: list[Entity], all_imports: list[str], saved_count: int) -> 
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Extract Python code entities from files and archives.")
-    parser.add_argument("-t", "--tmp", action="store_true", help="Write output to ~/tmp/output/ instead of ./output/")
+    parser = argparse.ArgumentParser(
+        description="Extract Python code entities from files and archives."
+    )
+    parser.add_argument(
+        "-t",
+        "--tmp",
+        action="store_true",
+        help="Write output to ~/tmp/output/ instead of ./output/",
+    )
     parser.add_argument(
         "-w",
         "--workers",
@@ -541,10 +563,16 @@ def main(argv: list[str] | None = None) -> int:
         help="Number of parallel workers (default: min(cpu_count, 8))",
     )
     parser.add_argument(
-        "-d", "--dir", type=Path, default=Path.cwd(), help="Root directory to scan (default: current directory)"
+        "-d",
+        "--dir",
+        type=Path,
+        default=Path.cwd(),
+        help="Root directory to scan (default: current directory)",
     )
     args = parser.parse_args(argv)
-    output_dir: Path = Path.home() / "tmp" / "output" if args.tmp else Path.cwd() / "output"
+    output_dir: Path = (
+        Path.home() / "tmp" / "output" if args.tmp else Path.cwd() / "output"
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"Output directory: {output_dir}")
     root: Path = args.dir.resolve()
@@ -557,7 +585,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     all_entities: list[Entity] = []
     all_imports: list[str] = []
-    tasks: list[tuple[callable, Path]] = [(_worker_py, p) for p in py_files] + [(_worker_archive, p) for p in archives]
+    tasks: list[tuple[callable, Path]] = [(_worker_py, p) for p in py_files] + [
+        (_worker_archive, p) for p in archives
+    ]
     print(f"\nProcessing {len(tasks)} file(s) with {args.workers} worker(s)…")
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
         future_map = {pool.submit(fn, path): path for fn, path in tasks}

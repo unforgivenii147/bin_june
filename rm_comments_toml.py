@@ -8,7 +8,9 @@ from dh import get_files, mpf3
 
 
 class Result:
-    def __init__(self, text: str, comments_found: int, comments_removed_chars: int) -> None:
+    def __init__(
+        self, text: str, comments_found: int, comments_removed_chars: int
+    ) -> None:
         self.text = text
         self.comments = comments_found
         self.removed = comments_removed_chars
@@ -59,7 +61,9 @@ def strip_comments(src: str, allow_semicolon: bool = True) -> Result:
         if cut is not None:
             comments += 1
             removed += len(line) - cut
-            out_lines.append(line[:cut].rstrip() + ("\n" if line.endswith("\n") else ""))
+            out_lines.append(
+                line[:cut].rstrip() + ("\n" if line.endswith("\n") else "")
+            )
         else:
             out_lines.append(line)
     return Result("".join(out_lines), comments, removed)
@@ -74,7 +78,6 @@ def process_file(path: str | Path) -> None:
         print(f"{path.name} : {result.comments}\n\n{result.removed}")
     else:
         print(f"{path.name} : (no change)")
-    return
 
 
 def main() -> None:

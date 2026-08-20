@@ -1,20 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove comments from bash scripts in place using tree-sitter.
-Requirements:
-    - Python 3.12+
-    - tree-sitter==0.26.0
-    - tree-sitter-bash  (the bash grammar; the proper companion for tree-sitter 0.26.0)
-Features:
-    * Detects bash scripts by `.sh`/`.bash` extension OR by shebang
-      (so extensionless scripts like `~/bin/mytool` work too).
-    * Removes full-line AND inline comments.
-    * Preserves shebang (`
-    * Uses `pathlib` and `concurrent.futures.ProcessPoolExecutor`.
-    * Accepts multiple files/dirs; falls back to recursive current-dir scan.
-    * Updates files in place.
-    * Prints per-file stats using a relative path.
-"""
 
 from __future__ import annotations
 

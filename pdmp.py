@@ -21,7 +21,9 @@ def is_excluded(path: Path, root_path: Path) -> bool:
     return bool(path.name.startswith("mc") and path.parent.name == "tmp")
 
 
-def delete_empty_dirs_iterative(root: Path, dry_run: bool = False, verbose: bool = False) -> tuple[int, list[Path]]:
+def delete_empty_dirs_iterative(
+    root: Path, dry_run: bool = False, verbose: bool = False
+) -> tuple[int, list[Path]]:
     removed_count: int = 0
     removed_dirs_list: list[Path] = []
     dirs_to_visit: list[Path] = [d for d in root.rglob("*") if d.is_dir()]
@@ -36,7 +38,9 @@ def delete_empty_dirs_iterative(root: Path, dry_run: bool = False, verbose: bool
                 print(f"Skipping excluded directory: {path.relative_to(root)}")
             continue
         try:
-            if not any(entry for entry in path.iterdir() if entry.is_dir() or entry.is_file()):
+            if not any(
+                entry for entry in path.iterdir() if entry.is_dir() or entry.is_file()
+            ):
                 if verbose:
                     print(f"Empty directory found: {path.relative_to(root)}")
                 if not dry_run:
@@ -48,9 +52,15 @@ def delete_empty_dirs_iterative(root: Path, dry_run: bool = False, verbose: bool
                 else:
                     print(f"  (Dry Run) Would remove: {path.relative_to(root)}")
         except PermissionError:
-            print(f"[ERROR] Permission denied for: {path.relative_to(root)}", file=sys.stderr)
+            print(
+                f"[ERROR] Permission denied for: {path.relative_to(root)}",
+                file=sys.stderr,
+            )
         except OSError as e:
-            print(f"[ERROR] Could not process {path.relative_to(root)}: {e}", file=sys.stderr)
+            print(
+                f"[ERROR] Could not process {path.relative_to(root)}: {e}",
+                file=sys.stderr,
+            )
         except Exception as e:
             print(
                 f"[ERROR] An unexpected error occurred with {path.relative_to(root)}: {e}",
@@ -60,7 +70,9 @@ def delete_empty_dirs_iterative(root: Path, dry_run: bool = False, verbose: bool
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Find and remove empty directories, excluding specified ones.")
+    parser = argparse.ArgumentParser(
+        description="Find and remove empty directories, excluding specified ones."
+    )
     parser.add_argument(
         "path",
         nargs="?",
@@ -82,7 +94,10 @@ def main() -> None:
     args = parser.parse_args()
     root_path = args.path.resolve()
     if not root_path.is_dir():
-        print(f"Error: The provided path '{root_path}' is not a valid directory.", file=sys.stderr)
+        print(
+            f"Error: The provided path '{root_path}' is not a valid directory.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if args.dry_run:
         print("--- DRY RUN MODE (no changes will be made) ---")

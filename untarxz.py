@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract all .tar.xz files in current directory using parallel processing,
-then remove the original archive files.
-"""
 
 from __future__ import annotations
 
@@ -38,7 +34,10 @@ def main():
         return
     print(f"📦 Found {len(tar_files)} .tar.xz file(s) to process...\n")
     with ProcessPoolExecutor() as executor:
-        future_to_file = {executor.submit(extract_and_remove, tar_path): tar_path for tar_path in tar_files}
+        future_to_file = {
+            executor.submit(extract_and_remove, tar_path): tar_path
+            for tar_path in tar_files
+        }
         success_count = 0
         failure_count = 0
         for future in as_completed(future_to_file):

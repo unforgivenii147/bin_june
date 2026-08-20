@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Filter the latest version for ARMv7 architecture (armeabi_v7a, armv7l, linux_arm)
-from a list of wheel URLs.
-"""
 
 from __future__ import annotations
 
@@ -83,7 +79,9 @@ def filter_latest_for_armv7(urls_file=None):
     print(f"SUMMARY: Found {len(results)} ARMv7 wheel(s)")
     print("-" * 42)
     for result in results:
-        print(f"{result['package']}=={result['version']} (Python {result['python_version']})")
+        print(
+            f"{result['package']}=={result['version']} (Python {result['python_version']})"
+        )
     return results
 
 
@@ -94,15 +92,20 @@ def main():
         description="Find latest ARMv7 wheels from URL list",
         epilog="Example: python3 filter_armv7.py urls.txt",
     )
-    parser.add_argument("input", nargs="?", default=None, help="Input file with URLs (one per line)")
-    parser.add_argument("--output", "-o", help="Output file to save URLs (one per line)")
-    parser.add_argument("--download", action="store_true", help="Generate download script")
+    parser.add_argument(
+        "input", nargs="?", default=None, help="Input file with URLs (one per line)"
+    )
+    parser.add_argument(
+        "--output", "-o", help="Output file to save URLs (one per line)"
+    )
+    parser.add_argument(
+        "--download", action="store_true", help="Generate download script"
+    )
     args = parser.parse_args()
     results = filter_latest_for_armv7(args.input)
     if args.output:
         with open(args.output, "w") as f:
-            for result in results:
-                f.write(f"{result['url']}\n")
+            f.writelines(f"{result['url']}\n" for result in results)
         print(f"\n✓ URLs saved to {args.output}")
     if args.download:
         script = "#!/bin/bash\n\n"

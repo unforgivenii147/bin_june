@@ -9,7 +9,9 @@ import secrets
 from pathlib import Path
 
 
-def enhanced_shuffle(input_file, output_file_prefix=None, methods=None, repeats=3) -> None:
+def enhanced_shuffle(
+    input_file, output_file_prefix=None, methods=None, repeats=3
+) -> None:
     if methods is None:
         methods = ["basic", "crypto", "shuffle3"]
     input_file_path = Path(input_file)
@@ -51,7 +53,9 @@ def enhanced_shuffle(input_file, output_file_prefix=None, methods=None, repeats=
             output_path = f"{base}_{method}{ext}"
         with Path(output_path).open("w", encoding="utf-8") as f:
             f.writelines(shuffled_lines)
-        print(f"Shuffled {original_count} lines using method '{method}' with {repeats} passes")
+        print(
+            f"Shuffled {original_count} lines using method '{method}' with {repeats} passes"
+        )
         print(f"Output written to: {output_path}")
 
 
@@ -90,8 +94,12 @@ def test_randomness(input_file) -> None:
             crypto_shuffle(current_lines)
         elif method_to_test == "shuffle3":
             shuffle3(current_lines)
-        changes = sum(1 for a, b in zip(original_order, current_lines, strict=False) if a != b)
-        print(f"Shuffle {i + 1}: {changes} out of {len(current_lines)} positions changed")
+        changes = sum(
+            1 for a, b in zip(original_order, current_lines, strict=False) if a != b
+        )
+        print(
+            f"Shuffle {i + 1}: {changes} out of {len(current_lines)} positions changed"
+        )
 
 
 def main() -> None:
@@ -109,7 +117,12 @@ def main() -> None:
         default=3,
         help="Number of shuffle passes per method (default: 3)",
     )
-    parser.add_argument("-t", "--test", action="store_true", help="Test randomness of the 'crypto' method")
+    parser.add_argument(
+        "-t",
+        "--test",
+        action="store_true",
+        help="Test randomness of the 'crypto' method",
+    )
     args = parser.parse_args()
     output_prefix = args.output
     if output_prefix and not output_prefix.endswith((".txt", ".TXT")):

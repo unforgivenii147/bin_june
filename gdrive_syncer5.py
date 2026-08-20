@@ -17,14 +17,18 @@ if env_path.exists():
 
 
 class GoogleDriveSync:
-    def __init__(self, client_id=None, client_secret=None, token_file: str = "drive_token.pkl") -> None:
+    def __init__(
+        self, client_id=None, client_secret=None, token_file: str = "drive_token.pkl"
+    ) -> None:
         self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
         self.client_secret = client_secret or os.getenv("GOOGLE_CLIENT_SECRET")
         self.token_file = token_file
         self.access_token = None
         self.refresh_token = None
         if not self.client_id or not self.client_secret:
-            raise ValueError("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in ~/.env")
+            raise ValueError(
+                "Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in ~/.env"
+            )
         self.load_or_auth()
 
     def load_or_auth(self) -> None:
@@ -55,7 +59,13 @@ class GoogleDriveSync:
                 token_data = response.json()
                 self.access_token = token_data.get("access_token")
                 with open(self.token_file, "wb") as f:
-                    pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+                    pickle.dump(
+                        {
+                            "access_token": self.access_token,
+                            "refresh_token": self.refresh_token,
+                        },
+                        f,
+                    )
                 return True
         except Exception as e:
             print(f"Token refresh error: {e}")
@@ -65,9 +75,16 @@ class GoogleDriveSync:
         print("\n" + "=" * 42)
         print("GOOGLE DRIVE AUTHENTICATION (Device Flow)")
         print("-" * 42)
-        device_data = {"client_id": self.client_id, "scope": "https://www.googleapis.com/auth/drive.readonly"}
+        device_data = {
+            "client_id": self.client_id,
+            "scope": "https://www.googleapis.com/auth/drive.readonly",
+        }
         try:
-            response = requests.post("https://oauth2.googleapis.com/device/code", data=device_data, timeout=10)
+            response = requests.post(
+                "https://oauth2.googleapis.com/device/code",
+                data=device_data,
+                timeout=10,
+            )
             if response.status_code != 200:
                 raise Exception(f"Failed to get device code: {response.text}")
             device_info = response.json()
@@ -86,13 +103,23 @@ class GoogleDriveSync:
             for attempt in range(max_attempts):
                 time.sleep(interval)
                 try:
-                    token_response = requests.post("https://oauth2.googleapis.com/token", data=poll_data, timeout=10)
+                    token_response = requests.post(
+                        "https://oauth2.googleapis.com/token",
+                        data=poll_data,
+                        timeout=10,
+                    )
                     if token_response.status_code == 200:
                         token_data = token_response.json()
                         self.access_token = token_data.get("access_token")
                         self.refresh_token = token_data.get("refresh_token")
                         with open(self.token_file, "wb") as f:
-                            pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+                            pickle.dump(
+                                {
+                                    "access_token": self.access_token,
+                                    "refresh_token": self.refresh_token,
+                                },
+                                f,
+                            )
                         print("\n✓ Authentication successful!\n")
                         return
                     error_data = token_response.json()
@@ -156,14 +183,22 @@ class GoogleDriveSync:
         response = requests.post("https://oauth2.googleapis.com/token", data=token_data)
         if response.status_code != 200:
             token_data["redirect_uri"] = "urn:ietf:wg:oauth:2.0:oob"
-            response = requests.post("https://oauth2.googleapis.com/token", data=token_data)
+            response = requests.post(
+                "https://oauth2.googleapis.com/token", data=token_data
+            )
         if response.status_code != 200:
             raise Exception(f"Authentication failed: {response.text}")
         tokens = response.json()
         self.access_token = tokens.get("access_token")
         self.refresh_token = tokens.get("refresh_token")
         with open(self.token_file, "wb") as f:
-            pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+            pickle.dump(
+                {
+                    "access_token": self.access_token,
+                    "refresh_token": self.refresh_token,
+                },
+                f,
+            )
         print("\n✓ Authentication successful!\n")
 
     def authenticate(self) -> None:
@@ -175,7 +210,9 @@ class GoogleDriveSync:
             try:
                 self.authenticate_manual_flow()
             except Exception as e2:
-                raise Exception(f"All authentication methods failed. Device: {e}, Manual: {e2}")
+                raise Exception(
+                    f"All authentication methods failed. Device: {e}, Manual: {e2}"
+                )
 
     def api_request(self, method: str, url: str, **kwargs) -> Response:
         headers = kwargs.get("headers", {})
@@ -225,7 +262,10 @@ class GoogleDriveSync:
             return False
         total_size = int(response.headers.get("content-length", 0))
         downloaded = 0
-        os.makedirs(os.path.dirname(local_path) if os.path.dirname(local_path) else ".", exist_ok=True)
+        os.makedirs(
+            os.path.dirname(local_path) if os.path.dirname(local_path) else ".",
+            exist_ok=True,
+        )
         with open(local_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
@@ -233,7 +273,11 @@ class GoogleDriveSync:
                     downloaded += len(chunk)
                     if total_size > 0:
                         percent = downloaded / total_size * 100
-                        print(f"\rDownloading {file_name}: {percent:.1f}%", end="", flush=True)
+                        print(
+                            f"\rDownloading {file_name}: {percent:.1f}%",
+                            end="",
+                            flush=True,
+                        )
         print(f"\n✓ Downloaded: {file_name}")
         return True
 
@@ -245,7 +289,13 @@ class GoogleDriveSync:
             return response.json()
         return None
 
-    def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root", depth=0) -> None:
+    def sync_folder(
+        self,
+        drive_folder_id: str,
+        local_folder_path,
+        folder_name: str = "root",
+        depth=0,
+    ) -> None:
         indent = "  " * depth
         print(f"{indent}📁 Syncing: {folder_name}")
         os.makedirs(local_folder_path, exist_ok=True)
@@ -254,7 +304,9 @@ class GoogleDriveSync:
             item_name = item["name"]
             item_id = item["id"]
             item_mime = item.get("mimeType", "")
-            local_path = os.path.join(local_folder_path, self.sanitize_filename(item_name))
+            local_path = os.path.join(
+                local_folder_path, self.sanitize_filename(item_name)
+            )
             if item_mime == "application/vnd.google-apps.folder":
                 self.sync_folder(item_id, local_path, item_name, depth + 1)
             else:
@@ -263,13 +315,19 @@ class GoogleDriveSync:
                 if os.path.exists(local_path):
                     local_mtime = os.path.getmtime(local_path)
                     if remote_modified:
-                        remote_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
+                        remote_time = datetime.fromisoformat(
+                            remote_modified.replace("Z", "+00:00")
+                        ).timestamp()
                         if local_mtime >= remote_time:
                             should_download = False
                             print(f"{indent}  ⏭ Up to date: {item_name}")
-                if should_download and self.download_file(item_id, item_name, local_path):
+                if should_download and self.download_file(
+                    item_id, item_name, local_path
+                ):
                     if remote_modified:
-                        mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
+                        mod_time = datetime.fromisoformat(
+                            remote_modified.replace("Z", "+00:00")
+                        ).timestamp()
                         os.utime(local_path, (mod_time, mod_time))
 
     def sanitize_filename(self, filename):
@@ -295,7 +353,10 @@ class GoogleDriveSync:
         items = self.get_all_files_recursive("root")
         target_folder = None
         for item in items:
-            if item["name"] == folder_name and item["mimeType"] == "application/vnd.google-apps.folder":
+            if (
+                item["name"] == folder_name
+                and item["mimeType"] == "application/vnd.google-apps.folder"
+            ):
                 target_folder = item
                 break
         if target_folder:

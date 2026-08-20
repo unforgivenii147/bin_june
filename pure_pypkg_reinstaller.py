@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Reinstall Python packages with force-reinstall and upgrade flags.
-Reads package names from ~/missing.txt or sys.argv[1] (one per line).
-Uses multiprocessing for parallel installation.
-"""
 
 from __future__ import annotations
 
@@ -84,7 +79,12 @@ def check_package_in_system_site(pkg_name):
 
         system_site = site.getsitepackages()
         user_site = site.getusersitepackages()
-        result = subprocess.run(["pip3", "show", "-f", pkg_name], capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            ["pip3", "show", "-f", pkg_name],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         if result.returncode == 0:
             for line in result.stdout.split("\n"):
                 if line.startswith("Location:"):

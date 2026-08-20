@@ -11,10 +11,16 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 
-def run_python_file(file_path: Path, timeout: int = 10) -> tuple[Path, bool, str | None, str | None]:
+def run_python_file(
+    file_path: Path, timeout: int = 10
+) -> tuple[Path, bool, str | None, str | None]:
     try:
         result = runpy(
-            [sys.executable, str(file_path)], capture_output=True, text=True, timeout=timeout, cwd=file_path.parent
+            [sys.executable, str(file_path)],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=file_path.parent,
         )
         if result.returncode == 0:
             return (file_path, True, None, None)
@@ -40,7 +46,12 @@ def run_python_file(file_path: Path, timeout: int = 10) -> tuple[Path, bool, str
                 error_type = f"RuntimeError (exit code: {result.returncode})"
             return (file_path, False, error_type, error_msg.strip())
     except subprocess.TimeoutExpired:
-        return (file_path, False, "TimeoutError", f"Execution exceeded {timeout} seconds")
+        return (
+            file_path,
+            False,
+            "TimeoutError",
+            f"Execution exceeded {timeout} seconds",
+        )
     except subprocess.SubprocessError as e:
         return (file_path, False, "SubprocessError", str(e))
     except Exception as e:
@@ -55,13 +66,19 @@ def find_python_files(root_dir: Path, recursive: bool = True) -> list[Path]:
 
 
 def run_files_parallel(
-    files: list[Path], max_workers: int | None = None, timeout: int = 10, verbose: bool = False
+    files: list[Path],
+    max_workers: int | None = None,
+    timeout: int = 10,
+    verbose: bool = False,
 ) -> dict[str, list[tuple[Path, str]]]:
     if max_workers is None:
         max_workers = min(multiprocessing.cpu_count(), len(files))
     results = {"success": [], "failed": []}
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(run_python_file, file_path, timeout): file_path for file_path in files}
+        future_to_file = {
+            executor.submit(run_python_file, file_path, timeout): file_path
+            for file_path in files
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -84,7 +101,9 @@ def run_files_parallel(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Recursively run Python files with timeout and parallel processing")
+    parser = argparse.ArgumentParser(
+        description="Recursively run Python files with timeout and parallel processing"
+    )
     parser.add_argument(
         "directory",
         type=str,
@@ -93,14 +112,35 @@ def main():
         help="Directory to scan for Python files (default: current directory)",
     )
     parser.add_argument(
-        "-r", "--recursive", action="store_true", default=True, help="Recursively search subdirectories (default: True)"
+        "-r",
+        "--recursive",
+        action="store_true",
+        default=True,
+        help="Recursively search subdirectories (default: True)",
     )
-    parser.add_argument("-t", "--timeout", type=int, default=10, help="Timeout in seconds per file (default: 10)")
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)"
+        "-t",
+        "--timeout",
+        type=int,
+        default=10,
+        help="Timeout in seconds per file (default: 10)",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print detailed output")
-    parser.add_argument("--no-recursive", action="store_false", dest="recursive", help="Don't scan subdirectories")
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Print detailed output"
+    )
+    parser.add_argument(
+        "--no-recursive",
+        action="store_false",
+        dest="recursive",
+        help="Don't scan subdirectories",
+    )
     args = parser.parse_args()
     root_dir = Path(args.directory).resolve()
     if not root_dir.exists():
@@ -109,16 +149,25 @@ def main():
     if not root_dir.is_dir():
         print(f"Error: '{root_dir}' is not a directory")
         sys.exit(1)
-    print(f"Scanning {('recursively' if args.recursive else 'non-recursively')} in: {root_dir}")
+    print(
+        f"Scanning {('recursively' if args.recursive else 'non-recursively')} in: {root_dir}"
+    )
     files = find_python_files(root_dir, args.recursive)
     if not files:
         print("No Python files found.")
         return
     print(f"Found {len(files)} Python files")
-    print(f"Using {args.workers or 'auto'} workers with {args.timeout}s timeout per file")
+    print(
+        f"Using {args.workers or 'auto'} workers with {args.timeout}s timeout per file"
+    )
     print("-" * 42)
     start_time = time.time()
-    results = run_files_parallel(files=files, max_workers=args.workers, timeout=args.timeout, verbose=args.verbose)
+    results = run_files_parallel(
+        files=files,
+        max_workers=args.workers,
+        timeout=args.timeout,
+        verbose=args.verbose,
+    )
     elapsed_time = time.time() - start_time
     print("\n" + "=" * 42)
     print("SUMMARY")

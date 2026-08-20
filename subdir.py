@@ -66,7 +66,9 @@ def main() -> None:
             indx = item.stem.index("_")
         else:
             indx = 8
-        base_dir = cwd / item.stem[:indx].replace(".", "").replace("-", "").replace("_", "")
+        base_dir = cwd / item.stem[:indx].replace(".", "").replace("-", "").replace(
+            "_", ""
+        )
         target_dir = safe_mkdir(base_dir)
         moved_file = target_dir / item.name
         shutil.move(str(item), moved_file)

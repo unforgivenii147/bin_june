@@ -10,7 +10,9 @@ import gcld3
 from nltk.corpus import words
 
 
-def is_english_strict(line: str, detector, english_vocab: set, min_ratio: float = 0.5) -> tuple[bool, str]:
+def is_english_strict(
+    line: str, detector, english_vocab: set, min_ratio: float = 0.5
+) -> tuple[bool, str]:
     clean_line = line.strip()
     if not clean_line:
         return True, "Empty"
@@ -46,24 +48,30 @@ def process_file_lines(input_path: Path, move_mode: bool, strict_ratio: float):
     print(f"🔍 Strictly scanning {len(lines)} lines from '{input_path.name}'...")
     print("-" * 42)
     for i, line in enumerate(lines, start=1):
-        is_en, diagnostic = is_english_strict(line, detector, english_vocab, strict_ratio)
+        is_en, diagnostic = is_english_strict(
+            line, detector, english_vocab, strict_ratio
+        )
         if is_en:
             english_lines.append(line)
         else:
             non_english_lines.append(line)
             print(f"Line {i} [{diagnostic}]: {line.strip()}")
     print("-" * 42)
-    print(f"📊 Strict Filter Summary: Identified {len(non_english_lines)} non-English lines.")
+    print(
+        f"📊 Strict Filter Summary: Identified {len(non_english_lines)} non-English lines."
+    )
     if move_mode:
         if not non_english_lines:
             print("ℹ️  No non-English lines crossed the strict detection threshold.")
             return
         output_path = Path("noneng.txt")
         try:
-            output_path.write_text("\n".join(non_english_lines) + "\n", encoding="utf-8")
+            output_path.write_text(
+                "\n".join(non_english_lines) + "\n", encoding="utf-8"
+            )
             print(f"💾 Extracted text written safely to: {output_path.resolve()}")
             input_path.write_text("\n".join(english_lines) + "\n", encoding="utf-8")
-            print(f"🔄 In-place clean file written back to original location.")
+            print("🔄 In-place clean file written back to original location.")
         except Exception as e:
             print(f"❌ Storage error: {e}")
 

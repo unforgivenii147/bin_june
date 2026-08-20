@@ -1,21 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Strip docstrings from Python files, preserving module docstrings.
-Optionally remove comments too while preserving:
-- shebang (
-- # type: ... (type comments)
-- # fmt: ... (formatter directives)
-- inline pragmas starting with "# noqa" and "# type:" / "# fmt:"
-- standalone "# coding: ..." (encoding cookies)
-- standalone "#!..." (shebang)
-- preserves valid Python syntax by validating with ast.parse before write
-- Accepts multiple files/dirs as CLI args (if none: current dir recursively)
-- Uses pathlib
-- Uses parallel processing
-- Prints only relative paths of files that were modified
-- Reports number of docstrings removed for every file (only if removed)
-- If -c is set, also removes comments and reports comment removals count
-"""
 
 from __future__ import annotations
 
@@ -54,7 +37,9 @@ def _remove_docstrings_from_source(source: str) -> tuple[str, int]:
         if preserve_module and tree.body and node is tree.body[0]:
             continue
         if hasattr(node, "lineno") and hasattr(node, "end_lineno"):
-            to_remove.append((node.lineno, node.col_offset, node.end_lineno, node.end_col_offset))
+            to_remove.append(
+                (node.lineno, node.col_offset, node.end_lineno, node.end_col_offset)
+            )
     if not to_remove:
         return source, 0
     lines = source.splitlines(keepends=True)
@@ -128,7 +113,9 @@ def _should_preserve_comment(comment: str, *, is_line_start: bool) -> bool:
         return True
     if s.startswith("# fmt") or s.startswith("#fmt"):
         return True
-    return bool(s.startswith("# noqa") or s.startswith("# nosec") or s.startswith("# lint"))
+    return bool(
+        s.startswith("# noqa") or s.startswith("# nosec") or s.startswith("# lint")
+    )
 
 
 def _remove_comments_from_source(source: str) -> tuple[str, int]:
@@ -177,7 +164,9 @@ def _collect_py_files(paths: list[Path], *, recursive: bool = True) -> list[Path
     return sorted({p.resolve() for p in py_files})
 
 
-def process_file(path: Path, cwd: Path, *, strip_comments: bool) -> tuple[str, int, int] | None:
+def process_file(
+    path: Path, cwd: Path, *, strip_comments: bool
+) -> tuple[str, int, int] | None:
     rel = str(path.relative_to(cwd))
     try:
         source = path.read_text(encoding="utf-8")
@@ -230,7 +219,10 @@ def main() -> None:
     strip_comments = True
     changed: list[tuple[str, int, int]] = []
     with ProcessPoolExecutor(max_workers=8) as ex:
-        futures = {ex.submit(process_file, p, cwd, strip_comments=strip_comments): p for p in py_files}
+        futures = {
+            ex.submit(process_file, p, cwd, strip_comments=strip_comments): p
+            for p in py_files
+        }
         for fut in as_completed(futures):
             res = fut.result()
             if res is not None:

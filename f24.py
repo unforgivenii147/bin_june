@@ -39,7 +39,9 @@ def main() -> None:
     recent: list[tuple[float, Path]] = []
     with ThreadPoolExecutor() as executor:
         futures = [executor.submit(ctime_if_recent, p) for p in files]
-        for fut in tqdm(as_completed(futures), total=len(futures), desc="Scanning", unit="file"):
+        for fut in tqdm(
+            as_completed(futures), total=len(futures), desc="Scanning", unit="file"
+        ):
             result = fut.result()
             if result is not None:
                 recent.append(result)

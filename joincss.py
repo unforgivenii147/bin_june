@@ -8,7 +8,9 @@ from pathlib import Path
 LOCAL_FONT_BASE = Path("/sdcard/_static/fonts")
 FONT_EXTS = {".woff", ".woff2", ".ttf", ".otf", ".eot"}
 IMG_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
-IMPORT_RE = re.compile("@import\\s+url\\([^)]+fonts\\.googleapis[^)]+\\);?", re.IGNORECASE)
+IMPORT_RE = re.compile(
+    "@import\\s+url\\([^)]+fonts\\.googleapis[^)]+\\);?", re.IGNORECASE
+)
 FAMILY_RULES = {
     "roboto": "roboto",
     "lato": "lato",
@@ -17,7 +19,9 @@ FAMILY_RULES = {
     "fontawesome": "fa",
     "fa-": "fa",
 }
-URL_RE = re.compile("url\\(([\\\"\\']?)(https?://[^)]+?\\.(?:woff2?|ttf|otf|eot))\\1\\)", re.IGNORECASE)
+URL_RE = re.compile(
+    "url\\(([\\\"\\']?)(https?://[^)]+?\\.(?:woff2?|ttf|otf|eot))\\1\\)", re.IGNORECASE
+)
 
 
 def find_css(paths: str):

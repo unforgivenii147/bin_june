@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of transocr.py for Python 3.12.
-Translates text or images to English using OCR and Google Translator.
-"""
 
 from __future__ import annotations
 

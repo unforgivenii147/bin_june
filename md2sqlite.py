@@ -31,7 +31,11 @@ def create_database():
 def parse_and_insert():
     with open(MD_FILE, "r", encoding="utf-8") as f:
         content = f.read()
-    rule_blocks = re.findall(r"^#\s+(.*?)\s+\((.*?)\)\s*\n(.*?)(?=\n#\s+|\Z)", content, re.DOTALL | re.MULTILINE)
+    rule_blocks = re.findall(
+        r"^#\s+(.*?)\s+\((.*?)\)\s*\n(.*?)(?=\n#\s+|\Z)",
+        content,
+        re.DOTALL | re.MULTILINE,
+    )
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     inserted_count = 0
@@ -55,7 +59,16 @@ def parse_and_insert():
                 (code, name, what_it_does, why_it_bad, example, fix_safety, options, references_list)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-                (code.strip(), name.strip(), what_it_does, why_it_bad, example, fix_safety, options, references),
+                (
+                    code.strip(),
+                    name.strip(),
+                    what_it_does,
+                    why_it_bad,
+                    example,
+                    fix_safety,
+                    options,
+                    references,
+                ),
             )
             inserted_count += 1
         except sqlite3.Error as e:

@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Reinstall system packages from a text file or command line argument.
-Reads package names (one per line) and runs 'yes | apt install --reinstall'
-for each package.
-"""
 
 from __future__ import annotations
 

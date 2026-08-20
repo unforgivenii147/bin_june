@@ -1,18 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Strip comments and docstrings from Python files recursively (in-place).
-Behavior:
-- Preserves module-level docstring.
-- Removes function/class docstrings. If a function/class body would be empty after removal,
-  inserts `pass` to avoid syntax errors.
-- Removes comments, but preserves:
-    - Shebang (
-    - Top-of-file comments that contain "type:" or "fmt:" (case-insensitive).
-    - Top-of-file encoding/coding declarations (PEP 263).
-- Validates the transformed source with `ast.parse()` before writing.
-- Uses pathlib and parallel processing for speed.
-- Only reports files that changed.
-"""
 
 from __future__ import annotations
 
@@ -132,7 +118,15 @@ def process_file(path: Path) -> tuple[Path, str | None]:
 
 def should_skip_path(p: Path) -> bool:
     parts = {p_part.lower() for p_part in p.parts}
-    skip_indicators = {".git", "__pycache__", "venv", ".venv", "env", ".env", "node_modules"}
+    skip_indicators = {
+        ".git",
+        "__pycache__",
+        "venv",
+        ".venv",
+        "env",
+        ".env",
+        "node_modules",
+    }
     return bool(parts & skip_indicators)
 
 

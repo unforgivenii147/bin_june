@@ -36,7 +36,10 @@ def detect_text_based_extension(text: str):
         return "toml"
     if text.startswith("[") and "]" in text:
         return "ini"
-    if any(text.lower().startswith(cmd) for cmd in ["select ", "insert ", "update ", "delete ", "create "]):
+    if any(
+        text.lower().startswith(cmd)
+        for cmd in ["select ", "insert ", "update ", "delete ", "create "]
+    ):
         return "sql"
     if "{" in text and "}" in text and ":" in text:
         return "css"

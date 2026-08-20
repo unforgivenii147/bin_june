@@ -24,7 +24,9 @@ def write_file_if_missing(path: Path, content: str = "") -> None:
         path.write_text(content)
 
 
-def create_project_structure(pkg: str, author: str, email: str, url: str, simple_cli: bool = False) -> None:
+def create_project_structure(
+    pkg: str, author: str, email: str, url: str, simple_cli: bool = False
+) -> None:
     cwd = Path.cwd()
     version = "1.4.7"
     readme_path = cwd / "README.md"
@@ -80,10 +82,19 @@ build-backend = "setuptools.build_meta\"
 
 def main() -> None:
     user_info = load_user_info()
-    parser = argparse.ArgumentParser(description="Initialize a Python project structure")
+    parser = argparse.ArgumentParser(
+        description="Initialize a Python project structure"
+    )
     parser.add_argument("name", help="Package name")
-    parser.add_argument("--version", default="1.4.7", help="Initial version (default: 1.4.7)")
-    parser.add_argument("-s", "--simple-cli", action="store_true", help="Create with simple CLI entry point")
+    parser.add_argument(
+        "--version", default="1.4.7", help="Initial version (default: 1.4.7)"
+    )
+    parser.add_argument(
+        "-s",
+        "--simple-cli",
+        action="store_true",
+        help="Create with simple CLI entry point",
+    )
     args = parser.parse_args()
     author = user_info.get("name", "")
     email = user_info.get("email", "")

@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Strip debug symbols from .so files, including those inside .whl archives."""
 
 import re
 import sys

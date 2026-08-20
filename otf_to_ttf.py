@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert OTF to TTF recursively using FontForge Python bindings.
-Usage: fontforge -script otf2ttf_fontforge.py [directory]
-"""
 
 from __future__ import annotations
 
@@ -53,7 +49,9 @@ def main():
             print(f"  ✗ Failed: {message}")
             stats["error"] += 1
     print(f"\n{'=' * 42}")
-    print(f"Summary: {stats['success']} converted, {stats['skipped']} skipped, {stats['error']} failed")
+    print(
+        f"Summary: {stats['success']} converted, {stats['skipped']} skipped, {stats['error']} failed"
+    )
 
 
 if __name__ == "__main__":

@@ -36,8 +36,15 @@ def check_or_fix_imports(file_path, autofix=False):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Check or fix unused imports in a Python file.")
+    parser = argparse.ArgumentParser(
+        description="Check or fix unused imports in a Python file."
+    )
     parser.add_argument("file", help="Path to the Python file")
-    parser.add_argument("-a", "--autofix", action="store_true", help="Automatically remove unused imports")
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Automatically remove unused imports",
+    )
     args = parser.parse_args()
     check_or_fix_imports(args.file, args.autofix)

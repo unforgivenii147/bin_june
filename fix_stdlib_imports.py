@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to detect potentially missing standard library imports in Python files.
-Recursively scans directories and reports stdlib names that are used but not imported.
-"""
 
 from __future__ import annotations
 
@@ -305,7 +301,15 @@ def get_stdlib_names() -> dict[str, set[str]]:
         "pathlib": {"Path", "PurePath", "PurePosixPath", "PureWindowsPath"},
         "re": {"match", "search", "findall", "sub", "compile", "split", "escape"},
         "argparse": {"ArgumentParser", "Namespace"},
-        "logging": {"debug", "info", "warning", "error", "critical", "getLogger", "basicConfig"},
+        "logging": {
+            "debug",
+            "info",
+            "warning",
+            "error",
+            "critical",
+            "getLogger",
+            "basicConfig",
+        },
         "statistics": {"mean", "median", "mode", "stdev", "variance"},
         "typing": {
             "list",
@@ -325,7 +329,15 @@ def get_stdlib_names() -> dict[str, set[str]]:
         "shutil": {"copy", "copy2", "move", "rmtree", "make_archive"},
         "tempfile": {"NamedTemporaryFile", "TemporaryFile", "mkdtemp"},
         "glob": {"glob"},
-        "time": {"time", "sleep", "ctime", "localtime", "gmtime", "strftime", "strptime"},
+        "time": {
+            "time",
+            "sleep",
+            "ctime",
+            "localtime",
+            "gmtime",
+            "strftime",
+            "strptime",
+        },
     }
     for module in STDLIB_MODULES:
         if "." not in module and module not in stdlib_names:
@@ -341,7 +353,9 @@ class ImportChecker(ast.NodeVisitor):
         self.import_nodes = []
 
 
-def find_missing_imports(filepath: str, stdlib_names: dict[str, set[str]]) -> list[tuple[str, str]]:
+def find_missing_imports(
+    filepath: str, stdlib_names: dict[str, set[str]]
+) -> list[tuple[str, str]]:
     try:
         with open(filepath, encoding="utf-8") as f:
             source = f.read()
@@ -376,7 +390,9 @@ def find_missing_imports(filepath: str, stdlib_names: dict[str, set[str]]) -> li
     return missing
 
 
-def scan_directory(root_dir: str, exclude_dirs: set[str] | None = None) -> dict[str, list[tuple[str, str]]]:
+def scan_directory(
+    root_dir: str, exclude_dirs: set[str] | None = None
+) -> dict[str, list[tuple[str, str]]]:
     if exclude_dirs is None:
         exclude_dirs = {
             ".git",
@@ -398,7 +414,9 @@ def scan_directory(root_dir: str, exclude_dirs: set[str] | None = None) -> dict[
         print(f"Error: Directory '{root_dir}' does not exist.", file=sys.stderr)
         return results
     python_files = list(root_path.rglob("*.py"))
-    python_files = [f for f in python_files if not any(excl in f.parts for excl in exclude_dirs)]
+    python_files = [
+        f for f in python_files if not any(excl in f.parts for excl in exclude_dirs)
+    ]
     print(f"Scanning {len(python_files)} Python files in {root_dir}...")
     for filepath in python_files:
         missing = find_missing_imports(str(filepath), stdlib_names)
@@ -414,7 +432,9 @@ def print_results(results: dict[str, list[tuple[str, str]]], show_all: bool = Fa
     total_files = len(results)
     total_missing = sum(len(missing) for missing in results.values())
     print(f"\n{'=' * 42}")
-    print(f" Found {total_missing} potentially missing import(s) in {total_files} file(s)")
+    print(
+        f" Found {total_missing} potentially missing import(s) in {total_files} file(s)"
+    )
     print(f"{'=' * 42}\n")
     for filepath, missing in sorted(results.items()):
         rel_path = os.path.relpath(filepath)
@@ -447,7 +467,12 @@ Examples:
         default=".",
         help="Root directory to scan (default: current directory)",
     )
-    parser.add_argument("--exclude", "-e", default="", help="Comma-separated list of directories to exclude")
+    parser.add_argument(
+        "--exclude",
+        "-e",
+        default="",
+        help="Comma-separated list of directories to exclude",
+    )
     parser.add_argument(
         "--show-all",
         "-a",

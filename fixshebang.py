@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Change Python shebang in all Python files to Termux path.
-If a file has no shebang, add one at the beginning.
-Usage: python change_shebang.py
-"""
 
 from __future__ import annotations
 
@@ -71,7 +66,10 @@ def is_likely_python_file(path: Path) -> bool:
                 r"^if\s+__name__\s*==\s*['\"]__main__['\"]",
                 r"^#!.*python",
             ]
-            return any(re.search(pattern, text_sample, re.MULTILINE) for pattern in python_patterns)
+            return any(
+                re.search(pattern, text_sample, re.MULTILINE)
+                for pattern in python_patterns
+            )
     except (OSError, UnicodeDecodeError, PermissionError):
         return False
 
@@ -79,7 +77,10 @@ def is_likely_python_file(path: Path) -> bool:
 def find_python_files(directory: Path) -> list[Path]:
     python_files = []
     for path in directory.rglob("*"):
-        if any(part.startswith(".") and part != "." for part in path.parts) and ".git" in path.parts:
+        if (
+            any(part.startswith(".") and part != "." for part in path.parts)
+            and ".git" in path.parts
+        ):
             continue
         if is_symlink(path):
             continue
@@ -98,7 +99,9 @@ def find_python_files(directory: Path) -> list[Path]:
             r"\.(so|dll|dylib|exe|o|a|lib)$",
             r"\.(pyc|pyo|pyd)$",
         ]
-        if any(re.search(pattern, str(path), re.IGNORECASE) for pattern in skip_patterns):
+        if any(
+            re.search(pattern, str(path), re.IGNORECASE) for pattern in skip_patterns
+        ):
             continue
         if path.stem in COMMON_PYTHON_NAMES:
             if is_likely_python_file(path):
@@ -150,7 +153,10 @@ def main():
     already_correct_count = 0
     not_python_count = 0
     with ProcessPoolExecutor() as executor:
-        future_to_file = {executor.submit(process_file, path, current_dir): path for path in python_files}
+        future_to_file = {
+            executor.submit(process_file, path, current_dir): path
+            for path in python_files
+        }
         for future in as_completed(future_to_file):
             path, was_changed, error, rel_path, action_type = future.result()
             if error:

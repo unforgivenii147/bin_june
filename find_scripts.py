@@ -49,4 +49,6 @@ if __name__ == "__main__":
         for script_path in found_scripts:
             print(script_path.relative_to(cwd))
     else:
-        print("No Python scripts without extension found in the current directory or its subdirectories.")
+        print(
+            "No Python scripts without extension found in the current directory or its subdirectories."
+        )

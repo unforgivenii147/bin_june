@@ -50,7 +50,9 @@ def translate(word: str, fa_en: dict[str, str], en_fa: dict[str, str]) -> str | 
     return fa_en.get(word) or en_fa.get(word)
 
 
-def fuzzy_search(word: str, all_words: set[str], limit: int = 5, cutoff: float = 0.6) -> list[str]:
+def fuzzy_search(
+    word: str, all_words: set[str], limit: int = 5, cutoff: float = 0.6
+) -> list[str]:
     return get_close_matches(word, all_words, n=limit, cutoff=cutoff)
 
 
@@ -60,7 +62,13 @@ def fzf_select(all_words: set[str]) -> str | None:
         return None
     try:
         proc = subprocess.run(
-            ["fzf", "--prompt=Select word: ", "--height=40%", "--layout=reverse", "--border"],
+            [
+                "fzf",
+                "--prompt=Select word: ",
+                "--height=40%",
+                "--layout=reverse",
+                "--border",
+            ],
             input="\n".join(sorted(all_words)),
             text=True,
             capture_output=True,
@@ -102,7 +110,9 @@ def main() -> None:
     parser.add_argument("word", nargs="*", help="Word to translate")
     parser.add_argument("--prefix", help="List words starting with prefix")
     parser.add_argument("--fuzzy", help="Fuzzy search (typo tolerant)")
-    parser.add_argument("--no-fzf", action="store_true", help="Disable interactive fzf selector")
+    parser.add_argument(
+        "--no-fzf", action="store_true", help="Disable interactive fzf selector"
+    )
     args = parser.parse_args()
     fa_en, en_fa = load_dictionary(Path(DICT_FILE))
     all_words = set(fa_en) | set(en_fa)
@@ -137,7 +147,9 @@ def main() -> None:
         else:
             matches = fuzzy_search(word, all_words)
             if matches:
-                faprint(f"Not found. Did you mean: {', '.join(matches)}?", file=sys.stderr)
+                faprint(
+                    f"Not found. Did you mean: {', '.join(matches)}?", file=sys.stderr
+                )
             else:
                 print("Not found", file=sys.stderr)
             sys.exit(1)

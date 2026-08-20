@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Reverse inline functions by extracting them back to dh package imports."""
 
 from __future__ import annotations
 
@@ -54,7 +53,9 @@ def build_dh_function_map(dh_src_path: Path) -> dict[str, tuple[str, str]]:
     return func_map
 
 
-def find_matching_inlined_functions(source: str, dh_func_map: dict[str, tuple[str, str]]) -> list[tuple[str, int, int]]:
+def find_matching_inlined_functions(
+    source: str, dh_func_map: dict[str, tuple[str, str]]
+) -> list[tuple[str, int, int]]:
     try:
         tree = ast.parse(source)
     except SyntaxError:
@@ -73,7 +74,7 @@ def has_import(source: str, func_name: str) -> bool:
     return (
         f"from dh.{func_name} import" in source
         or f"from dh import {func_name}" in source
-        or (f"from dh import" in source and f"{func_name}" in source)
+        or ("from dh import" in source and f"{func_name}" in source)
     )
 
 
@@ -84,11 +85,15 @@ def add_imports(lines: list[str], imports: set[tuple[str, str]]) -> list[str]:
     for i, line in enumerate(lines):
         if line.startswith(("import ", "from ")):
             last_import_idx = i
-    import_lines = sorted([f"from dh.{module} import {func}" for func, module in imports])
+    import_lines = sorted(
+        [f"from dh.{module} import {func}" for func, module in imports]
+    )
     if last_import_idx == -1:
         return import_lines + [""] + lines
     else:
-        return lines[: last_import_idx + 1] + import_lines + lines[last_import_idx + 1 :]
+        return (
+            lines[: last_import_idx + 1] + import_lines + lines[last_import_idx + 1 :]
+        )
 
 
 def process_file(
@@ -97,7 +102,7 @@ def process_file(
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
-    except (IOError, UnicodeDecodeError):
+    except (OSError, UnicodeDecodeError):
         return (file_path, 0, set())
     matches = find_matching_inlined_functions(content, dh_func_map)
     if not matches:
@@ -121,14 +126,23 @@ def process_file(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Reverse inline functions from dh package")
-    parser.add_argument("-n", "--no-dry-run", action="store_true", help="Actually modify files (dry-run by default)")
+    parser = argparse.ArgumentParser(
+        description="Reverse inline functions from dh package"
+    )
+    parser.add_argument(
+        "-n",
+        "--no-dry-run",
+        action="store_true",
+        help="Actually modify files (dry-run by default)",
+    )
     parser.add_argument("paths", nargs="*", help="Files or directories to process")
     args = parser.parse_args()
     dry_run = not args.no_dry_run
     dh_path = Path.home() / "isaac" / "pkgs" / "dh" / "src" / "dh"
     bin_path = Path.cwd()
-    target_paths = [Path(p).expanduser() for p in args.paths] if args.paths else [bin_path]
+    target_paths = (
+        [Path(p).expanduser() for p in args.paths] if args.paths else [bin_path]
+    )
     if not dh_path.is_dir():
         print(f"Error: dh package not found at {dh_path}")
         sys.exit(1)
@@ -144,7 +158,10 @@ def main():
     mode = "DRY RUN" if dry_run else "ACTUAL"
     print(f"{mode} MODE: Processing {len(py_files)} Python files...\n")
     with ProcessPoolExecutor() as executor:
-        futures = {executor.submit(process_file, py_file, dh_func_map, dry_run): py_file for py_file in py_files}
+        futures = {
+            executor.submit(process_file, py_file, dh_func_map, dry_run): py_file
+            for py_file in py_files
+        }
         total_removed = 0
         changes_by_file = {}
         for future in as_completed(futures):
@@ -159,7 +176,9 @@ def main():
         imports = changes_by_file[file_path]
         print(f"{file_path.name}:")
         for func_name, module_name in sorted(imports):
-            print(f"  - Replace {func_name}() and add: from dh.{module_name} import {func_name}")
+            print(
+                f"  - Replace {func_name}() and add: from dh.{module_name} import {func_name}"
+            )
         print()
     print(f"Total functions to process: {total_removed}")
     if dry_run:

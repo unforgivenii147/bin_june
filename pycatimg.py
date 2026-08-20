@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-catimg - Display images in terminal with true color support (including SVG)
-"""
 
 from __future__ import annotations
 
@@ -17,7 +14,13 @@ from PIL.ImageFile import ImageFile
 SVG_SUPPORT = True
 
 
-def resize_image(img: ImageFile, terminal_width: int, terminal_height: int, max_width=None, max_height=None):
+def resize_image(
+    img: ImageFile,
+    terminal_width: int,
+    terminal_height: int,
+    max_width=None,
+    max_height=None,
+):
     orig_width, orig_height = img.size
     if max_width and max_height:
         target_width = min(max_width, terminal_width)
@@ -113,7 +116,9 @@ def get_terminal_size() -> tuple[int, int]:
         return 80, 24
 
 
-def catimg(image_path, width=None, height=None, use_half_blocks=True, dpi=96, bg_color=None) -> None:
+def catimg(
+    image_path, width=None, height=None, use_half_blocks=True, dpi=96, bg_color=None
+) -> None:
     if not os.path.exists(image_path):
         print(f"Error: File '{image_path}' not found", file=sys.stderr)
         sys.exit(1)
@@ -161,11 +166,18 @@ def main() -> None:
         action="store_true",
         help="Disable half-block characters (lower vertical resolution)",
     )
-    parser.add_argument("--dpi", type=int, default=96, help="DPI for SVG rendering (default: 96)")
-    parser.add_argument("--bg-color", help='Background color for transparent areas (e.g., "black" or "#000000")')
+    parser.add_argument(
+        "--dpi", type=int, default=96, help="DPI for SVG rendering (default: 96)"
+    )
+    parser.add_argument(
+        "--bg-color",
+        help='Background color for transparent areas (e.g., "black" or "#000000")',
+    )
     args = parser.parse_args()
     if args.image.lower().endswith(".svg") and not SVG_SUPPORT:
-        print("Warning: SVG support requires 'cairosvg'. Install with:", file=sys.stderr)
+        print(
+            "Warning: SVG support requires 'cairosvg'. Install with:", file=sys.stderr
+        )
         print("  pip install cairosvg", file=sys.stderr)
         print("\nFor system dependencies (Linux):", file=sys.stderr)
         print("  Ubuntu/Debian: sudo apt-get install libcairo2-dev", file=sys.stderr)

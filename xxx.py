@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Auto-extract tar archives with integrity check and parallel processing."""
 
 import sys
 import tarfile
@@ -32,14 +31,20 @@ def extract_archive(archive_path: Path) -> tuple[Path, bool, str]:
 
 def main():
     cwd = Path.cwd()
-    archives = list(cwd.glob("*.tar.gz")) + list(cwd.glob("*.tar.xz")) + list(cwd.glob("*.tar.zst"))
+    archives = (
+        list(cwd.glob("*.tar.gz"))
+        + list(cwd.glob("*.tar.xz"))
+        + list(cwd.glob("*.tar.zst"))
+    )
     if not archives:
         print("No tar archives found in current directory")
         return
     print(f"Found {len(archives)} archive(s)\n--- Checking integrity ---")
     valid_archives = []
     with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(check_integrity, archive): archive for archive in archives}
+        futures = {
+            executor.submit(check_integrity, archive): archive for archive in archives
+        }
         for future in as_completed(futures):
             is_valid, message = future.result()
             print(message)
@@ -51,7 +56,10 @@ def main():
     print(f"\n--- Extracting {len(valid_archives)} valid archive(s) ---")
     failed = []
     with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(extract_archive, archive): archive for archive in valid_archives}
+        futures = {
+            executor.submit(extract_archive, archive): archive
+            for archive in valid_archives
+        }
         for future in as_completed(futures):
             path, success, message = future.result()
             print(message)

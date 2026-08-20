@@ -14,7 +14,7 @@ mpf = mpf_async
 
 
 def is_ascii_printable(s: str) -> bool:
-    return all((32 <= ord(c) <= 126 for c in s))
+    return all(32 <= ord(c) <= 126 for c in s)
 
 
 def clean_filename(s: str) -> str:
@@ -91,7 +91,9 @@ def main() -> None:
     files = (
         [Path(arg) for arg in args]
         if args
-        else get_files(cwd, extensions=[".ttf", ".woff", ".woff2", ".bin", ".otf", ".eot"])
+        else get_files(
+            cwd, extensions=[".ttf", ".woff", ".woff2", ".bin", ".otf", ".eot"]
+        )
     )
     if not files:
         print("no files found")

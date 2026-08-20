@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Sanity check script to validate binary file extensions.
-Traverses the filesystem to find files with extensions in BIN_EXT,
-verifies they are actually binary files, and reports mismatches.
-Uses memory-efficient os.walk traversal with progress reporting
-and optimized filesystem walking strategies.
-"""
 
 from __future__ import annotations
 
@@ -20,7 +13,9 @@ from pathlib import Path
 
 from dh import BIN_EXT
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +34,9 @@ class OptimizedWalker:
     def _get_extensions_lower(extensions: tuple) -> set:
         return {ext.lower() for ext in extensions}
 
-    def walk(self, root_dir: str, extensions: set[str], progress_callback=None) -> Iterator[Path]:
+    def walk(
+        self, root_dir: str, extensions: set[str], progress_callback=None
+    ) -> Iterator[Path]:
         extensions_lower = self._get_extensions_lower(tuple(extensions))
         file_count = 0
         if self.skip_mount_points:
@@ -48,13 +45,19 @@ class OptimizedWalker:
             except OSError:
                 self.root_dev = None
         try:
-            yield from self._walk_recursive(root_dir, extensions_lower, progress_callback, file_count)
+            yield from self._walk_recursive(
+                root_dir, extensions_lower, progress_callback, file_count
+            )
         except KeyboardInterrupt:
             logger.info("Traversal interrupted by user")
             raise
 
     def _walk_recursive(
-        self, current_dir: str, extensions_lower: set[str], progress_callback, file_count: int
+        self,
+        current_dir: str,
+        extensions_lower: set[str],
+        progress_callback,
+        file_count: int,
     ) -> Iterator[Path]:
         if self.skip_symlinks:
             try:
@@ -85,7 +88,9 @@ class OptimizedWalker:
                         except (OSError, FileNotFoundError):
                             continue
                     for dir_path in directories:
-                        yield from self._walk_recursive(dir_path, extensions_lower, progress_callback, file_count)
+                        yield from self._walk_recursive(
+                            dir_path, extensions_lower, progress_callback, file_count
+                        )
             else:
                 for entry in os.listdir(current_dir):
                     full_path = os.path.join(current_dir, entry)
@@ -96,8 +101,15 @@ class OptimizedWalker:
                                 if progress_callback and file_count % 500 == 0:
                                     progress_callback(current_dir, file_count)
                                 yield Path(full_path)
-                        elif os.path.isdir(full_path) and (not self._is_symlink(full_path)):
-                            yield from self._walk_recursive(full_path, extensions_lower, progress_callback, file_count)
+                        elif os.path.isdir(full_path) and (
+                            not self._is_symlink(full_path)
+                        ):
+                            yield from self._walk_recursive(
+                                full_path,
+                                extensions_lower,
+                                progress_callback,
+                                file_count,
+                            )
                     except (OSError, FileNotFoundError):
                         continue
         except PermissionError:
@@ -119,7 +131,9 @@ class SpinnerProgressReporter:
         if file_count - self.last_count >= 500:
             self.last_count = file_count
             self.spinner_index = (self.spinner_index + 1) % len(self.spinner)
-            path_display = current_path[:60] + "..." if len(current_path) > 60 else current_path
+            path_display = (
+                current_path[:60] + "..." if len(current_path) > 60 else current_path
+            )
             msg = f"\r{self.spinner[self.spinner_index]} Files: {file_count:8d} | {path_display}"
             print(msg, end="", flush=True)
 
@@ -146,7 +160,9 @@ def is_binary_file(file_path: Path) -> bool | None:
         except UnicodeDecodeError:
             try:
                 decoded = chunk.decode("latin-1")
-                control_chars = sum(1 for c in decoded if ord(c) < 32 and c not in "\t\n\r")
+                control_chars = sum(
+                    1 for c in decoded if ord(c) < 32 and c not in "\t\n\r"
+                )
                 return control_chars > len(decoded) * 0.3
             except Exception:
                 return True
@@ -167,7 +183,10 @@ def check_file(file_path: Path) -> tuple[Path, str, bool | None, str]:
 
 
 def validate_extensions(
-    root_dir: str = "/", num_workers: int | None = None, verbose: bool = True, skip_mount_points: bool = True
+    root_dir: str = "/",
+    num_workers: int | None = None,
+    verbose: bool = True,
+    skip_mount_points: bool = True,
 ) -> dict:
     if num_workers is None:
         num_workers = max(1, cpu_count() - 1)
@@ -207,14 +226,18 @@ def validate_extensions(
     for file_path, ext, is_binary, mime_type in results:
         if ext not in by_extension:
             by_extension[ext] = {"binary": 0, "text": 0, "error": 0, "files": []}
-        by_extension[ext]["files"].append({"path": str(file_path), "is_binary": is_binary, "mime_type": mime_type})
+        by_extension[ext]["files"].append(
+            {"path": str(file_path), "is_binary": is_binary, "mime_type": mime_type}
+        )
         if is_binary is True:
             binary_count += 1
             by_extension[ext]["binary"] += 1
         elif is_binary is False:
             text_count += 1
             by_extension[ext]["text"] += 1
-            mismatches.append({"path": str(file_path), "extension": ext, "mime_type": mime_type})
+            mismatches.append(
+                {"path": str(file_path), "extension": ext, "mime_type": mime_type}
+            )
         else:
             error_count += 1
             by_extension[ext]["error"] += 1
@@ -244,7 +267,9 @@ def print_report(results: dict):
         print("-" * 42)
         for i, mismatch in enumerate(results["mismatches"][:20], 1):
             print(f"  {i}. {mismatch['path']}")
-            print(f"     └─ Extension: {mismatch['extension']} | MIME: {mismatch['mime_type']}")
+            print(
+                f"     └─ Extension: {mismatch['extension']} | MIME: {mismatch['mime_type']}"
+            )
         if len(results["mismatches"]) > 20:
             print(f"  ... and {len(results['mismatches']) - 20} more")
     else:
@@ -252,7 +277,9 @@ def print_report(results: dict):
     print("\nBreakdown by extension:")
     print("-" * 42)
     for ext, stats in sorted(results["by_extension"].items()):
-        print(f"  {ext:12} - Binary: {stats['binary']:6}  Text: {stats['text']:6}  Errors: {stats['error']:6}")
+        print(
+            f"  {ext:12} - Binary: {stats['binary']:6}  Text: {stats['text']:6}  Errors: {stats['error']:6}"
+        )
     print("\n" + "=" * 42)
 
 
@@ -264,7 +291,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         skip_mounts = sys.argv[2].lower() in ("true", "1", "yes")
     try:
-        results = validate_extensions(root_dir, verbose=True, skip_mount_points=skip_mounts)
+        results = validate_extensions(
+            root_dir, verbose=True, skip_mount_points=skip_mounts
+        )
         print_report(results)
         sys.exit(1 if results.get("mismatches") else 0)
     except KeyboardInterrupt:

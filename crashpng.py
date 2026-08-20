@@ -11,11 +11,16 @@ def optimize_pngs_recursively() -> None:
     for png_file in Path().rglob("*.png"):
         original_size = png_file.stat().st_size
         total_original_size += original_size
-        subprocess.run(["pngcrush", "-ow", "-rem", "allb", "-brute", "-reduce", str(png_file)], check=True)
+        subprocess.run(
+            ["pngcrush", "-ow", "-rem", "allb", "-brute", "-reduce", str(png_file)],
+            check=True,
+        )
         optimized_size = png_file.stat().st_size
         size_change = original_size - optimized_size
         print(f"Processed: {png_file}")
-        print(f"  Original: {original_size} bytes, Optimized: {optimized_size} bytes, Change: {size_change} bytes")
+        print(
+            f"  Original: {original_size} bytes, Optimized: {optimized_size} bytes, Change: {size_change} bytes"
+        )
         total_optimized_size += optimized_size
     total_reduction = total_original_size - total_optimized_size
     print("\n--- Summary ---")

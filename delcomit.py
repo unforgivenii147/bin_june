@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 from git import Repo
 
 
-def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master") -> bool:
+def delete_commits_older_than_week(
+    repo_path: str = ".", branch: str = "master"
+) -> bool:
     try:
         repo = Repo(repo_path)
         origin = repo.remotes.origin
@@ -40,8 +42,12 @@ def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master")
             return True
         print(f"Found {len(commits_to_delete)} commit(s) to delete:")
         for commit in commits_to_delete[:5]:
-            date = datetime.fromtimestamp(commit.committed_date).strftime("%Y-%m-%d %H:%M")
-            print(f"  {commit.hexsha[:8]} - {date} - {commit.message.splitlines()[0][:50]}")
+            date = datetime.fromtimestamp(commit.committed_date).strftime(
+                "%Y-%m-%d %H:%M"
+            )
+            print(
+                f"  {commit.hexsha[:8]} - {date} - {commit.message.splitlines()[0][:50]}"
+            )
         oldest_keep = None
         for commit in repo.iter_commits(f"{branch}"):
             commit_date = datetime.fromtimestamp(commit.committed_date)
@@ -63,7 +69,9 @@ def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master")
         return False
 
 
-def delete_commits_interactive(repo_path: str = ".", branch: str = "master", days_old: int = 7) -> bool:
+def delete_commits_interactive(
+    repo_path: str = ".", branch: str = "master", days_old: int = 7
+) -> bool:
     try:
         repo = Repo(repo_path)
         origin = repo.remotes.origin
@@ -89,7 +97,9 @@ def delete_commits_interactive(repo_path: str = ".", branch: str = "master", day
             return True
         print(f"\nFound {len(old_local_commits)} commit(s) older than {days_old} days:")
         for i, commit in enumerate(old_local_commits, 1):
-            date = datetime.fromtimestamp(commit.committed_date).strftime("%Y-%m-%d %H:%M")
+            date = datetime.fromtimestamp(commit.committed_date).strftime(
+                "%Y-%m-%d %H:%M"
+            )
             print(f"{i}. {commit.hexsha[:8]} - {date} - {commit.summary}")
         response = input(f"\nDelete these {len(old_local_commits)} commit(s)? (y/n): ")
         if response.lower() != "y":
@@ -121,12 +131,18 @@ def delete_commits_interactive(repo_path: str = ".", branch: str = "master", day
         return False
 
 
-def delete_commits_with_rebase(repo_path: str = ".", branch: str = "master", days_old: int = 7) -> bool | None:
+def delete_commits_with_rebase(
+    repo_path: str = ".", branch: str = "master", days_old: int = 7
+) -> bool | None:
     try:
         repo = Repo(repo_path)
         origin = repo.remotes.origin
         upstream = f"origin/{branch}"
-        if upstream not in repo.refs and branch == "master" and "origin/main" in repo.refs:
+        if (
+            upstream not in repo.refs
+            and branch == "master"
+            and "origin/main" in repo.refs
+        ):
             upstream = "origin/main"
             branch = "main"
         if branch not in repo.branches:
@@ -142,7 +158,9 @@ def delete_commits_with_rebase(repo_path: str = ".", branch: str = "master", day
         if not first_keep_commit:
             print("No commits to keep")
             return False
-        parent_commit = first_keep_commit.parents[0] if first_keep_commit.parents else None
+        parent_commit = (
+            first_keep_commit.parents[0] if first_keep_commit.parents else None
+        )
         if parent_commit:
             print(f"Resetting to parent commit: {parent_commit.hexsha[:8]}")
             repo.head.reset(parent_commit, index=True, working_tree=True)
@@ -163,10 +181,14 @@ def delete_commits_with_rebase(repo_path: str = ".", branch: str = "master", day
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Delete git commits older than one week")
+    parser = argparse.ArgumentParser(
+        description="Delete git commits older than one week"
+    )
     parser.add_argument("--path", default=".", help="Repository path")
     parser.add_argument("--branch", default="master", help="Branch to clean")
-    parser.add_argument("--days", type=int, default=7, help="Delete commits older than N days")
+    parser.add_argument(
+        "--days", type=int, default=7, help="Delete commits older than N days"
+    )
     parser.add_argument("--interactive", action="store_true", help="Interactive mode")
     args = parser.parse_args()
     if args.interactive:

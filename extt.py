@@ -79,7 +79,10 @@ for py in Path().rglob("*.py"):
             folder_path = py.parent
             relative_folder = get_relative_path(folder_path, Path())
             folders_found.add(str(relative_folder))
-            folder_definitions[relative_folder][py.name] = {"definitions": definitions, "path": py}
+            folder_definitions[relative_folder][py.name] = {
+                "definitions": definitions,
+                "path": py,
+            }
             processed_files_count += 1
             total_definitions += len(definitions)
     except Exception as e:
@@ -143,13 +146,13 @@ for folder, files_dict in folder_definitions.items():
     print(f"✅ saved: {out_file}")
     print(f"   📊 {len(files_dict)} files, {total_defs_in_folder} definitions")
     print(f"   📁 {folder}")
-print(
-    f"""
-✨ Done! Processed {processed_files_count} files with {total_definitions} total definitions in {len(folder_definitions)} folder(s)"""
-)
+print(f"""
+✨ Done! Processed {processed_files_count} files with {total_definitions} total definitions in {len(folder_definitions)} folder(s)""")
 if folders_found:
     print("📁 Folders:")
     for folder in sorted(folders_found):
-        def_count = sum(len(f["definitions"]) for f in folder_definitions[Path(folder)].values())
+        def_count = sum(
+            len(f["definitions"]) for f in folder_definitions[Path(folder)].values()
+        )
         file_count = len(folder_definitions[Path(folder)])
         print(f"   • {folder}: {file_count} files, {def_count} definitions")

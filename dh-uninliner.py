@@ -64,7 +64,9 @@ def find_import_insert_position(lines: list[str]) -> int:
     return pos
 
 
-def process_file(py_file: Path, dh_index: dict[str, str]) -> tuple[Path, list[str], list[str], list[str]] | None:
+def process_file(
+    py_file: Path, dh_index: dict[str, str]
+) -> tuple[Path, list[str], list[str], list[str]] | None:
     try:
         source = py_file.read_text(encoding="utf-8")
         tree = ast.parse(source)
@@ -93,7 +95,7 @@ def process_file(py_file: Path, dh_index: dict[str, str]) -> tuple[Path, list[st
         m = re.match("^from\\s+dh\\s+import\\s+(.*)", line)
         if m:
             existing_dh_import_idx = i
-            existing_names.update((n.strip() for n in m.group(1).split(",")))
+            existing_names.update(n.strip() for n in m.group(1).split(","))
             break
     names_to_add = [n for n in import_names if n not in existing_names]
     if not names_to_add:
@@ -112,16 +114,24 @@ def process_file(py_file: Path, dh_index: dict[str, str]) -> tuple[Path, list[st
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Replace inlined dh functions with imports.")
-    parser.add_argument("-a", "--apply", action="store_true", help="write changes in place")
+    parser = argparse.ArgumentParser(
+        description="Replace inlined dh functions with imports."
+    )
+    parser.add_argument(
+        "-a", "--apply", action="store_true", help="write changes in place"
+    )
     args = parser.parse_args()
     dh_index = extract_function_index(DH_DIR)
     here = Path.cwd()
     own_path = Path(sys.argv[0]).resolve()
-    py_files = [p for p in here.iterdir() if p.suffix == ".py" and p.resolve() != own_path]
+    py_files = [
+        p for p in here.iterdir() if p.suffix == ".py" and p.resolve() != own_path
+    ]
     results: list[tuple[Path, list[str], list[str], list[str]]] = []
     with ProcessPoolExecutor() as executor:
-        future_to_path = {executor.submit(process_file, p, dh_index): p for p in py_files}
+        future_to_path = {
+            executor.submit(process_file, p, dh_index): p for p in py_files
+        }
         for future in as_completed(future_to_path):
             res = future.result()
             if res:
@@ -135,7 +145,9 @@ def main():
         mode = "APPLY" if args.apply else "DRY RUN"
         print(f"[{mode}] {path.name}")
         print(f"  Functions to import from dh: {', '.join(names)}")
-        diff = difflib.unified_diff(old_lines, new_lines, fromfile=str(path), tofile=str(path) + " (new)")
+        diff = difflib.unified_diff(
+            old_lines, new_lines, fromfile=str(path), tofile=str(path) + " (new)"
+        )
         diff_text = "".join(diff)
         if diff_text:
             print(diff_text)
@@ -143,7 +155,7 @@ def main():
             print("  (no textual difference)")
         if args.apply:
             path.write_text("".join(new_lines), encoding="utf-8")
-            print(f"  Written.")
+            print("  Written.")
 
 
 if __name__ == "__main__":

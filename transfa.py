@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Translates Persian (Farsi) text in a file to English.
-"""
 
 from __future__ import annotations
 

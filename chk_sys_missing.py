@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""System package file integrity checker for Termux/Linux."""
 
 from __future__ import annotations
 
@@ -12,7 +11,9 @@ from pathlib import Path
 
 def get_installed_packages() -> list[str]:
     try:
-        result = subprocess.run(["dpkg", "-l"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["dpkg", "-l"], capture_output=True, text=True, check=True
+        )
         packages = []
         for line in result.stdout.split("\n"):
             parts = line.split()
@@ -25,7 +26,9 @@ def get_installed_packages() -> list[str]:
 
 def get_package_files(pkg_name: str) -> list[Path]:
     try:
-        result = subprocess.run(["dpkg", "-L", pkg_name], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["dpkg", "-L", pkg_name], capture_output=True, text=True, check=True
+        )
         return [Path(f) for f in result.stdout.strip().split("\n") if f]
     except subprocess.CalledProcessError:
         return []
@@ -35,12 +38,17 @@ def is_ignored_path(file_path: Path) -> bool:
     ignore_dirs = {"share/man", "share/info", "share/doc"}
     parts = file_path.parts
     for i in range(len(parts) - 1):
-        if (f"{parts[i]}/share" == "share" or parts[i] == "share") and i + 1 < len(parts):
+        if (f"{parts[i]}/share" == "share" or parts[i] == "share") and i + 1 < len(
+            parts
+        ):
             subdir = parts[i + 1]
             if subdir in {"man", "info", "doc"}:
                 return True
     path_str = str(file_path)
-    return any(f"/{ignore}/" in path_str or path_str.endswith(f"/{ignore}") for ignore in ignore_dirs)
+    return any(
+        f"/{ignore}/" in path_str or path_str.endswith(f"/{ignore}")
+        for ignore in ignore_dirs
+    )
 
 
 def check_package(pkg_name: str) -> dict:
@@ -53,7 +61,12 @@ def check_package(pkg_name: str) -> dict:
         checked += 1
         if not file_path.exists():
             missing.append(str(file_path))
-    return {"package": pkg_name, "total_checked": checked, "missing_count": len(missing), "missing_files": missing}
+    return {
+        "package": pkg_name,
+        "total_checked": checked,
+        "missing_count": len(missing),
+        "missing_files": missing,
+    }
 
 
 def main():

@@ -13,7 +13,11 @@ from textual.widgets import Footer, Header, TextEditor
 
 
 class BasicEditor(App):
-    BINDINGS = [("o", "open_file", "Open"), ("s", "save_file", "Save"), ("q", "app_quit", "Quit")]
+    BINDINGS = [
+        ("o", "open_file", "Open"),
+        ("s", "save_file", "Save"),
+        ("q", "app_quit", "Quit"),
+    ]
 
     def __init__(self, filename: str | None = None) -> None:
         super().__init__()
@@ -96,7 +100,9 @@ class BasicEditor(App):
         editor = self.query_one(TextEditor)
         if editor.text and self.is_dirty:
             try:
-                confirm = input("You have unsaved changes. Are you sure you want to quit? (y/n): ")
+                confirm = input(
+                    "You have unsaved changes. Are you sure you want to quit? (y/n): "
+                )
                 if confirm.lower() == "y":
                     self.exit()
                 else:

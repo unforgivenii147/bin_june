@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of transwords.py for Python 3.12.
-Translates chunks of words.txt from Persian to English in parallel.
-"""
 
 from __future__ import annotations
 
@@ -55,7 +51,9 @@ def chunk_file(file_path: Path, chunk_size: int = 32768) -> list[tuple[int, int,
     return chunks
 
 
-def translate_chunk(chunk_data: tuple[int, int, str], chunk_index: int, total_chunks: int) -> TranslationResult | None:
+def translate_chunk(
+    chunk_data: tuple[int, int, str], chunk_index: int, total_chunks: int
+) -> TranslationResult | None:
     start_line, end_line, text = chunk_data
     if chunk_index > 0:
         time.sleep(2)
@@ -89,7 +87,10 @@ def main() -> None:
     logger.info("Translating chunks...")
     translations: list[TranslationResult] = []
     with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(translate_chunk, chunk, idx, len(chunks)) for idx, chunk in enumerate(chunks)]
+        futures = [
+            executor.submit(translate_chunk, chunk, idx, len(chunks))
+            for idx, chunk in enumerate(chunks)
+        ]
         for i, future in enumerate(as_completed(futures), 1):
             result = future.result()
             if result:
@@ -100,8 +101,12 @@ def main() -> None:
         return
     logger.info(f"Writing results to {OUTPUT_FILE}...")
     try:
-        final_data = {"translations": sorted(translations, key=lambda x: x["start_line"])}
-        OUTPUT_FILE.write_text(json.dumps(final_data, ensure_ascii=False, indent=2), encoding="utf-8")
+        final_data = {
+            "translations": sorted(translations, key=lambda x: x["start_line"])
+        }
+        OUTPUT_FILE.write_text(
+            json.dumps(final_data, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         logger.info("Done!")
     except Exception as e:
         logger.error(f"Error writing output file: {e}")

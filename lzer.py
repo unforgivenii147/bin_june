@@ -12,7 +12,9 @@ COMPRESSED_EXT = ".lz4"
 EXT = {".gz", ".br", ".xz", ".zst", ".bz2", ".zip", ".whl", ".lz4"}
 
 
-def compress_file(src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_MAX) -> None:
+def compress_file(
+    src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_MAX
+) -> None:
     if src_path.is_dir():
         return
     if src_path.suffix == COMPRESSED_EXT:
@@ -21,7 +23,9 @@ def compress_file(src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_M
     try:
         file_size = src_path.stat().st_size
         with open(src_path, "rb") as f_in, open(dst_path, "wb") as f_out:
-            compressor = lz4.frame.LZ4FrameCompressor(compression_level=compression_level)
+            compressor = lz4.frame.LZ4FrameCompressor(
+                compression_level=compression_level
+            )
             if file_size > CHUNK_THRESHOLD:
                 while True:
                     chunk = f_in.read(CHUNK_SIZE)

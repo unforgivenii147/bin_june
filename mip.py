@@ -21,13 +21,18 @@ def get_files(directory: Path, ext: list[str]) -> list[Path]:
 
 
 def get_installed_packages() -> dict[str, str]:
-    return {dist.metadata["Name"].lower(): dist.version for dist in importlib.metadata.distributions()}
+    return {
+        dist.metadata["Name"].lower(): dist.version
+        for dist in importlib.metadata.distributions()
+    }
 
 
 def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:
     try:
         with zipfile.ZipFile(path, "r") as zip_ref:
-            metadata_file = next((f for f in zip_ref.namelist() if f.endswith("METADATA")), None)
+            metadata_file = next(
+                (f for f in zip_ref.namelist() if f.endswith("METADATA")), None
+            )
             if metadata_file:
                 pkg_name, pkg_version = None, None
                 with zip_ref.open(metadata_file) as f:
@@ -59,7 +64,9 @@ def main() -> None:
                 v_installed = parse_version_tuple(installed_version)
                 v_wheel = parse_version_tuple(pkg_version)
                 if v_installed == v_wheel:
-                    print(f"🗑️  {pkg_name} == {pkg_version} already installed, deleting {path.name}")
+                    print(
+                        f"🗑️  {pkg_name} == {pkg_version} already installed, deleting {path.name}"
+                    )
                     path.unlink()
                 elif v_installed > v_wheel:
                     print(

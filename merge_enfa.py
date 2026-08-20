@@ -5,14 +5,18 @@ import json
 from pathlib import Path
 
 
-def merge_translation_files(base_dir=".", output_file="dic_en_fa.json", failed_file="failed-en.txt"):
+def merge_translation_files(
+    base_dir=".", output_file="dic_en_fa.json", failed_file="failed-en.txt"
+):
     base_path = Path(base_dir)
     existing_dictionary = {}
     if (base_path / output_file).exists():
         try:
             with open(base_path / output_file, "r", encoding="utf-8") as f:
                 existing_dictionary = json.load(f)
-            print(f"📖 Loaded existing dictionary with {len(existing_dictionary)} entries")
+            print(
+                f"📖 Loaded existing dictionary with {len(existing_dictionary)} entries"
+            )
         except json.JSONDecodeError:
             print(f"⚠️  Warning: Could not parse existing {output_file}, starting fresh")
         except Exception as e:
@@ -56,7 +60,10 @@ def merge_translation_files(base_dir=".", output_file="dic_en_fa.json", failed_f
         if not fa_file.exists():
             print(f"⚠️  Warning: Missing {fa_file.name} for {en_file.name}")
             continue
-        with open(en_file, "r", encoding="utf-8") as f_en, open(fa_file, "r", encoding="utf-8") as f_fa:
+        with (
+            open(en_file, "r", encoding="utf-8") as f_en,
+            open(fa_file, "r", encoding="utf-8") as f_fa,
+        ):
             en_lines = [line.strip() for line in f_en if line.strip()]
             fa_lines = [line.strip() for line in f_fa if line.strip()]
             if len(en_lines) != len(fa_lines):

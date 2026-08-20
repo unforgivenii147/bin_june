@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-zsr_optimized_by_gemini.py — Multi-threaded Zstandard compression/decompression tool.
-Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
-"""
 
 from __future__ import annotations
 
@@ -28,7 +24,11 @@ MAX_WORKERS: Final[int] = max(1, multiprocessing.cpu_count())
 CHUNK_SIZE: Final[int] = 512 * 1024
 ZSTD_LEVEL: Final[int] = 22
 ZSTD_THREADS: Final[int] = 4
-logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 logger = logging.getLogger(__name__)
 
 
@@ -53,9 +53,15 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
             in_path.open("rb") as fin,
             mmap.mmap(fin.fileno(), length=0, access=mmap.ACCESS_READ) as mm,
         ):
-            chunks = (mm[i * 32768 : min((i + 1) * 32768, file_size)] for i in range(chunk_count))
+            chunks = (
+                mm[i * 32768 : min((i + 1) * 32768, file_size)]
+                for i in range(chunk_count)
+            )
             with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
-                futures = {executor.submit(compress_chunk, bytes(chunk)): i for i, chunk in enumerate(chunks)}
+                futures = {
+                    executor.submit(compress_chunk, bytes(chunk)): i
+                    for i, chunk in enumerate(chunks)
+                }
                 results = [None] * chunk_count
                 for future in as_completed(futures):
                     idx = futures[future]
@@ -103,10 +109,14 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
             if compressed_size < original_size:
                 path.unlink()
                 reduction = (original_size - compressed_size) / original_size * 100
-                logger.info(f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})")
+                logger.info(
+                    f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})"
+                )
                 return (True, original_size, compressed_size)
             else:
-                logger.info(f"  ✗ {path.name}: No space saved, removing compressed file")
+                logger.info(
+                    f"  ✗ {path.name}: No space saved, removing compressed file"
+                )
                 out_path.unlink()
                 return (False, 0, 0)
     except Exception as e:
@@ -124,7 +134,9 @@ def decompress_file(path: Path) -> bool:
             dctx.copy_stream(f_in, f_out)
         original_size = path.stat().st_size
         decompressed_size = out_path.stat().st_size
-        logger.info(f"  ✓ Decompressed {path.name}: {fsz(original_size)} → {fsz(decompressed_size)}")
+        logger.info(
+            f"  ✓ Decompressed {path.name}: {fsz(original_size)} → {fsz(decompressed_size)}"
+        )
         path.unlink()
         return True
     except Exception as e:
@@ -148,21 +160,29 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
     zst_path = Path(f"{output_base_name}.tar.zst")
     try:
         logger.info(f"  Creating tar archive for {folder_path.name}...")
-        success = await loop.run_in_executor(None, create_tar_archive, folder_path, tar_path)
+        success = await loop.run_in_executor(
+            None, create_tar_archive, folder_path, tar_path
+        )
         if not success or not tar_path.exists():
             return False
         logger.info("  Compressing tar archive with Zstandard...")
         tar_size = tar_path.stat().st_size
         if tar_size < CHUNK_SIZE:
-            success = await loop.run_in_executor(None, compress_in_memory, tar_path, zst_path)
+            success = await loop.run_in_executor(
+                None, compress_in_memory, tar_path, zst_path
+            )
         else:
-            success = await loop.run_in_executor(None, compress_chunked, tar_path, zst_path, tar_size)
+            success = await loop.run_in_executor(
+                None, compress_chunked, tar_path, zst_path, tar_size
+            )
         if success and zst_path.exists():
             zst_size = zst_path.stat().st_size
             if zst_size < tar_size:
                 tar_path.unlink()
                 reduction = (tar_size - zst_size) / tar_size * 100
-                logger.info(f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(zst_size)})")
+                logger.info(
+                    f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(zst_size)})"
+                )
                 await loop.run_in_executor(None, shutil.rmtree, folder_path)
                 return True
             else:
@@ -185,7 +205,9 @@ async def process_compress() -> None:
     files = [
         p
         for p in cwd.iterdir()
-        if p.is_file() and (p.suffix not in (".zst", ".tar", ".gz", ".zip")) and (p.stat().st_size >= 1024)
+        if p.is_file()
+        and (p.suffix not in (".zst", ".tar", ".gz", ".zip"))
+        and (p.stat().st_size >= 1024)
     ]
     if files:
         logger.info(f"\n📄 Compressing {len(files)} files...")

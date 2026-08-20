@@ -5,10 +5,13 @@ import re
 from pathlib import Path
 
 REMOTE_PREFIXES = "http://", "https://", "//"
-IMG_TAG_RE = re.compile(r"<img\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"'][^>]*>", re.IGNORECASE)
+IMG_TAG_RE = re.compile(
+    r"<img\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"'][^>]*>", re.IGNORECASE
+)
 
 
 def remove_remote_html_images(text: str) -> str:
+
     def repl(match):
         src = match.group(1)
         if src.startswith(REMOTE_PREFIXES):
@@ -25,6 +28,7 @@ RST_IMG_RE = re.compile(r"^\s*\.\. \|[^|]+\| image:: https?://[^\s]+.*$", re.MUL
 
 
 def remove_remote_md_images(text: str) -> str:
+
     def inline_repl(match):
         url = match.group(1)
         if url.startswith(REMOTE_PREFIXES):

@@ -9,7 +9,15 @@ from faprint import faprint
 def georgian_to_hijri(year: int, month: int, day: int) -> str:
     from datetime import date as datetime_date
 
-    weekdays: list[str] = ["دو شنبه", "سه شنبه", "چهار شنبه", "پنج شنبه", "جمعه", "شنبه", "یکشنبه"]
+    weekdays: list[str] = [
+        "دو شنبه",
+        "سه شنبه",
+        "چهار شنبه",
+        "پنج شنبه",
+        "جمعه",
+        "شنبه",
+        "یکشنبه",
+    ]
     months: list[str] = [
         "فروردین",
         "اردیبهشت",

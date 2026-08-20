@@ -6,7 +6,6 @@ import ast
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Tuple
 
 
 class ParentMapper(ast.NodeVisitor):
@@ -19,7 +18,7 @@ class ParentMapper(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def get_ancestors(node: ast.AST, parent_map: dict) -> List[ast.AST]:
+def get_ancestors(node: ast.AST, parent_map: dict) -> list[ast.AST]:
     ancestors = []
     current = node
     while current in parent_map:
@@ -46,7 +45,7 @@ def is_in_restricted_scope(node: ast.AST, parent_map: dict) -> bool:
     return any(isinstance(ancestor, restricted_types) for ancestor in ancestors)
 
 
-def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
+def find_imports_not_at_head(file_path: Path) -> list[tuple[int, int, str]]:
     try:
         source = file_path.read_text(encoding="utf-8")
         tree = ast.parse(source)
@@ -61,7 +60,9 @@ def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             head_end_line = max(head_end_line, node.end_lineno or node.lineno)
         elif isinstance(node, ast.Expr):
-            if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+            if isinstance(node.value, ast.Constant) and isinstance(
+                node.value.value, str
+            ):
                 head_end_line = max(head_end_line, node.end_lineno or node.lineno)
             else:
                 break
@@ -76,11 +77,15 @@ def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
                 continue
             lines = source.split("\n")
             import_text = "\n".join(lines[node.lineno - 1 : node.end_lineno])
-            misplaced_imports.append((node.lineno, node.end_lineno or node.lineno, import_text))
+            misplaced_imports.append(
+                (node.lineno, node.end_lineno or node.lineno, import_text)
+            )
     return misplaced_imports
 
 
-def autofix_imports(file_path: Path, misplaced_imports: List[Tuple[int, int, str]]) -> bool:
+def autofix_imports(
+    file_path: Path, misplaced_imports: list[tuple[int, int, str]]
+) -> bool:
     if not misplaced_imports:
         return False
     source = file_path.read_text(encoding="utf-8")
@@ -114,7 +119,7 @@ def autofix_imports(file_path: Path, misplaced_imports: List[Tuple[int, int, str
     return True
 
 
-def process_file(file_path: Path, autofix: bool) -> Tuple[bool, bool, List[str]]:
+def process_file(file_path: Path, autofix: bool) -> tuple[bool, bool, list[str]]:
     misplaced = find_imports_not_at_head(file_path)
     if not misplaced:
         return False, False, []
@@ -130,14 +135,16 @@ def process_file(file_path: Path, autofix: bool) -> Tuple[bool, bool, List[str]]
             details.append(msg)
             return True, True, details
         else:
-            msg = f"  [ERROR] Failed to fix"
+            msg = "  [ERROR] Failed to fix"
             print(msg)
             details.append(msg)
             return True, False, details
     return True, False, details
 
 
-def save_report(report_data: List[Tuple[Path, List[str]]], output_file: str, autofix: bool):
+def save_report(
+    report_data: list[tuple[Path, list[str]]], output_file: str, autofix: bool
+):
     with open(output_file, "w", encoding="utf-8") as f:
         if not report_data:
             f.write("No misplaced imports found! All files are clean.\n")
@@ -145,20 +152,31 @@ def save_report(report_data: List[Tuple[Path, List[str]]], output_file: str, aut
         for file_path, details in report_data:
             f.write(f"File: {file_path}\n")
             f.write(f"{'-' * 40}\n")
-            for detail in details:
-                f.write(f"{detail}\n")
+            f.writelines(f"{detail}\n" for detail in details)
             f.write("\n")
         if autofix:
-            fixed = sum(1 for _, details in report_data if any("[FIXED]" in d for d in details))
+            fixed = sum(
+                1 for _, details in report_data if any("[FIXED]" in d for d in details)
+            )
             f.write(f"  Files fixed: {fixed}\n")
             f.write(f"  Files with errors: {len(report_data) - fixed}\n")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Find .py files with imports not at the head of the file")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
+    parser = argparse.ArgumentParser(
+        description="Find .py files with imports not at the head of the file"
+    )
     parser.add_argument(
-        "-a", "--autofix", action="store_true", help="Automatically move misplaced imports to the top of the file"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Automatically move misplaced imports to the top of the file",
     )
     parser.add_argument(
         "-o",
@@ -167,7 +185,9 @@ def main():
         default=None,
         help="Save report to file",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=8, help="Number of parallel jobs (default: 4)")
+    parser.add_argument(
+        "-j", "--jobs", type=int, default=8, help="Number of parallel jobs (default: 4)"
+    )
     args = parser.parse_args()
     output_file = args.output or (None if args.autofix else "errors.txt")
     root = Path(args.directory)
@@ -195,12 +215,12 @@ def main():
             if was_fixed:
                 files_fixed += 1
     print(f"\n{'=' * 40}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Files with misplaced imports: {files_with_issues}")
     if args.autofix:
         print(f"  Files fixed: {files_fixed}")
     else:
-        print(f"  Run with -a to autofix")
+        print("  Run with -a to autofix")
     if output_file and (files_with_issues > 0 or args.output):
         save_report(report_data, output_file, args.autofix)
         print(f"  Report saved to: {output_file}")

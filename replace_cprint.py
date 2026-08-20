@@ -119,7 +119,9 @@ def already_imports_cprint(tree: ast.Module) -> bool:
         if isinstance(node, ast.ImportFrom) and node.module == "dh":
             if any(alias.name == "cprint" for alias in node.names):
                 return True
-        if isinstance(node, ast.Import) and any(alias.name == "cprint" for alias in node.names):
+        if isinstance(node, ast.Import) and any(
+            alias.name == "cprint" for alias in node.names
+        ):
             return True
     return False
 

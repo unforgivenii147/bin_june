@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of transformimports.py for Python 3.12.
-Transforms direct imports (import module) to from-imports (from module import name).
-"""
 
 from __future__ import annotations
 
@@ -40,7 +36,11 @@ class ImportTransformer(ast.NodeTransformer):
                 self.modified = True
                 names = sorted(self.module_to_names[alias.name])
                 new_nodes.append(
-                    ast.ImportFrom(module=alias.name, names=[ast.alias(name=n, asname=None) for n in names], level=0)
+                    ast.ImportFrom(
+                        module=alias.name,
+                        names=[ast.alias(name=n, asname=None) for n in names],
+                        level=0,
+                    )
                 )
             else:
                 new_nodes.append(ast.Import(names=[alias]))
@@ -55,7 +55,9 @@ class ImportTransformer(ast.NodeTransformer):
 
 def main() -> None:
     if len(sys.argv) != 2:
-        print("Usage: python transformimports_optimized.py <python_file>", file=sys.stderr)
+        print(
+            "Usage: python transformimports_optimized.py <python_file>", file=sys.stderr
+        )
         sys.exit(1)
     filepath = Path(sys.argv[1])
     if not filepath.exists() or filepath.suffix != ".py":

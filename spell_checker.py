@@ -6,10 +6,10 @@ import json
 import re
 import subprocess
 from abc import ABC, abstractmethod
+from collections.abc import Generator, Iterable, Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Generator, Iterable, Sequence
 
 
 @dataclass
@@ -62,7 +62,13 @@ class FileSource(Source):
             yield Text(content, [str(self.path), *context])
         elif self.path.is_dir():
             for file_path in self.path.rglob("*"):
-                if file_path.is_file() and file_path.suffix in {".txt", ".md", ".py", ".php", ".js"}:
+                if file_path.is_file() and file_path.suffix in {
+                    ".txt",
+                    ".md",
+                    ".py",
+                    ".php",
+                    ".js",
+                }:
                     content = file_path.read_text(encoding="utf-8")
                     yield Text(content, [str(file_path), *context])
 
@@ -102,7 +108,9 @@ class HTMLRemover(TextProcessor):
 
 class Spellchecker(ABC):
     @abstractmethod
-    def check(self, text: str, languages: Sequence[str], context: list[str]) -> Generator[Misspelling, None, None]:
+    def check(
+        self, text: str, languages: Sequence[str], context: list[str]
+    ) -> Generator[Misspelling, None, None]:
         pass
 
 
@@ -110,22 +118,30 @@ class Hunspell(Spellchecker):
     def __init__(
         self,
         cmd: str = "hunspell",
-        personal_dict: Path | str | None = Path("/data/data/com.termux/files/home/.personal_dict"),
+        personal_dict: Path | str | None = Path(
+            "/data/data/com.termux/files/home/.personal_dict"
+        ),
     ):
         self.cmd = cmd
-        self.personal_dict = Path(personal_dict) if personal_dict else self._get_default_personal_dict()
+        self.personal_dict = (
+            Path(personal_dict) if personal_dict else self._get_default_personal_dict()
+        )
 
     def _get_default_personal_dict(self) -> Path:
         home = Path.home()
         return home / ".personal_dict"
 
-    def check(self, text: str, languages: Sequence[str], context: list[str]) -> Generator[Misspelling, None, None]:
+    def check(
+        self, text: str, languages: Sequence[str], context: list[str]
+    ) -> Generator[Misspelling, None, None]:
         lang = languages[0] if languages else "en_US"
         try:
             cmd_args = [self.cmd, "-d", lang, "-a"]
             if self.personal_dict.exists():
                 cmd_args.extend(["-p", str(self.personal_dict)])
-            result = subprocess.run(cmd_args, input=text, capture_output=True, text=True, timeout=30)
+            result = subprocess.run(
+                cmd_args, input=text, capture_output=True, text=True, timeout=30
+            )
             for line in result.stdout.strip().split("\n"):
                 if line.startswith("&"):
                     parts = line.split()
@@ -225,62 +241,96 @@ class JSONHandler(MisspellingHandler):
 
 class MisspellingFinder:
     def __init__(
-        self, spellchecker: Spellchecker, handler: MisspellingHandler | None = None, *processors: TextProcessor
+        self,
+        spellchecker: Spellchecker,
+        handler: MisspellingHandler | None = None,
+        *processors: TextProcessor,
     ):
         self.spellchecker = spellchecker
         self.handler = handler or EchoHandler()
         self.processors = processors
 
-    def find(self, source: Source | str, languages: Sequence[str], context: list[str] | None = None) -> None:
+    def find(
+        self,
+        source: Source | str,
+        languages: Sequence[str],
+        context: list[str] | None = None,
+    ) -> None:
         if isinstance(source, str):
             source = StringSource(source)
         ctx = context or []
         for text in source.to_texts(ctx):
             for processor in self.processors:
                 text = processor.process(text)
-            for misspelling in self.spellchecker.check(text.content, languages, text.context):
+            for misspelling in self.spellchecker.check(
+                text.content, languages, text.context
+            ):
                 self.handler.handle(misspelling)
 
 
 class ParallelMisspellingFinder:
-    def __init__(self, spellchecker: Spellchecker, handler: MisspellingHandler, *processors: TextProcessor):
+    def __init__(
+        self,
+        spellchecker: Spellchecker,
+        handler: MisspellingHandler,
+        *processors: TextProcessor,
+    ):
         self.spellchecker = spellchecker
         self.handler = handler
         self.processors = processors
         self.max_workers = 4
 
-    def find(self, source: Source | str, languages: Sequence[str], context: list[str] | None = None) -> None:
+    def find(
+        self,
+        source: Source | str,
+        languages: Sequence[str],
+        context: list[str] | None = None,
+    ) -> None:
         if isinstance(source, str):
             source = StringSource(source)
         ctx = context or []
         texts = list(source.to_texts(ctx))
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self._process_text, text, languages): text for text in texts}
+            futures = {
+                executor.submit(self._process_text, text, languages): text
+                for text in texts
+            }
             for future in as_completed(futures):
                 for misspelling in future.result():
                     self.handler.handle(misspelling)
 
-    def _process_text(self, text: Text, languages: Sequence[str]) -> Generator[Misspelling, None, None]:
+    def _process_text(
+        self, text: Text, languages: Sequence[str]
+    ) -> Generator[Misspelling, None, None]:
         for processor in self.processors:
             text = processor.process(text)
         return self.spellchecker.check(text.content, languages, text.context)
 
 
-def check_files(*paths: str, languages: list[str] | None = None, apply_fixes: bool = False) -> None:
+def check_files(
+    *paths: str, languages: list[str] | None = None, apply_fixes: bool = False
+) -> None:
     languages = languages or ["en_US"]
     spellchecker = Hunspell()
     sources = [FileSource(p) for p in paths or [Path.cwd()]]
     source = MultiSource(sources) if len(sources) > 1 else sources[0]
-    finder = ParallelMisspellingFinder(spellchecker, EchoHandler(apply_fixes), MarkdownRemover())
+    finder = ParallelMisspellingFinder(
+        spellchecker, EchoHandler(apply_fixes), MarkdownRemover()
+    )
     finder.find(source, languages)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Spell checker using hunspell")
     parser.add_argument(
-        "spellchecker", nargs="?", default="hunspell", help="Spellchecker to use (only hunspell supported)"
+        "spellchecker",
+        nargs="?",
+        default="hunspell",
+        help="Spellchecker to use (only hunspell supported)",
     )
-    parser.add_argument("-a", "--apply", action="store_true", help="Apply spelling fixes")
+    parser.add_argument(
+        "-a", "--apply", action="store_true", help="Apply spelling fixes"
+    )
     parser.add_argument("paths", nargs="*", help="Files or directories to check")
     args = parser.parse_args()
     check_files(*args.paths, apply_fixes=args.apply)

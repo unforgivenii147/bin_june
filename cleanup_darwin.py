@@ -124,16 +124,27 @@ def print_report(stats: dict) -> None:
     print("REMOVAL REPORT")
     print("-" * 42)
     print(f"Files removed: {stats['files_removed']}")
-    print(f"Total disk space freed: {stats['total_freed_human']} ({stats['total_freed_bytes']} bytes)")
+    print(
+        f"Total disk space freed: {stats['total_freed_human']} ({stats['total_freed_bytes']} bytes)"
+    )
     print("-" * 42)
 
 
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Remove Darwin and Windows related files recursively")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show details of each removed file")
+    parser = argparse.ArgumentParser(
+        description="Remove Darwin and Windows related files recursively"
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Show details of each removed file"
+    )
     args = parser.parse_args()
     stats = find_and_remove_files(args.directory)
     print_report(stats)

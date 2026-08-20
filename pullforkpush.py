@@ -23,8 +23,7 @@ def setup_github_client():
 def get_repo_info(repo: git.Repo):
     try:
         remote_url = repo.remotes.origin.url
-        if remote_url.endswith(".git"):
-            remote_url = remote_url[:-4]
+        remote_url = remote_url.removesuffix(".git")
         if "github.com" in remote_url:
             parts = remote_url.split("github.com")[-1].strip("/:").split("/")
             if len(parts) >= 2:
@@ -56,9 +55,13 @@ def main():
         print(f"[*] Pulling latest changes into '{active_branch.name}'...")
         origin.pull()
         if repo_owner.lower() == my_username.lower():
-            print("[+] You are the owner of this repository. Preparing to push local changes...")
+            print(
+                "[+] You are the owner of this repository. Preparing to push local changes..."
+            )
             if local_repo.is_dirty(untracked_files=True):
-                print("[-] Found uncommitted local changes. Please commit them before pushing.")
+                print(
+                    "[-] Found uncommitted local changes. Please commit them before pushing."
+                )
                 return
             print(f"[*] Pushing '{active_branch.name}' to origin...")
             info = origin.push()
@@ -74,7 +77,9 @@ def main():
                 print(f"[+] Existing fork found: {my_fork.full_name}")
             except GithubException as e:
                 if e.status == 404:
-                    print(f"[*] Creating a fork of {repo_owner}/{repo_name} on your account...")
+                    print(
+                        f"[*] Creating a fork of {repo_owner}/{repo_name} on your account..."
+                    )
                     my_fork = current_user.create_fork(target_repo)
                     print(f"[+] Fork created successfully: {my_fork.full_name}")
                 else:
@@ -87,11 +92,15 @@ def main():
                 print("[*] Adding 'fork' remote to local configuration...")
                 fork_remote = local_repo.create_remote("fork", fork_url)
             print(f"[*] Pushing '{active_branch.name}' to your fork...")
-            fork_info = fork_remote.push(refspec=f"{active_branch.name}:{active_branch.name}")
+            fork_info = fork_remote.push(
+                refspec=f"{active_branch.name}:{active_branch.name}"
+            )
             if fork_info[0].flags & git.remote.PushInfo.ERROR:
                 print(f"[-] Push to fork failed: {fork_info[0].summary}")
             else:
-                print("[+] Successfully pulled upstream updates and pushed your work to your fork!")
+                print(
+                    "[+] Successfully pulled upstream updates and pushed your work to your fork!"
+                )
     except git.InvalidGitRepositoryError:
         print("[-] Error: Current directory is not inside a valid Git repository.")
     except Exception as e:

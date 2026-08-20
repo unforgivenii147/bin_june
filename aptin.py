@@ -8,18 +8,26 @@ import sys
 
 def get_all_packages():
     try:
-        result = subprocess.run(["pkg", "list-all"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["pkg", "list-all"], capture_output=True, text=True, check=True
+        )
         packages = []
         lines = result.stdout.split("\n")
         for line in lines:
-            if line and not line.startswith("Listing") and not line.startswith("Packages"):
+            if (
+                line
+                and not line.startswith("Listing")
+                and not line.startswith("Packages")
+            ):
                 parts = line.split("/")[0].split()
                 if parts:
                     packages.append(parts[0])
         return packages
     except subprocess.CalledProcessError:
         try:
-            result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["apt", "list", "--installed"], capture_output=True, text=True
+            )
             packages = []
             for line in result.stdout.split("\n"):
                 if "/" in line:
@@ -62,9 +70,15 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python install_wildcard.py <pattern>")
         print("Examples:")
-        print("  python install_wildcard.py morse     # Install packages with 'morse' in name")
-        print("  python install_wildcard.py python*   # Install packages starting with 'python'")
-        print("  python install_wildcard.py *sql*     # Install packages containing 'sql'")
+        print(
+            "  python install_wildcard.py morse     # Install packages with 'morse' in name"
+        )
+        print(
+            "  python install_wildcard.py python*   # Install packages starting with 'python'"
+        )
+        print(
+            "  python install_wildcard.py *sql*     # Install packages containing 'sql'"
+        )
         sys.exit(1)
     pattern = sys.argv[1]
     print(f"Searching for packages matching '{pattern}'...")

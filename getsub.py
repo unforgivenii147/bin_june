@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Subtitle Downloader - Download English subtitles for movies/TV shows by name
-Usage: python get_sub.py "movie_or_series_name"
-Example: python get_sub.py outcast_s01
-"""
 
 from __future__ import annotations
 
@@ -17,7 +12,11 @@ import requests
 class SubtitleDownloader:
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+        self.session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+        )
 
     def search_opensubtitles(self, query):
         try:

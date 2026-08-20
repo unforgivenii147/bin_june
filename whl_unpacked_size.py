@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Report the overall unpacked size of .whl files in the current directory.
-Uses pathlib for path handling and multiprocessing for parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -42,7 +38,9 @@ def find_wheel_files(directory: Path, recursive: bool = False) -> list[Path]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Report the overall unpacked size of .whl files")
+    parser = argparse.ArgumentParser(
+        description="Report the overall unpacked size of .whl files"
+    )
     parser.add_argument(
         "-d",
         "--directory",
@@ -50,7 +48,9 @@ def main():
         default=Path.cwd(),
         help="Directory to scan (default: current directory)",
     )
-    parser.add_argument("-r", "--recursive", action="store_true", help="Scan subdirectories recursively")
+    parser.add_argument(
+        "-r", "--recursive", action="store_true", help="Scan subdirectories recursively"
+    )
     parser.add_argument(
         "-j",
         "--jobs",
@@ -58,8 +58,15 @@ def main():
         default=cpu_count(),
         help=f"Number of parallel jobs (default: {cpu_count()})",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed information for each wheel")
-    parser.add_argument("--json", action="store_true", help="Output results in JSON format")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show detailed information for each wheel",
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="Output results in JSON format"
+    )
     parser.add_argument(
         "-s",
         "--sort",
@@ -86,7 +93,9 @@ def main():
     results = []
     errors = []
     with Pool(args.jobs) as pool:
-        for wheel_path, size, error in pool.imap_unordered(get_wheel_unpacked_size, wheels):
+        for wheel_path, size, error in pool.imap_unordered(
+            get_wheel_unpacked_size, wheels
+        ):
             if error:
                 errors.append((wheel_path, error))
             else:
@@ -140,7 +149,9 @@ def main():
             print(f"   Total wheels found:      {len(wheels)}")
             print(f"   Successfully processed:  {len(results)}")
             print(f"   Errors:                  {len(errors)}")
-            print(f"   Average size per wheel:  {fsz(total_unpacked_size // len(results)) if results else 'N/A'}")
+            print(
+                f"   Average size per wheel:  {fsz(total_unpacked_size // len(results)) if results else 'N/A'}"
+            )
         if errors:
             print(f"\n⚠️  Errors ({len(errors)}):")
             for wheel_path, error in errors:

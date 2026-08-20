@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Rewrite of the RECORD updater with multiprocessing support.
-Recalculates file hashes and sizes for installed packages,
-skipping .pyc files and certain metadata files.
-"""
 
 from __future__ import annotations
 
@@ -15,7 +10,11 @@ import site
 import sys
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", stream=sys.stderr)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    stream=sys.stderr,
+)
 logger = logging.getLogger(__name__)
 
 
@@ -67,7 +66,9 @@ def parse_record_line(line: str) -> tuple[str, str, str]:
 def should_include_file(filepath: Path) -> bool:
     name = filepath.name
     return not (
-        filepath.suffix == ".pyc" or name.endswith(".pyc") or name in ("direct_url.json", "INSTALLER", "RECORD")
+        filepath.suffix == ".pyc"
+        or name.endswith(".pyc")
+        or name in ("direct_url.json", "INSTALLER", "RECORD")
     )
 
 

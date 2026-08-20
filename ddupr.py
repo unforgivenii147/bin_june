@@ -1,13 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-refactor_utils.py — AST-based duplicate extractor.
-Scans Python files (and compressed archives) recursively, finds functions,
-classes, and module-level constants that appear more than once (by content
-hash), then copies or moves them to utils/{func,class,const}.py.
-Usage
------
-  python refactor_utils.py [--copy | --move] [--dir PATH] [--workers N]
-"""
 
 from __future__ import annotations
 
@@ -30,8 +21,22 @@ from loguru import logger
 
 HAS_ZST = True
 HAS_BR = True
-ARCHIVE_EXTENSIONS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".tgz", ".tbz2", ".zst", ".br"}
-UTILS_MAP: dict[str, str] = {"func": "funcs.py", "class": "classes.py", "const": "const.py"}
+ARCHIVE_EXTENSIONS = {
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".tgz",
+    ".tbz2",
+    ".zst",
+    ".br",
+}
+UTILS_MAP: dict[str, str] = {
+    "func": "funcs.py",
+    "class": "classes.py",
+    "const": "const.py",
+}
 CONSTANT_CALL_NAMES = {"TypeVar", "NewType", "ParamSpec", "TypeVarTuple"}
 
 
@@ -48,7 +53,11 @@ class PyObject:
 
 
 def _content_hash(source: str) -> str:
-    normalised = "\n".join(line for line in source.splitlines() if line.strip() and not line.strip().startswith("#"))
+    normalised = "\n".join(
+        line
+        for line in source.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    )
     return hashlib.sha256(normalised.encode()).hexdigest()
 
 
@@ -102,7 +111,13 @@ def _is_constant_node(node: ast.AST) -> tuple[bool, str]:
         value = node.value
         if isinstance(value, ast.Call):
             func = value.func
-            func_name = func.id if isinstance(func, ast.Name) else func.attr if isinstance(func, ast.Attribute) else ""
+            func_name = (
+                func.id
+                if isinstance(func, ast.Name)
+                else func.attr
+                if isinstance(func, ast.Attribute)
+                else ""
+            )
             if func_name in CONSTANT_CALL_NAMES:
                 return True, name
     return False, ""
@@ -162,7 +177,12 @@ def analyse_source(source: str, origin: str) -> list[PyObject]:
                         )
                     )
         except Exception as exc:
-            logger.error("Failed to process node '{}' in {}: {}", getattr(node, "name", "?"), origin, exc)
+            logger.error(
+                "Failed to process node '{}' in {}: {}",
+                getattr(node, "name", "?"),
+                origin,
+                exc,
+            )
     return objects
 
 
@@ -286,11 +306,15 @@ def _validate_source(source: str, dest: Path) -> bool:
         ast.parse(source)
         return True
     except SyntaxError as exc:
-        logger.error("Generated source for {} has syntax error — skipping write: {}", dest, exc)
+        logger.error(
+            "Generated source for {} has syntax error — skipping write: {}", dest, exc
+        )
         return False
 
 
-def write_utils(grouped: dict[str, list[PyObject]], utils_dir: Path, *, dry_run: bool = False) -> dict[str, Path]:
+def write_utils(
+    grouped: dict[str, list[PyObject]], utils_dir: Path, *, dry_run: bool = False
+) -> dict[str, Path]:
     utils_dir.mkdir(parents=True, exist_ok=True)
     written: dict[str, Path] = {}
     for kind, filename in UTILS_MAP.items():
@@ -324,7 +348,9 @@ def write_utils(grouped: dict[str, list[PyObject]], utils_dir: Path, *, dry_run:
             dest.write_text(combined, encoding="utf-8")
             logger.success("Wrote {} object(s) to {}", len(new_objects), dest)
         else:
-            logger.info("[dry-run] Would write {} object(s) to {}", len(new_objects), dest)
+            logger.info(
+                "[dry-run] Would write {} object(s) to {}", len(new_objects), dest
+            )
         written[kind] = dest
     return written
 
@@ -335,11 +361,15 @@ def _build_import_line(utils_dir: Path, cwd: Path, kind: str) -> str:
     return f"from {module_path} import {{names}}"
 
 
-def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, cwd: Path) -> None:
+def remove_and_patch(
+    objects_to_remove: list[PyObject], utils_dir: Path, cwd: Path
+) -> None:
     by_file: dict[str, list[PyObject]] = defaultdict(list)
     for obj in objects_to_remove:
         if "::" in obj.origin_file:
-            logger.warning("Cannot patch archive member {} — skipping move", obj.origin_file)
+            logger.warning(
+                "Cannot patch archive member {} — skipping move", obj.origin_file
+            )
             continue
         by_file[obj.origin_file].append(obj)
     for filepath, objs in by_file.items():
@@ -382,7 +412,11 @@ def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, cwd: Pa
             continue
         try:
             path.write_text(new_source, encoding="utf-8")
-            logger.success("Patched {}: removed {} definition(s), added imports", filepath, len(objs))
+            logger.success(
+                "Patched {}: removed {} definition(s), added imports",
+                filepath,
+                len(objs),
+            )
         except Exception as exc:
             logger.error("Cannot write patched {}: {}", filepath, exc)
 
@@ -497,7 +531,13 @@ def main() -> None:
         format="<green>{time:HH:mm:ss}</green> | <level>{level:<8}</level> | {message}",
         colorize=True,
     )
-    logger.add("refactor_utils.log", level="DEBUG", rotation="5 MB", retention=3, encoding="utf-8")
+    logger.add(
+        "refactor_utils.log",
+        level="DEBUG",
+        rotation="5 MB",
+        retention=3,
+        encoding="utf-8",
+    )
     root = args.dir.resolve()
     if not root.is_dir():
         logger.error("'{}' is not a directory", root)
@@ -507,7 +547,12 @@ def main() -> None:
         mode = "copy"
     elif args.move:
         mode = "move"
-    logger.info("Root: {}  |  mode: {}  |  workers: {}", root, mode or "report-only", args.workers)
+    logger.info(
+        "Root: {}  |  mode: {}  |  workers: {}",
+        root,
+        mode or "report-only",
+        args.workers,
+    )
     run(root, mode, args.workers)
 
 

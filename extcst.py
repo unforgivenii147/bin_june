@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract entities (functions, classes, constants) from Python files recursively.
-Saves each entity as a separate .py file with its full source code.
-Processes files in parallel and updates them in-place.
-"""
 
 import argparse
 import json
@@ -14,13 +9,14 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
 
 import libcst as cst
 from libcst import MetadataWrapper
 from libcst.metadata import PositionProvider
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -34,24 +30,24 @@ class Entity:
     line_end: int
     docstring: str = ""
     parent: str = ""
-    imports: List[str] = None
-    decorators: List[str] = None
+    imports: list[str] = None
+    decorators: list[str] = None
 
 
 class EntityExtractor(cst.CSTTransformer):
-    def __init__(self, file_path: str, source_lines: List[str]):
+    def __init__(self, file_path: str, source_lines: list[str]):
         self.file_path = file_path
         self.source_lines = source_lines
-        self.entities: List[Entity] = []
+        self.entities: list[Entity] = []
         self.current_class: str = ""
-        self.module_imports: List[str] = []
-        self.constants: Set[str] = set()
-        self.wrapper: Optional[MetadataWrapper] = None
+        self.module_imports: list[str] = []
+        self.constants: set[str] = set()
+        self.wrapper: MetadataWrapper | None = None
 
     def set_wrapper(self, wrapper: MetadataWrapper):
         self.wrapper = wrapper
 
-    def _get_node_position(self, node) -> Tuple[int, int]:
+    def _get_node_position(self, node) -> tuple[int, int]:
         if not self.wrapper:
             return (0, 0)
         try:
@@ -82,7 +78,9 @@ class EntityExtractor(cst.CSTTransformer):
                 self.module_imports.append(import_code)
         return True
 
-    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.CSTNode:
+    def leave_ClassDef(
+        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
+    ) -> cst.CSTNode:
         class_name = original_node.name.value
         start_line, end_line = self._get_node_position(original_node)
         source_code = self._get_source_code(original_node, start_line, end_line)
@@ -90,7 +88,11 @@ class EntityExtractor(cst.CSTTransformer):
         decorators = []
         if original_node.decorators:
             for decorator in original_node.decorators:
-                decorators.append(cst.Module(body=[cst.SimpleStatementLine(body=[decorator])]).code.strip())
+                decorators.append(
+                    cst.Module(
+                        body=[cst.SimpleStatementLine(body=[decorator])]
+                    ).code.strip()
+                )
         self.entities.append(
             Entity(
                 name=class_name,
@@ -108,7 +110,9 @@ class EntityExtractor(cst.CSTTransformer):
         self.current_class = class_name
         return updated_node
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.CSTNode:
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ) -> cst.CSTNode:
         func_name = original_node.name.value
         start_line, end_line = self._get_node_position(original_node)
         source_code = self._get_source_code(original_node, start_line, end_line)
@@ -116,7 +120,11 @@ class EntityExtractor(cst.CSTTransformer):
         decorators = []
         if original_node.decorators:
             for decorator in original_node.decorators:
-                decorators.append(cst.Module(body=[cst.SimpleStatementLine(body=[decorator])]).code.strip())
+                decorators.append(
+                    cst.Module(
+                        body=[cst.SimpleStatementLine(body=[decorator])]
+                    ).code.strip()
+                )
         self.entities.append(
             Entity(
                 name=func_name,
@@ -166,25 +174,37 @@ class EntityExtractor(cst.CSTTransformer):
         first_stmt = node.body[0]
         if isinstance(first_stmt, cst.SimpleStatementLine):
             for stmt in first_stmt.body:
-                if isinstance(stmt, cst.Expr) and isinstance(stmt.value, cst.SimpleString):
+                if isinstance(stmt, cst.Expr) and isinstance(
+                    stmt.value, cst.SimpleString
+                ):
                     doc = stmt.value.value
-                    if doc.startswith("'''") and doc.endswith("'''"):
+                    if (
+                        doc.startswith("'''")
+                        and doc.endswith("'''")
+                        or doc.startswith('"""')
+                        and doc.endswith('"""')
+                    ):
                         doc = doc[3:-3]
-                    elif doc.startswith('"""') and doc.endswith('"""'):
-                        doc = doc[3:-3]
-                    elif doc.startswith("'") and doc.endswith("'"):
-                        doc = doc[1:-1]
-                    elif doc.startswith('"') and doc.endswith('"'):
+                    elif (
+                        doc.startswith("'")
+                        and doc.endswith("'")
+                        or doc.startswith('"')
+                        and doc.endswith('"')
+                    ):
                         doc = doc[1:-1]
                     return doc.strip()
         return ""
 
 
-def process_file(file_path: Path, output_dir: Path) -> Dict[str, int]:
+def process_file(file_path: Path, output_dir: Path) -> dict[str, int]:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
-            source_lines = f.readlines() if hasattr(f, "readlines") else content.splitlines(keepends=True)
+            source_lines = (
+                f.readlines()
+                if hasattr(f, "readlines")
+                else content.splitlines(keepends=True)
+            )
         if not source_lines or len(source_lines) == 1 and source_lines[0] == "":
             with open(file_path, "r", encoding="utf-8") as f:
                 source_lines = f.readlines()
@@ -193,7 +213,11 @@ def process_file(file_path: Path, output_dir: Path) -> Dict[str, int]:
         extractor = EntityExtractor(file_path, source_lines)
         extractor.set_wrapper(wrapper)
         wrapper.visit(extractor)
-        entities_by_type: Dict[str, List[Entity]] = {"function": [], "class": [], "constant": []}
+        entities_by_type: dict[str, list[Entity]] = {
+            "function": [],
+            "class": [],
+            "constant": [],
+        }
         for entity in extractor.entities:
             if entity.type in entities_by_type:
                 entities_by_type[entity.type].append(entity)
@@ -228,7 +252,9 @@ def process_file(file_path: Path, output_dir: Path) -> Dict[str, int]:
                 metadata_file = type_dir / f"{base_filename}_metadata.json"
                 counter_md = 1
                 while metadata_file.exists():
-                    metadata_file = type_dir / f"{base_filename}_{counter_md}_metadata.json"
+                    metadata_file = (
+                        type_dir / f"{base_filename}_{counter_md}_metadata.json"
+                    )
                     counter_md += 1
                 with open(metadata_file, "w", encoding="utf-8") as f:
                     json.dump(
@@ -270,7 +296,7 @@ def sanitize_filename(name: str) -> str:
     return name
 
 
-def get_py_files(paths: List[Path]) -> List[Path]:
+def get_py_files(paths: list[Path]) -> list[Path]:
     py_files = []
     for path in paths:
         if path.is_file() and path.suffix == ".py":
@@ -280,7 +306,9 @@ def get_py_files(paths: List[Path]) -> List[Path]:
     return sorted(py_files)
 
 
-def process_entity_extraction(input_paths: List[Path], output_base: Path, max_workers: int = None) -> None:
+def process_entity_extraction(
+    input_paths: list[Path], output_base: Path, max_workers: int = None
+) -> None:
     py_files = get_py_files(input_paths)
     if not py_files:
         logger.warning("No Python files found to process.")
@@ -289,14 +317,19 @@ def process_entity_extraction(input_paths: List[Path], output_base: Path, max_wo
     output_base.mkdir(parents=True, exist_ok=True)
     total_stats = {}
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(process_file, py_file, output_base): py_file for py_file in py_files}
+        future_to_file = {
+            executor.submit(process_file, py_file, output_base): py_file
+            for py_file in py_files
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
                 stats = future.result()
                 if stats:
                     for entity_type, count in stats.items():
-                        total_stats[entity_type] = total_stats.get(entity_type, 0) + count
+                        total_stats[entity_type] = (
+                            total_stats.get(entity_type, 0) + count
+                        )
                     logger.info(f"✓ Processed {file_path.name}: {stats}")
                 else:
                     logger.info(f"✗ No entities found in {file_path.name}")
@@ -310,10 +343,24 @@ def process_entity_extraction(input_paths: List[Path], output_base: Path, max_wo
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Extract entities (functions, classes, constants) from Python files.")
-    parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("-o", "--output", default="output", help="Output directory (default: output)")
-    parser.add_argument("-j", "--jobs", type=int, default=None, help="Number of parallel workers (default: CPU count)")
+    parser = argparse.ArgumentParser(
+        description="Extract entities (functions, classes, constants) from Python files."
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
+    )
+    parser.add_argument(
+        "-o", "--output", default="output", help="Output directory (default: output)"
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count)",
+    )
     args = parser.parse_args()
     if args.paths:
         input_paths = [Path(p).resolve() for p in args.paths]

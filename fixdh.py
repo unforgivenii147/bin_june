@@ -57,7 +57,9 @@ def is_import_used(node: ast.Import | ast.ImportFrom, text: str) -> bool:
     return False
 
 
-def process_file(path: Path, public_map: dict[str, Path], symbol_index: dict[str, set[str]]):
+def process_file(
+    path: Path, public_map: dict[str, Path], symbol_index: dict[str, set[str]]
+):
     path = Path(path)
     if path.resolve() == Path(__file__).resolve():
         return
@@ -74,7 +76,11 @@ def process_file(path: Path, public_map: dict[str, Path], symbol_index: dict[str
         name = None
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             name = node.name
-        elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        elif (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+        ):
             name = node.targets[0].id
         if name is None or name not in symbol_index:
             continue

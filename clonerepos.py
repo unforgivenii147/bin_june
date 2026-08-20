@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Clone GitHub repositories by downloading ZIP archives.
-No git binary needed. Uses requests for HTTP.
-"""
 
 from __future__ import annotations
 
@@ -74,13 +70,30 @@ def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download GitHub repositories as ZIP archives")
-    parser.add_argument(
-        "file", nargs="?", default="repos.txt", help="Path to file containing repositories (default: repos.txt)"
+    parser = argparse.ArgumentParser(
+        description="Download GitHub repositories as ZIP archives"
     )
-    parser.add_argument("-o", "--output", default="repos", help="Output directory (default: repos)")
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be downloaded without downloading")
+    parser.add_argument(
+        "file",
+        nargs="?",
+        default="repos.txt",
+        help="Path to file containing repositories (default: repos.txt)",
+    )
+    parser.add_argument(
+        "-o", "--output", default="repos", help="Output directory (default: repos)"
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be downloaded without downloading",
+    )
     args = parser.parse_args()
     repos_file = Path(args.file)
     output_dir = Path(args.output)
@@ -100,10 +113,14 @@ def main():
     successful = 0
     failed = 0
     skipped = 0
-    print(f"\nDownloading with {args.workers} parallel workers to {output_dir.absolute()}")
+    print(
+        f"\nDownloading with {args.workers} parallel workers to {output_dir.absolute()}"
+    )
     print("-" * 42)
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        future_to_repo = {executor.submit(download_repo_zip, repo, output_dir): repo for repo in repos}
+        future_to_repo = {
+            executor.submit(download_repo_zip, repo, output_dir): repo for repo in repos
+        }
         for future in as_completed(future_to_repo):
             repo = future_to_repo[future]
             try:

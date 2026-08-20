@@ -4,7 +4,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from dh import get_files, mpf3
+from dh import get_files, mpf_async
 from loguru import logger
 
 
@@ -61,7 +61,7 @@ def main():
     if len(files) == 1:
         process_file(files[0])
         sys.exit(1)
-    results = mpf3(process_file, files)
+    results = mpf_async(process_file, files)
     total = 0
     for res in results:
         total += res

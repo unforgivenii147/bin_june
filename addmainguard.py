@@ -92,8 +92,15 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="\nExamples:\n  %(prog)s                    # Find missing guards in current directory\n  %(prog)s -a                 # Add guards to all missing files\n  %(prog)s src/ -a            # Check src/ directory and add guards\n  %(prog)s -a --dry-run       # Preview changes without modifying\n  %(prog)s -j 4 -a            # Use 4 parallel processes\n        ",
     )
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("-a", "--add", action="store_true", help="Add the main guard to missing files")
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-a", "--add", action="store_true", help="Add the main guard to missing files"
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -106,7 +113,9 @@ def main():
         default=None,
         help="Number of parallel processes (default: CPU count)",
     )
-    parser.add_argument("--exclude", nargs="+", default=[], help="Additional directories to exclude")
+    parser.add_argument(
+        "--exclude", nargs="+", default=[], help="Additional directories to exclude"
+    )
     args = parser.parse_args()
     exclude_patterns = [
         ".git",
@@ -139,7 +148,10 @@ def main():
         "errors": [],
     }
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        futures = {executor.submit(process_file, f, args.add, args.dry_run): f for f in py_files}
+        futures = {
+            executor.submit(process_file, f, args.add, args.dry_run): f
+            for f in py_files
+        }
         completed = 0
         for future in as_completed(futures):
             status, message, filepath = future.result()
@@ -180,10 +192,14 @@ def main():
     else:
         print(f"\n📋 Found {missing} files without the main guard:")
         for path in sorted(results["missing"]):
-            rel_path = path.relative_to(args.directory) if args.directory != "." else path
+            rel_path = (
+                path.relative_to(args.directory) if args.directory != "." else path
+            )
             print(f"  {rel_path}")
         if missing > 0:
-            print(f"\n💡 Run with -a to add the guard: python {sys.argv[0]} {args.directory} -a")
+            print(
+                f"\n💡 Run with -a to add the guard: python {sys.argv[0]} {args.directory} -a"
+            )
         else:
             print("\n✅ All Python files have the main guard!")
     if args.add and (not args.dry_run) and results["added"]:

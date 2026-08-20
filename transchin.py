@@ -13,7 +13,11 @@ from deep_translator import GoogleTranslator
 MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 3
 RETRY_DELAY: Final[float] = 0.5
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +33,9 @@ def translate_line(line: str) -> str | None:
             if result:
                 return result
         except Exception as e:
-            logger.warning("Failed '%s' (attempt %d/%d): %s", line, attempt + 1, RETRY_ATTEMPTS, e)
+            logger.warning(
+                "Failed '%s' (attempt %d/%d): %s", line, attempt + 1, RETRY_ATTEMPTS, e
+            )
             if attempt < RETRY_ATTEMPTS - 1:
                 time.sleep(RETRY_DELAY)
     return None
@@ -65,7 +71,9 @@ def main() -> None:
     logger.info("Starting translation with %d workers...", MAX_WORKERS)
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_line = {executor.submit(translate_line, line): line for line in chinese_lines}
+        future_to_line = {
+            executor.submit(translate_line, line): line for line in chinese_lines
+        }
         for future in as_completed(future_to_line):
             chinese_line = future_to_line[future]
             try:

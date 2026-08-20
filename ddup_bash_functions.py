@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Check for bash functions that also exist as aliases and remove the aliases.
-"""
 
 from __future__ import annotations
 
@@ -12,7 +9,9 @@ from pathlib import Path
 
 def extract_function_names(filepath: Path):
     functions = set()
-    function_pattern = re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{", re.MULTILINE)
+    function_pattern = re.compile(
+        r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{", re.MULTILINE
+    )
     try:
         with open(filepath, encoding="utf-8") as f:
             content = f.read()
@@ -123,7 +122,11 @@ def main() -> None:
     for conflict in sorted(conflicts):
         print(f"  - {conflict} (alias: {aliases[conflict].strip()})")
     print("-" * 42)
-    response = input(f"\nRemove these {len(conflicts)} conflicting aliases? [y/N]: ").strip().lower()
+    response = (
+        input(f"\nRemove these {len(conflicts)} conflicting aliases? [y/N]: ")
+        .strip()
+        .lower()
+    )
     if response != "y":
         print("Operation cancelled")
         sys.exit(0)

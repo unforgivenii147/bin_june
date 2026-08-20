@@ -13,7 +13,9 @@ def get_all_dist_info_dirs():
     for site_dir in [*site.getsitepackages(), site.getusersitepackages()]:
         if Path(site_dir).exists():
             dist_info_dirs.extend(
-                os.path.join(site_dir, item) for item in os.listdir(site_dir) if item.endswith(".dist-info")
+                os.path.join(site_dir, item)
+                for item in os.listdir(site_dir)
+                if item.endswith(".dist-info")
             )
     return dist_info_dirs
 
@@ -55,7 +57,14 @@ def clean_requirements_txt(requirements_file: str = "requirements.txt") -> None:
     pure_python = []
     removed = []
     for req in requirements:
-        pkg_name = req.split("==")[0].split(">=")[0].split("<=")[0].split("~=")[0].strip().lower()
+        pkg_name = (
+            req.split("==")[0]
+            .split(">=")[0]
+            .split("<=")[0]
+            .split("~=")[0]
+            .strip()
+            .lower()
+        )
         if pkg_name in binary_packages:
             removed.append(req)
         else:

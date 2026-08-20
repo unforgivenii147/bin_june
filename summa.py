@@ -37,7 +37,9 @@ class TextSummarizer:
                 word_freq[word] /= total_words
         return dict(word_freq)
 
-    def _score_sentences(self, sentences: list[str], word_freq: dict[str, float]) -> dict[int, float]:
+    def _score_sentences(
+        self, sentences: list[str], word_freq: dict[str, float]
+    ) -> dict[int, float]:
         sentence_scores = {}
         for idx, sentence in enumerate(sentences):
             words = word_tokenize(sentence.lower())
@@ -53,8 +55,12 @@ class TextSummarizer:
                 sentence_scores[idx] = 0
         return sentence_scores
 
-    def _select_top_sentences(self, sentence_scores: dict[int, float], num_sentences: int) -> list[int]:
-        top_indices = sorted(sentence_scores.keys(), key=lambda x: sentence_scores[x], reverse=True)[:num_sentences]
+    def _select_top_sentences(
+        self, sentence_scores: dict[int, float], num_sentences: int
+    ) -> list[int]:
+        top_indices = sorted(
+            sentence_scores.keys(), key=lambda x: sentence_scores[x], reverse=True
+        )[:num_sentences]
         return sorted(top_indices)
 
     def summarize(self, text: str, ratio: float = 0.3) -> str:

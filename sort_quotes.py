@@ -31,7 +31,7 @@ def sort_quotes_by_author(path):
     uniques.sort(key=lambda item: item.get("author", "").lower())
     with open(path, "w", encoding="utf-8") as f:
         json.dump(uniques, f, indent=2, ensure_ascii=False)
-    print(f"Success: Sorted")
+    print("Success: Sorted")
 
 
 if __name__ == "__main__":

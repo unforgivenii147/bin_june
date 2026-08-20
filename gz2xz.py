@@ -22,7 +22,11 @@ def process_file(path: Path) -> tuple[str, bool, str]:
             original_size = path.stat().st_size if path.exists() else 0
             new_size = xz_path.stat().st_size
             ratio = new_size / original_size * 100 if original_size > 0 else 0
-            return (str(path), True, f"Converted to {xz_path.name} ({original_size} -> {new_size} bytes, {ratio:.1f}%)")
+            return (
+                str(path),
+                True,
+                f"Converted to {xz_path.name} ({original_size} -> {new_size} bytes, {ratio:.1f}%)",
+            )
         else:
             return (str(path), False, "Output file is empty or missing")
     except Exception as e:
@@ -65,7 +69,9 @@ def main() -> None:
     print(f"Total files processed: {len(results)}")
     if success_count > 0 and total_original > 0:
         savings = (1 - total_new / total_original) * 100
-        print(f"Total space saved: {total_original - total_new:,} bytes ({savings:.1f}%)")
+        print(
+            f"Total space saved: {total_original - total_new:,} bytes ({savings:.1f}%)"
+        )
         print(f"Original total: {total_original:,} bytes")
         print(f"New total: {total_new:,} bytes")
     if success_count > 0:

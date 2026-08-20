@@ -38,13 +38,21 @@ def process_file(path):
                 b, g, r, a = cv2.split(img)
                 white_bg = np.full(img.shape[:2], 255, dtype=np.uint8)
                 alpha = a.astype(float) / 255.0
-                img_b = (b.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)).astype(np.uint8)
-                img_g = (g.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)).astype(np.uint8)
-                img_r = (r.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)).astype(np.uint8)
+                img_b = (
+                    b.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)
+                ).astype(np.uint8)
+                img_g = (
+                    g.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)
+                ).astype(np.uint8)
+                img_r = (
+                    r.astype(float) * alpha + white_bg.astype(float) * (1 - alpha)
+                ).astype(np.uint8)
                 final_img = cv2.merge((img_b, img_g, img_r))
             else:
                 final_img = img
-            success = cv2.imwrite(str(output_path), final_img, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+            success = cv2.imwrite(
+                str(output_path), final_img, [int(cv2.IMWRITE_JPEG_QUALITY), 95]
+            )
         else:
             img = Image.open(path)
             if img.mode in {"RGBA", "LA"}:
@@ -69,7 +77,11 @@ def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]
-    files = [Path(f) for f in args] if args else get_files(cwd, ext=[".webp", ".bmp", ".jpeg", ".png", ".tiff", "PNG"])
+    files = (
+        [Path(f) for f in args]
+        if args
+        else get_files(cwd, ext=[".webp", ".bmp", ".jpeg", ".png", ".tiff", "PNG"])
+    )
     if len(files) == 1:
         process_file(files[0])
         sys.exit(1)

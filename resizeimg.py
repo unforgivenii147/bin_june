@@ -13,7 +13,9 @@ def reduce_image_size(image_path, scale_factor=0.75) -> None:
             new_height = int(img.height * scale_factor)
             resized_img = img.resize((new_width, new_height), Image.LANCZOS)
             resized_img.save(image_path, optimize=True, quality=85)
-            print(f"Reduced: {image_path} ({img.width}x{img.height} -> {new_width}x{new_height})")
+            print(
+                f"Reduced: {image_path} ({img.width}x{img.height} -> {new_width}x{new_height})"
+            )
     except Exception as e:
         print(f"Error processing {image_path}: {e!s}")
 

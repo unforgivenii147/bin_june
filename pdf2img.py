@@ -31,8 +31,12 @@ def convert_pdf_to_jpg(pdf_path: Path, output_folder: Path) -> bool:
                 shutil.move(source_jpg_path, final_jpg_path)
                 converted_files.append(final_jpg_path)
             else:
-                print(f"Warning: Expected file {source_jpg_path} not found after conversion.")
-        print(f"Successfully converted '{pdf_path.name}' to {len(converted_files)} JPG files in '{pdf_output_dir}'.")
+                print(
+                    f"Warning: Expected file {source_jpg_path} not found after conversion."
+                )
+        print(
+            f"Successfully converted '{pdf_path.name}' to {len(converted_files)} JPG files in '{pdf_output_dir}'."
+        )
         return True
     except Exception as e:
         print(f"Error converting '{pdf_path.name}': {e}")
@@ -52,7 +56,9 @@ def process_directory(start_dir: Path, output_base_dir: Path) -> None:
     for item in start_dir.rglob("*"):
         if item.is_file() and item.suffix.lower() == ".pdf":
             if output_base_dir in item.parents:
-                print(f"Skipping PDF '{item.name}' as it's within the output directory.")
+                print(
+                    f"Skipping PDF '{item.name}' as it's within the output directory."
+                )
                 continue
             if convert_pdf_to_jpg(item, output_base_dir):
                 try:

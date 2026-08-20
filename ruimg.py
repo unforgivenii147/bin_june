@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract Russian and English text from images using OCR.
-Supports parallel processing of multiple directories.
-"""
 
 from __future__ import annotations
 
@@ -40,18 +36,30 @@ class TextExtractor:
     def extract_from_image(image_path: Path) -> ExtractionResult:
         try:
             if not image_path.exists():
-                return ExtractionResult(file_path=image_path, success=False, error=f"File not found")
+                return ExtractionResult(
+                    file_path=image_path, success=False, error="File not found"
+                )
             image = Image.open(image_path)
             text = pytesseract.image_to_string(image, lang="rus+eng")
             print(text)
             txt_path = image_path.with_suffix(".txt")
             txt_path.write_text(text, encoding="utf-8")
             if not text.strip():
-                return ExtractionResult(file_path=image_path, success=True, text="", char_count=0, line_count=0)
+                return ExtractionResult(
+                    file_path=image_path,
+                    success=True,
+                    text="",
+                    char_count=0,
+                    line_count=0,
+                )
             char_count = len(text)
             line_count = len(text.strip().split("\n"))
             return ExtractionResult(
-                file_path=image_path, success=True, text=text, char_count=char_count, line_count=line_count
+                file_path=image_path,
+                success=True,
+                text=text,
+                char_count=char_count,
+                line_count=line_count,
             )
         except Exception as e:
             return ExtractionResult(file_path=image_path, success=False, error=str(e))
@@ -73,7 +81,7 @@ class TextExtractionReport:
     @staticmethod
     def print_header(total_files: int) -> None:
         print("\n" + "=" * 42)
-        print(f"📄 TEXT EXTRACTION REPORT")
+        print("📄 TEXT EXTRACTION REPORT")
         print(f"⏱  Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"📊 Total files to process: {total_files}")
         print("-" * 42)
@@ -154,10 +162,21 @@ Examples:
         help="Directories to process (default: current directory)",
     )
     parser.add_argument(
-        "-w", "--workers", type=int, default=cpu_count(), help=f"Number of parallel workers (default: {cpu_count()})"
+        "-w",
+        "--workers",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of parallel workers (default: {cpu_count()})",
     )
-    parser.add_argument("-j", "--json", type=Path, help="Save detailed report to JSON file")
-    parser.add_argument("-s", "--silent", action="store_true", help="Suppress file-by-file output (summary only)")
+    parser.add_argument(
+        "-j", "--json", type=Path, help="Save detailed report to JSON file"
+    )
+    parser.add_argument(
+        "-s",
+        "--silent",
+        action="store_true",
+        help="Suppress file-by-file output (summary only)",
+    )
     args = parser.parse_args()
     directories = [d.resolve() for d in args.directories]
     print("🔍 Scanning for images...")

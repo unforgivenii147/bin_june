@@ -21,7 +21,9 @@ except ImportError:
         HAS_SKIMAGE = True
     except ImportError:
         print("Error: Neither OpenCV nor scikit-image is available.")
-        print("Install one of them: pip install opencv-python or pip install scikit-image")
+        print(
+            "Install one of them: pip install opencv-python or pip install scikit-image"
+        )
         sys.exit(1)
 
 
@@ -48,7 +50,9 @@ def process_image_cv2(image_path: Path) -> Image:
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     gaussian_blur = cv2.GaussianBlur(blurred, (0, 0), 3)
     sharpened = cv2.addWeighted(blurred, 1.5, gaussian_blur, -0.5, 0)
-    binary = cv2.adaptiveThreshold(sharpened, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    binary = cv2.adaptiveThreshold(
+        sharpened, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+    )
     enhanced_img_pil = Image.fromarray(binary)
     enhanced = image_path.with_stem(image_path.stem + "_enhanced_pil")
     cv2.imwrite(str(enhanced), binary)
@@ -96,7 +100,9 @@ def process_file2(image_path):
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         gaussian_blur = cv2.GaussianBlur(blurred, (0, 0), 3)
         sharpened = cv2.addWeighted(blurred, 1.5, gaussian_blur, -0.5, 0)
-        binary = cv2.adaptiveThreshold(sharpened, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        binary = cv2.adaptiveThreshold(
+            sharpened, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+        )
         enhanced = image_path.with_stem(image_path.stem + "_enhanced_cv")
         cv2.imwrite(str(enhanced), binary)
         return binary

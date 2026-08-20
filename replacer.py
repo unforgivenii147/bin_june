@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Recursively replace or remove text in files with Python 3.12+ optimizations."""
 
 from __future__ import annotations
 
@@ -15,7 +14,11 @@ MAX_CONTEXT_DISPLAY = 3
 
 
 def process_file(
-    path: Path, search_text: str, replace_text: str = "", remove_mode: bool = False, dry_run: bool = False
+    path: Path,
+    search_text: str,
+    replace_text: str = "",
+    remove_mode: bool = False,
+    dry_run: bool = False,
 ) -> bool:
     try:
         content = path.read_text(encoding="utf-8")
@@ -103,9 +106,20 @@ def main() -> None:
         default="",
         help="Replacement text (optional, defaults to empty string)",
     )
-    parser.add_argument("-r", "--remove", action="store_true", help="Remove the search text instead of replacing it")
-    parser.add_argument("--dry-run", action="store_true", help="Show changes without applying them")
-    parser.add_argument("-f", "--file", help="Process only the specified file instead of recursive directory search")
+    parser.add_argument(
+        "-r",
+        "--remove",
+        action="store_true",
+        help="Remove the search text instead of replacing it",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show changes without applying them"
+    )
+    parser.add_argument(
+        "-f",
+        "--file",
+        help="Process only the specified file instead of recursive directory search",
+    )
     args = parser.parse_args()
     if args.remove:
         args.replace = ""
@@ -121,9 +135,15 @@ def main() -> None:
         print("--- RUNNING IN DRY RUN MODE (No files will be modified) ---")
     print(f"--- {action} ---")
     files_processed, files_changed = replace_in_files(
-        search_text, replace_text, remove_mode=args.remove, target_file=args.file, dry_run=args.dry_run
+        search_text,
+        replace_text,
+        remove_mode=args.remove,
+        target_file=args.file,
+        dry_run=args.dry_run,
     )
-    print(f"\n--- Complete: Processed {files_processed} files, modified {files_changed} files ---")
+    print(
+        f"\n--- Complete: Processed {files_processed} files, modified {files_changed} files ---"
+    )
 
 
 if __name__ == "__main__":

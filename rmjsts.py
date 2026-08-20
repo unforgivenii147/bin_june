@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Remove comments from JavaScript and TypeScript files."""
 
 from __future__ import annotations
 
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Optional
 
 
 def remove_js_comments(content: str) -> str:
@@ -53,7 +51,7 @@ def remove_js_comments(content: str) -> str:
     return "".join(result)
 
 
-def process_file(file_path: Path) -> Optional[str]:
+def process_file(file_path: Path) -> str | None:
     try:
         content = file_path.read_text(encoding="utf-8")
         cleaned = remove_js_comments(content)

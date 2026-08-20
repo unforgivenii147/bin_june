@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Bidirectional converter between wheel files (.whl) and tar.xz archives.
-- Converts .whl → .tar.xz
-- Converts .tar.xz → .whl
-- Auto-detects file type and performs appropriate conversion
-"""
 
 from __future__ import annotations
 
@@ -26,7 +20,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def convert_zip_time_to_timestamp(date_time: tuple[int, int, int, int, int, int]) -> float:
+def convert_zip_time_to_timestamp(
+    date_time: tuple[int, int, int, int, int, int],
+) -> float:
     try:
         dt = datetime(*date_time)
         return dt.timestamp()
@@ -48,7 +44,9 @@ def get_unique_path(path: Path) -> Path:
         counter += 1
 
 
-def preserve_zip_metadata(zip_member: zipfile.ZipInfo, tarinfo: tarfile.TarInfo) -> tarfile.TarInfo:
+def preserve_zip_metadata(
+    zip_member: zipfile.ZipInfo, tarinfo: tarfile.TarInfo
+) -> tarfile.TarInfo:
     tarinfo.size = zip_member.file_size
     if zip_member.date_time:
         tarinfo.mtime = convert_zip_time_to_timestamp(zip_member.date_time)
@@ -57,7 +55,9 @@ def preserve_zip_metadata(zip_member: zipfile.ZipInfo, tarinfo: tarfile.TarInfo)
         if unix_permissions:
             tarinfo.mode = unix_permissions
         else:
-            tarinfo.mode = 493 if zip_member.filename.endswith((".sh", ".py", ".exe")) else 420
+            tarinfo.mode = (
+                493 if zip_member.filename.endswith((".sh", ".py", ".exe")) else 420
+            )
     else:
         tarinfo.mode = 420
     tarinfo.type = tarfile.REGTYPE
@@ -68,7 +68,9 @@ def preserve_zip_metadata(zip_member: zipfile.ZipInfo, tarinfo: tarfile.TarInfo)
     return tarinfo
 
 
-def preserve_tar_metadata(tarinfo: tarfile.TarInfo, zipinfo: zipfile.ZipInfo) -> zipfile.ZipInfo:
+def preserve_tar_metadata(
+    tarinfo: tarfile.TarInfo, zipinfo: zipfile.ZipInfo
+) -> zipfile.ZipInfo:
     if hasattr(tarinfo, "mtime") and tarinfo.mtime:
         dt = datetime.fromtimestamp(tarinfo.mtime)
         zipinfo.date_time = (dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
@@ -77,7 +79,9 @@ def preserve_tar_metadata(tarinfo: tarfile.TarInfo, zipinfo: zipfile.ZipInfo) ->
     return zipinfo
 
 
-def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
+def convert_whl_to_tarxz(
+    path: Path, remove_original: bool = False
+) -> tuple[bool, str, Path | None]:
     try:
         if not path.exists() or not path.is_file():
             return False, f"Invalid file: {path}", None
@@ -106,7 +110,9 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> tuple[boo
                     except Exception as e:
                         failed_members.append(f"{member.filename}: {e}")
         if failed_members:
-            logger.warning(f"Failed to convert {len(failed_members)} files in {path.name}")
+            logger.warning(
+                f"Failed to convert {len(failed_members)} files in {path.name}"
+            )
         if output_path.exists() and output_path.stat().st_size > 0:
             if remove_original:
                 try:
@@ -126,15 +132,16 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> tuple[boo
         return False, f"Conversion error: {e}", None
 
 
-def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
+def convert_tarxz_to_whl(
+    path: Path, remove_original: bool = False
+) -> tuple[bool, str, Path | None]:
     try:
         if not path.exists() or not path.is_file():
             return False, f"Invalid file: {path}", None
         if not (path.suffix == ".xz" and path.stem.endswith(".tar")):
             return False, f"Not a tar.xz file: {path.name}", None
         stem = path.stem
-        if stem.endswith(".tar"):
-            stem = stem[:-4]
+        stem = stem.removesuffix(".tar")
         output_path = path.parent / f"{stem}.whl"
         if output_path.exists():
             output_path = get_unique_path(output_path)
@@ -156,7 +163,11 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> tuple[boo
                             file_content.close()
                     except Exception as e:
                         logger.error(f"Failed to convert {member.name}: {e}")
-                        return (False, f"Failed to convert member {member.name}: {e}", None)
+                        return (
+                            False,
+                            f"Failed to convert member {member.name}: {e}",
+                            None,
+                        )
         if output_path.exists() and output_path.stat().st_size > 0:
             try:
                 with zipfile.ZipFile(output_path, "r") as test_zip:
@@ -185,7 +196,9 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> tuple[boo
         return False, f"Conversion error: {e}", None
 
 
-def process_file(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
+def process_file(
+    path: Path, remove_original: bool = False
+) -> tuple[bool, str, Path | None]:
     path = Path(path)
     if not path.exists():
         return False, f"File not found: {path}", None
@@ -196,7 +209,11 @@ def process_file(path: Path, remove_original: bool = False) -> tuple[bool, str, 
         logger.info(f"Converting tar.xz to wheel: {path.name}")
         return convert_tarxz_to_whl(path, remove_original)
     else:
-        return (False, f"Unsupported file type: {path.suffix} (only .whl or .tar.xz)", None)
+        return (
+            False,
+            f"Unsupported file type: {path.suffix} (only .whl or .tar.xz)",
+            None,
+        )
 
 
 def find_convertible_files(directory: Path, recursive: bool = False) -> list[Path]:
@@ -237,15 +254,27 @@ Examples:
         default=["."],
         help="Files or directories to process (default: current directory)",
     )
-    parser.add_argument("-r", "--recursive", action="store_true", help="Search directories recursively")
+    parser.add_argument(
+        "-r", "--recursive", action="store_true", help="Search directories recursively"
+    )
     parser.add_argument(
         "--remove-original",
         action="store_true",
         help="Remove original files after successful conversion",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=None, help="Number of parallel jobs (default: CPU count)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
-    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress non-error output")
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help="Number of parallel jobs (default: CPU count)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose logging"
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress non-error output"
+    )
     args = parser.parse_args()
     if args.verbose:
         logger.setLevel(logging.DEBUG)
@@ -258,7 +287,9 @@ Examples:
             logger.error(f"Path does not exist: {path}")
             continue
         if path.is_file():
-            if path.suffix.lower() == ".whl" or (path.suffix == ".xz" and ".tar" in str(path)):
+            if path.suffix.lower() == ".whl" or (
+                path.suffix == ".xz" and ".tar" in str(path)
+            ):
                 convertible_files.append(path)
             else:
                 logger.warning(f"Skipping unsupported file: {path}")
@@ -281,12 +312,17 @@ Examples:
     failure_count = 0
     results = []
     if len(convertible_files) == 1:
-        success, message, output_path = process_file(convertible_files[0], args.remove_original)
+        success, message, output_path = process_file(
+            convertible_files[0], args.remove_original
+        )
         results.append((convertible_files[0], success, message, output_path))
     else:
         with ProcessPoolExecutor(max_workers=args.jobs) as executor:
             file_args = [(f, args.remove_original) for f in convertible_files]
-            future_to_file = {executor.submit(process_single_file, file_arg): file_arg[0] for file_arg in file_args}
+            future_to_file = {
+                executor.submit(process_single_file, file_arg): file_arg[0]
+                for file_arg in file_args
+            }
             for future in as_completed(future_to_file):
                 try:
                     result = future.result()
@@ -304,7 +340,9 @@ Examples:
             success_count += 1
             status = "✓ OK"
             input_type = "whl" if file_path.suffix == ".whl" else "tar.xz"
-            output_type = "tar.xz" if output_path and output_path.suffix == ".xz" else "whl"
+            output_type = (
+                "tar.xz" if output_path and output_path.suffix == ".xz" else "whl"
+            )
             size_info = ""
             if output_path and output_path.exists():
                 size_kb = output_path.stat().st_size / 1024

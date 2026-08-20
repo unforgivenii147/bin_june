@@ -44,7 +44,9 @@ def find_distributions(site_dirs):
         if not sd.exists():
             continue
         for p in sd.iterdir():
-            if p.is_dir() and (p.name.endswith(".dist-info") or p.name.endswith(".egg-info")):
+            if p.is_dir() and (
+                p.name.endswith(".dist-info") or p.name.endswith(".egg-info")
+            ):
                 key = p.name.rsplit(".", 1)[0].lower()
                 dists[key] = p
     return dists
@@ -119,7 +121,9 @@ def detect_wheel_tags():
         py_tag, abi_tag = f"cp{mj}{mn}", f"cp{mj}{mn}"
     else:
         cache = getattr(sys.implementation, "cache_tag", None)
-        py_tag, abi_tag = cache.split("-", 1) if cache and "-" in cache else (f"py{mj} ", "none")
+        py_tag, abi_tag = (
+            cache.split("-", 1) if cache and "-" in cache else (f"py{mj} ", "none")
+        )
     plat = sysconfig.get_platform().replace("-", "_").replace(".", "_")
     return py_tag, abi_tag, plat
 
@@ -131,7 +135,9 @@ def collect_and_build(distinfo_path, prefix: Path, wheel_out_path: Path) -> None
         print(f"[-] Error: Could not find RECORD for {distinfo_path.name}. Skipping.")
         return
     md = parse_metadata_from_distinfo(distinfo_path)
-    dist_name = (md.get("Name") or distinfo_path.name.split("-", 1)[0]).replace("-", "_")
+    dist_name = (md.get("Name") or distinfo_path.name.split("-", 1)[0]).replace(
+        "-", "_"
+    )
     md.get("Version") or "0.0.0"
     collected_files = []
     missing_files = []
@@ -146,13 +152,18 @@ def collect_and_build(distinfo_path, prefix: Path, wheel_out_path: Path) -> None
                 for root, _, files in os.walk(src):
                     for fn in files:
                         s_path = Path(root) / fn
-                        collected_files.append((s_path, s_path.relative_to(base).as_posix()))
+                        collected_files.append(
+                            (s_path, s_path.relative_to(base).as_posix())
+                        )
             else:
                 collected_files.append((src, rel))
         else:
             missing_files.append(rel)
     if "console_scripts" in md:
-        collected_files.extend((sp, f"bin/{sp.name}") for sp in find_script_paths(prefix, md["console_scripts"]))
+        collected_files.extend(
+            (sp, f"bin/{sp.name}")
+            for sp in find_script_paths(prefix, md["console_scripts"])
+        )
     if missing_files:
         print(f"[!] Error: Missing files for {dist_name}:")
         for m in missing_files:
@@ -176,13 +187,17 @@ Root-Is-Purelib: {"false" if is_platform else "true"}
 Tag: {wheel_tag}
 """
         zf.writestr(f"{distinfo_path.name}/WHEEL", wheel_content)
-        record_lines.extend((f"{distinfo_path.name}/WHEEL,,", f"{distinfo_path.name}/RECORD,,"))
+        record_lines.extend(
+            (f"{distinfo_path.name}/WHEEL,,", f"{distinfo_path.name}/RECORD,,")
+        )
         zf.writestr(f"{distinfo_path.name}/RECORD", "\n".join(record_lines) + "\n")
     print(f"[+] Successfully built: {wheel_out_path.name}")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Repack packages into .whl files directly.")
+    parser = argparse.ArgumentParser(
+        description="Repack packages into .whl files directly."
+    )
     parser.add_argument("packages", nargs="*", help="Distribution names to repack.")
     parser.add_argument("-a", "--all", action="store_true", help="Repack all.")
     args = parser.parse_args()

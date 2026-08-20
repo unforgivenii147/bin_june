@@ -104,7 +104,7 @@ def extract_with_tree_sitter(code: str):
                     parsed = ast.parse(text)
                     if len(parsed.body) == 1 and isinstance(parsed.body[0], ast.Assign):
                         assign = parsed.body[0]
-                        if all((isinstance(t, ast.Name) for t in assign.targets)):
+                        if all(isinstance(t, ast.Name) for t in assign.targets):
                             name = assign.targets[0].id
                             objects.append(
                                 {
@@ -159,7 +159,7 @@ def extract_with_ast(code: str):
                     }
                 )
             elif isinstance(node, ast.Assign):
-                if all((isinstance(t, ast.Name) for t in node.targets)):
+                if all(isinstance(t, ast.Name) for t in node.targets):
                     snippet = ast.get_source_segment(code, node)
                     if snippet is None:
                         continue
@@ -187,7 +187,7 @@ def extract_objects(code: str):
 
 def is_supported_archive(path: Path) -> bool:
     s = str(path).lower()
-    return any((s.endswith(ext) for ext in SUPPORTED_ARCHIVES))
+    return any(s.endswith(ext) for ext in SUPPORTED_ARCHIVES)
 
 
 def extract_archive(path: Path) -> str:
@@ -197,7 +197,9 @@ def extract_archive(path: Path) -> str:
         if lower.endswith(".zip"):
             with zipfile.ZipFile(path) as zf:
                 zf.extractall(temp_dir)
-        elif lower.endswith((".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")):
+        elif lower.endswith(
+            (".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")
+        ):
             with tarfile.open(path) as tf:
                 tf.extractall(temp_dir)
         elif lower.endswith(".gz") and (not lower.endswith(".tar.gz")):
@@ -325,7 +327,7 @@ def build_import_line(utils_module_name: str, names) -> str:
 
 
 def write_utils_file(path: Path, objects) -> bool:
-    content = "\n\n".join((obj["snippet"].rstrip() for obj in objects)).rstrip() + "\n"
+    content = "\n\n".join(obj["snippet"].rstrip() for obj in objects).rstrip() + "\n"
     try:
         ast.parse(content)
     except SyntaxError as e:
@@ -351,9 +353,16 @@ def insert_import_after_shebang(code: str, import_line: str) -> str:
 def remove_snippets_from_code(code: str, objects) -> str:
     if not objects:
         return code
-    if all((o.get("start_byte") is not None and o.get("end_byte") is not None for o in objects)):
+    if all(
+        o.get("start_byte") is not None and o.get("end_byte") is not None
+        for o in objects
+    ):
         encoded = code.encode("utf-8")
-        spans = sorted([(o["start_byte"], o["end_byte"]) for o in objects], key=lambda x: x[0], reverse=True)
+        spans = sorted(
+            [(o["start_byte"], o["end_byte"]) for o in objects],
+            key=lambda x: x[0],
+            reverse=True,
+        )
         for start, end in spans:
             encoded = encoded[:start] + encoded[end:]
         return encoded.decode("utf-8")
@@ -393,11 +402,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )
-    parser.add_argument("-m", "--move", action="store_true", help="Move duplicate objects to utils.py and add imports")
     parser.add_argument(
-        "-c", "--copy", action="store_true", help="Copy duplicate objects to utils.py without changing source files"
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move duplicate objects to utils.py and add imports",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=mp.cpu_count(), help="Number of worker processes")
+    parser.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy duplicate objects to utils.py without changing source files",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=mp.cpu_count(),
+        help="Number of worker processes",
+    )
     args = parser.parse_args()
     if args.move and args.copy:
         logger.error("Use either --move or --copy, not both.")
@@ -442,7 +465,9 @@ def main() -> None:
         sys.exit(1)
     logger.info(f"Wrote deduplicated objects to {utils_path}")
     if args.copy:
-        logger.info("Copy mode: source files were not modified and no imports were added.")
+        logger.info(
+            "Copy mode: source files were not modified and no imports were added."
+        )
         return
     by_file_to_remove = defaultdict(list)
     for h, group in duplicate_groups.items():

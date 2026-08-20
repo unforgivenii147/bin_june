@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-ziprepo_optimized_by_gemini.py — Download a GitHub repository as ZIP.
-Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
-"""
 
 from __future__ import annotations
 
@@ -15,14 +11,20 @@ from pathlib import Path
 from dotenv import load_dotenv
 from github import Github, GithubException
 
-logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 logger = logging.getLogger(__name__)
 env_path = Path.home() / ".env"
 if env_path.exists():
     load_dotenv(env_path)
 
 
-def download_repo_zip(username: str, repo: str, branch: str = "main", output_name: str | None = None) -> Path | None:
+def download_repo_zip(
+    username: str, repo: str, branch: str = "main", output_name: str | None = None
+) -> Path | None:
     token = os.getenv("GITHUB_TOKEN")
     if not token:
         logger.error("❌ Error: GITHUB_TOKEN environment variable not set.")
@@ -50,9 +52,13 @@ def download_repo_zip(username: str, repo: str, branch: str = "main", output_nam
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Download a GitHub repository as ZIP archive")
+    parser = argparse.ArgumentParser(
+        description="Download a GitHub repository as ZIP archive"
+    )
     parser.add_argument("repo", help='Repository in format "username/repo"')
-    parser.add_argument("--branch", "-b", default="main", help="Branch name (default: main)")
+    parser.add_argument(
+        "--branch", "-b", default="main", help="Branch name (default: main)"
+    )
     parser.add_argument("--output", "-o", help="Output filename")
     args = parser.parse_args()
     if "/" not in args.repo:

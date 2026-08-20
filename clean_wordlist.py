@@ -10,8 +10,13 @@ from pathlib import Path
 def get_lines(file_path: Path) -> list[str]:
     file_size = file_path.stat().st_size
     if file_size > 5 * 1024 * 1024:
-        print(f"[Info] Large file detected ({file_size / (1024 * 1024):.2f} MB). Using mmap...")
-        with file_path.open("r+b") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+        print(
+            f"[Info] Large file detected ({file_size / (1024 * 1024):.2f} MB). Using mmap..."
+        )
+        with (
+            file_path.open("r+b") as f,
+            mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm,
+        ):
             content = mm.read().decode("utf-8", errors="ignore")
             return [line.strip() for line in content.splitlines() if line.strip()]
     else:
@@ -48,7 +53,9 @@ def process_wordlist(file_path_str: str) -> None:
         for line in remaining_lines:
             f.write(line + "\n")
     print(f"[Success] Moved {len(similar_lines)} lines to {similar_file}")
-    print(f"[Success] Updated {file_path_str} in-place ({len(remaining_lines)} lines remaining).")
+    print(
+        f"[Success] Updated {file_path_str} in-place ({len(remaining_lines)} lines remaining)."
+    )
 
 
 if __name__ == "__main__":

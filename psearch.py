@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""CLI tool to search PyPI packages."""
 
 import argparse
 import json
 import sys
 from dataclasses import dataclass
-from typing import Optional
 
 import requests
 
@@ -28,7 +26,7 @@ class PyPISearch:
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
 
-    def search(self, query: str, limit: Optional[int] = None) -> list[Package]:
+    def search(self, query: str, limit: int | None = None) -> list[Package]:
         try:
             response = requests.get(
                 self.SEARCH_URL,
@@ -56,7 +54,7 @@ class PyPISearch:
                 break
         return sorted(results, key=lambda p: p.name.lower())
 
-    def search_json(self, query: str, limit: Optional[int] = None) -> str:
+    def search_json(self, query: str, limit: int | None = None) -> str:
         results = self.search(query, limit)
         return json.dumps(
             [

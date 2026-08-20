@@ -14,7 +14,16 @@ from loguru import logger
 
 logger.remove()
 logger.add("/data/data/com.termux/files/home/tmp/log/apps/pyrg.log")
-IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
+IGNORED_DIRS = {
+    ".git",
+    ".hg",
+    ".svn",
+    "node_modules",
+    "__pycache__",
+    ".ruff_cache",
+    ".pytest_cache",
+    ".mypy_cache",
+}
 BINARY_CHUNK = 8192
 DEFAULT_THREADS = 4
 ANSI_BOLD = "\x1b[1m"
@@ -93,7 +102,9 @@ def colorize_line(line: str, spans: list[tuple[int, int]]) -> str:
 def matches_any_glob(path: Path, patterns: list[str]) -> bool:
     basename = path.name
     path_str = str(path)
-    return any(fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(basename, p) for p in patterns)
+    return any(
+        fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(basename, p) for p in patterns
+    )
 
 
 def search_file_text_mode(
@@ -128,19 +139,66 @@ def search_file_text_mode(
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="ripgrep-like recursive search in Python")
     p.add_argument("pattern", nargs="?", help="Regex pattern (positional) or use -e")
-    p.add_argument("-e", "--regexp", dest="pattern_e", help="Pattern (alternative to positional)")
-    p.add_argument("-i", "--ignore-case", action="store_true", help="Case-insensitive search")
-    p.add_argument("-F", "--fixed-strings", action="store_true", help="Fixed string search (no regex)")
-    p.add_argument("-n", "--line-number", action="store_true", default=True, help="Show line numbers")
-    p.add_argument("-l", "--files-with-matches", action="store_true", help="Only print filenames that match")
-    p.add_argument("-c", "--count", action="store_true", help="Print count of matches per file")
-    p.add_argument("-t", "--threads", type=int, default=DEFAULT_THREADS, help="Number of worker threads")
-    p.add_argument("--hidden", action="store_true", help="Search hidden files and directories")
-    p.add_argument("-g", "--glob", action="append", help="Include glob; can be repeated")
-    p.add_argument("-x", "--exclude", action="append", help="Exclude glob; can be repeated")
-    p.add_argument("-C", "--no-color", action="store_true", help="Disable colorized output")
-    p.add_argument("-m", "--max-filesize", type=int, default=10000000, help="Skip files larger than size (bytes)")
-    p.add_argument("paths", nargs="*", default=["."], help="Files or directories to search (default: .)")
+    p.add_argument(
+        "-e", "--regexp", dest="pattern_e", help="Pattern (alternative to positional)"
+    )
+    p.add_argument(
+        "-i", "--ignore-case", action="store_true", help="Case-insensitive search"
+    )
+    p.add_argument(
+        "-F",
+        "--fixed-strings",
+        action="store_true",
+        help="Fixed string search (no regex)",
+    )
+    p.add_argument(
+        "-n",
+        "--line-number",
+        action="store_true",
+        default=True,
+        help="Show line numbers",
+    )
+    p.add_argument(
+        "-l",
+        "--files-with-matches",
+        action="store_true",
+        help="Only print filenames that match",
+    )
+    p.add_argument(
+        "-c", "--count", action="store_true", help="Print count of matches per file"
+    )
+    p.add_argument(
+        "-t",
+        "--threads",
+        type=int,
+        default=DEFAULT_THREADS,
+        help="Number of worker threads",
+    )
+    p.add_argument(
+        "--hidden", action="store_true", help="Search hidden files and directories"
+    )
+    p.add_argument(
+        "-g", "--glob", action="append", help="Include glob; can be repeated"
+    )
+    p.add_argument(
+        "-x", "--exclude", action="append", help="Exclude glob; can be repeated"
+    )
+    p.add_argument(
+        "-C", "--no-color", action="store_true", help="Disable colorized output"
+    )
+    p.add_argument(
+        "-m",
+        "--max-filesize",
+        type=int,
+        default=10000000,
+        help="Skip files larger than size (bytes)",
+    )
+    p.add_argument(
+        "paths",
+        nargs="*",
+        default=["."],
+        help="Files or directories to search (default: .)",
+    )
     return p
 
 
@@ -149,7 +207,10 @@ def main(argv: list[str] | None = None) -> int:
     args = build_argparser().parse_args(argv)
     pattern = args.pattern_e or args.pattern
     if not pattern:
-        print("No pattern provided. Use positional PATTERN or -e PATTERN.", file=sys.stderr)
+        print(
+            "No pattern provided. Use positional PATTERN or -e PATTERN.",
+            file=sys.stderr,
+        )
         return 2
     compiled = None
     if not args.fixed_strings:
@@ -174,7 +235,13 @@ def main(argv: list[str] | None = None) -> int:
     def worker(path: Path):
         if is_binary(path):
             return (str(path), [])
-        return search_file_text_mode(path=path, cwd=cwd, regex=compiled, fixed=pattern, ignore_case=args.ignore_case)
+        return search_file_text_mode(
+            path=path,
+            cwd=cwd,
+            regex=compiled,
+            fixed=pattern,
+            ignore_case=args.ignore_case,
+        )
 
     with ThreadPoolExecutor(max_workers=args.threads) as executor:
         futures = {executor.submit(worker, p): p for p in candidates}
@@ -192,7 +259,9 @@ def main(argv: list[str] | None = None) -> int:
                     for lineno, line, spans in matches:
                         out_line = colorize_line(line, spans) if color else line
                         if args.line_number:
-                            print(f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{lineno}:{out_line}")
+                            print(
+                                f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{lineno}:{out_line}"
+                            )
                         else:
                             print(f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{out_line}")
         except KeyboardInterrupt:

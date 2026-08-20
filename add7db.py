@@ -25,7 +25,9 @@ def get_user_folder_name(default_name: str):
 
 
 def folder_exists_in_db(cursor: Cursor, folder_name):
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (folder_name,))
+    cursor.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?", (folder_name,)
+    )
     return cursor.fetchone() is not None
 
 
@@ -61,7 +63,9 @@ def read_file_contents(filepath: str):
         encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
         get_size = Path(filepath).stat().st_size
         if get_size > 10 * 1024 * 1024:
-            print(f"    Warning: Large file ({get_size / 1024 / 1024:.1f}MB), may take time to compress")
+            print(
+                f"    Warning: Large file ({get_size / 1024 / 1024:.1f}MB), may take time to compress"
+            )
         for encoding in encodings:
             try:
                 with Path(filepath).open(encoding=encoding) as f:
@@ -75,11 +79,23 @@ def read_file_contents(filepath: str):
                 continue
         with Path(filepath).open("rb") as f:
             content = f.read()
-            return {"content": content, "is_binary": True, "original_size": len(content)}
+            return {
+                "content": content,
+                "is_binary": True,
+                "original_size": len(content),
+            }
     except PermissionError:
-        return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
+        return {
+            "content": error_msg,
+            "is_binary": False,
+            "original_size": len(error_msg),
+        }
     except Exception:
-        return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
+        return {
+            "content": error_msg,
+            "is_binary": False,
+            "original_size": len(error_msg),
+        }
 
 
 def get_files_in_cwd():
@@ -89,7 +105,11 @@ def get_files_in_cwd():
         for item_path in sorted(cwd.iterdir()):
             if item_path.is_file():
                 get_size = item_path.stat().st_size
-                size_str = f"{get_size / 1024:.1f}KB" if get_size < 1024 * 1024 else f"{get_size / 1024 / 1024:.1f}MB"
+                size_str = (
+                    f"{get_size / 1024:.1f}KB"
+                    if get_size < 1024 * 1024
+                    else f"{get_size / 1024 / 1024:.1f}MB"
+                )
                 print(f"  Processing: {item_path.name} ({size_str})")
                 file_data = read_file_contents(str(item_path))
                 if file_data["is_binary"]:
@@ -127,7 +147,9 @@ def get_files_in_cwd():
                             "compressed_size": 0,
                         }
                     )
-                    print(f"    ✓ Stored as text ({file_data['original_size'] / 1024:.1f}KB)")
+                    print(
+                        f"    ✓ Stored as text ({file_data['original_size'] / 1024:.1f}KB)"
+                    )
     except PermissionError:
         print("Warning: Permission denied accessing some files")
     return files
@@ -187,7 +209,11 @@ def main() -> None:
         total_compressed = sum(f.get("compressed_size", 0) for f in files)
         print(f"\n✅ Successfully added {len(files)} files to table '{folder_name}'")
         if total_compressed > 0:
-            ratio = (1 - total_compressed / total_original) * 100 if total_original > 0 else 0
+            ratio = (
+                (1 - total_compressed / total_original) * 100
+                if total_original > 0
+                else 0
+            )
             print("📊 Storage stats:")
             print(f"   Original size: {total_original / 1024 / 1024:.2f}MB")
             print(f"   Compressed size: {total_compressed / 1024 / 1024:.2f}MB")

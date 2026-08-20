@@ -1,7 +1,3 @@
-# fix my custom pkg_resources refrence/import detector/autofixer
-# debug and optimize for speed
-# use mp.starmap with 8 workers
-
 import argparse
 import re
 import sys
@@ -71,7 +67,7 @@ class Finding:
     lineno: int
     col: int
     line: str
-    kind: str  
+    kind: str
     pattern: str = ""
     autofixable: bool = False
 
@@ -295,7 +291,7 @@ def main(argv: list[str] | None = None) -> int:
             p = futures[fut]
             try:
                 rep = fut.result()
-            except Exception as exc:  
+            except Exception as exc:
                 print(f"error scanning {p}: {exc}", file=sys.stderr)
                 continue
             reports.append(rep)
@@ -330,7 +326,7 @@ def main(argv: list[str] | None = None) -> int:
                 p = futures[fut]
                 try:
                     changed, notes = fut.result()
-                except Exception as exc:  
+                except Exception as exc:
                     print(f"  error autofixing {p}: {exc}", file=sys.stderr)
                     continue
                 if changed:

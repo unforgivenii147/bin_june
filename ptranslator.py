@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Recursively translate text files using Google Translate.
-Optimized for Python 3.12 with modern syntax and performance improvements.
-"""
 
 from __future__ import annotations
 
@@ -95,7 +91,9 @@ def translate_file_task(task: tuple[Path, str, float, Path | None]) -> None:
             rel_path = file_path.relative_to(Path.cwd())
         except ValueError:
             rel_path = file_path.name
-        out_path = (output_dir / rel_path).with_suffix(f"{file_path.suffix}.{target_lang}")
+        out_path = (output_dir / rel_path).with_suffix(
+            f"{file_path.suffix}.{target_lang}"
+        )
     else:
         out_path = file_path.with_suffix(f"{file_path.suffix}.{target_lang}")
     try:
@@ -115,18 +113,32 @@ def collect_files(paths: list[str]) -> list[Path]:
                 files.add(path)
         elif path.is_dir():
             for entry in path.rglob("*"):
-                if entry.is_file() and (not any(part in SKIP_DIRS for part in entry.parts)) and is_text_file(entry):
+                if (
+                    entry.is_file()
+                    and (not any(part in SKIP_DIRS for part in entry.parts))
+                    and is_text_file(entry)
+                ):
                     files.add(entry)
     return sorted(files)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Recursive text file translator.")
-    parser.add_argument("paths", nargs="*", default=["."], help="Files/directories to process")
-    parser.add_argument("--target-lang", default="en", help="Target language (default: en)")
-    parser.add_argument("--delay", type=float, default=0.5, help="Delay between chunks (default: 0.5)")
-    parser.add_argument("--workers", type=int, help="Parallel workers (default: CPU count)")
-    parser.add_argument("--output-dir", type=Path, help="Target directory for translations")
+    parser.add_argument(
+        "paths", nargs="*", default=["."], help="Files/directories to process"
+    )
+    parser.add_argument(
+        "--target-lang", default="en", help="Target language (default: en)"
+    )
+    parser.add_argument(
+        "--delay", type=float, default=0.5, help="Delay between chunks (default: 0.5)"
+    )
+    parser.add_argument(
+        "--workers", type=int, help="Parallel workers (default: CPU count)"
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, help="Target directory for translations"
+    )
     args = parser.parse_args()
     workers = args.workers or multiprocessing.cpu_count()
     files = collect_files(args.paths)

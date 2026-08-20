@@ -7,7 +7,9 @@ import subprocess
 
 def get_packages_with_size():
     try:
-        result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True)
+        result = subprocess.run(
+            ["apt", "list", "--installed"], capture_output=True, text=True
+        )
         packages = []
         for line in result.stdout.split("\n"):
             if line and not line.startswith("Listing"):
@@ -18,7 +20,9 @@ def get_packages_with_size():
         pkg_sizes = []
         for pkg in packages:
             try:
-                info = subprocess.run(["apt", "show", pkg], capture_output=True, text=True)
+                info = subprocess.run(
+                    ["apt", "show", pkg], capture_output=True, text=True
+                )
                 for line in info.stdout.split("\n"):
                     if line.startswith("Installed-Size:"):
                         size_kb = int(re.search(r"\d+", line).group())

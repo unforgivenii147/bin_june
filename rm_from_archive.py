@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Delete a file from a tar.zst archive
-Usage: python script.py <archive.tar.zst> <file-to-delete>
-"""
 
 from __future__ import annotations
 
@@ -42,7 +38,9 @@ def delete_from_tar_zst(archive_path, file_to_delete):
                     found = True
                     break
             if not found:
-                print(f"Warning: '{file_to_delete}' not found in archive", file=sys.stderr)
+                print(
+                    f"Warning: '{file_to_delete}' not found in archive", file=sys.stderr
+                )
                 shutil.copy2(archive_path, output_path)
                 print(f"Original archive copied to: {output_path}")
                 return

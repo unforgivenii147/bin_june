@@ -1,12 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Pure Python implementation of qalc (quick calculator) CLI.
-A simple, fast command-line calculator with support for:
-- Basic arithmetic operations (+, -, *, /, %, **)
-- Unit conversions (length, mass, temperature, etc.)
-- Mathematical functions (sin, cos, tan, sqrt, log, etc.)
-- Constants (pi, e, etc.)
-"""
 
 from __future__ import annotations
 
@@ -87,16 +79,28 @@ class UnitConverter:
         to_unit = to_unit.lower().strip()
         if from_unit == to_unit:
             return value
-        if from_unit in UnitConverter.LENGTH_TO_METERS and to_unit in UnitConverter.LENGTH_TO_METERS:
+        if (
+            from_unit in UnitConverter.LENGTH_TO_METERS
+            and to_unit in UnitConverter.LENGTH_TO_METERS
+        ):
             meters = value * UnitConverter.LENGTH_TO_METERS[from_unit]
             return meters / UnitConverter.LENGTH_TO_METERS[to_unit]
-        if from_unit in UnitConverter.MASS_TO_KG and to_unit in UnitConverter.MASS_TO_KG:
+        if (
+            from_unit in UnitConverter.MASS_TO_KG
+            and to_unit in UnitConverter.MASS_TO_KG
+        ):
             kg = value * UnitConverter.MASS_TO_KG[from_unit]
             return kg / UnitConverter.MASS_TO_KG[to_unit]
-        if from_unit in UnitConverter.VOLUME_TO_LITERS and to_unit in UnitConverter.VOLUME_TO_LITERS:
+        if (
+            from_unit in UnitConverter.VOLUME_TO_LITERS
+            and to_unit in UnitConverter.VOLUME_TO_LITERS
+        ):
             liters = value * UnitConverter.VOLUME_TO_LITERS[from_unit]
             return liters / UnitConverter.VOLUME_TO_LITERS[to_unit]
-        if from_unit in UnitConverter.TEMP_UNITS and to_unit in UnitConverter.TEMP_UNITS:
+        if (
+            from_unit in UnitConverter.TEMP_UNITS
+            and to_unit in UnitConverter.TEMP_UNITS
+        ):
             return UnitConverter._convert_temperature(value, from_unit, to_unit)
         raise ValueError(f"Cannot convert between {from_unit} and {to_unit}")
 
@@ -179,7 +183,11 @@ class Calculator:
                 try:
                     value = float(value_str)
                     from_unit = tokens[i + 2]
-                    to_unit = tokens[i + 3] if i + 3 < len(tokens) and tokens[i + 3] not in "+-*/%()" else None
+                    to_unit = (
+                        tokens[i + 3]
+                        if i + 3 < len(tokens) and tokens[i + 3] not in "+-*/%()"
+                        else None
+                    )
                     if to_unit:
                         converted = UnitConverter.convert(value, from_unit, to_unit)
                         result.append(str(converted))
@@ -224,9 +232,7 @@ class Calculator:
             return "inf" if result > 0 else "-inf"
         if isinstance(result, float) and result.is_integer():
             return str(int(result))
-        if abs(result) < 1e-10 and result != 0:
-            return f"{result:.10e}"
-        elif abs(result) > 10000000000.0:
+        if abs(result) < 1e-10 and result != 0 or abs(result) > 10000000000.0:
             return f"{result:.10e}"
         else:
             formatted = f"{result:.15f}".rstrip("0").rstrip(".")
@@ -235,9 +241,13 @@ class Calculator:
 
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="qalc", description="Quick command-line calculator with unit conversion support", add_help=True
+        prog="qalc",
+        description="Quick command-line calculator with unit conversion support",
+        add_help=True,
     )
-    parser.add_argument("expression", nargs="*", help="Mathematical expression to evaluate")
+    parser.add_argument(
+        "expression", nargs="*", help="Mathematical expression to evaluate"
+    )
     parser.add_argument(
         "-f",
         "--format",
@@ -245,11 +255,25 @@ def create_parser() -> argparse.ArgumentParser:
         default="auto",
         help="Output format (default: auto)",
     )
-    parser.add_argument("-p", "--precision", type=int, default=15, help="Decimal precision (default: 15)")
     parser.add_argument(
-        "-d", "--degrees", action="store_true", help="Use degrees instead of radians for trig functions"
+        "-p",
+        "--precision",
+        type=int,
+        default=15,
+        help="Decimal precision (default: 15)",
     )
-    parser.add_argument("-i", "--interactive", action="store_true", help="Start interactive calculator mode")
+    parser.add_argument(
+        "-d",
+        "--degrees",
+        action="store_true",
+        help="Use degrees instead of radians for trig functions",
+    )
+    parser.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="Start interactive calculator mode",
+    )
     return parser
 
 

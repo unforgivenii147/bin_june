@@ -24,7 +24,10 @@ def py_to_ipynb(input_file, output_file=None) -> bool:
             i > 0
             and (
                 line.startswith(("def ", "class "))
-                or (line.startswith(("import ", "from ")) and not current_cell[-1].startswith(("import ", "from ")))
+                or (
+                    line.startswith(("import ", "from "))
+                    and not current_cell[-1].startswith(("import ", "from "))
+                )
                 or (
                     line.strip() == ""
                     and current_cell
@@ -56,9 +59,13 @@ def py_to_ipynb(input_file, output_file=None) -> bool:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Convert a Python script to a Jupyter notebook")
+    parser = argparse.ArgumentParser(
+        description="Convert a Python script to a Jupyter notebook"
+    )
     parser.add_argument("input", help="Input Python file (.py)")
-    parser.add_argument("output", nargs="?", help="Output notebook file (.ipynb) (optional)")
+    parser.add_argument(
+        "output", nargs="?", help="Output notebook file (.ipynb) (optional)"
+    )
     parser.add_argument(
         "--no-split",
         action="store_true",

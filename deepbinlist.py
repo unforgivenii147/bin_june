@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Find non-pure Python packages in system site-packages and save list to file.
-"""
 
 from __future__ import annotations
 
@@ -54,7 +51,9 @@ def find_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
         if pkg_path.exists() and pkg_path.is_dir():
             return pkg_path
         for item in site_path.iterdir():
-            if item.is_dir() and item.name.lower().replace("-", "_") == package_name.lower().replace("-", "_"):
+            if item.is_dir() and item.name.lower().replace(
+                "-", "_"
+            ) == package_name.lower().replace("-", "_"):
                 return item
     return None
 
@@ -85,15 +84,21 @@ def check_package(args_tuple: tuple[str, str, list[Path]]) -> tuple[str, str, bo
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Find non-pure Python packages in site-packages")
+    parser = argparse.ArgumentParser(
+        description="Find non-pure Python packages in site-packages"
+    )
     parser.add_argument(
         "-o",
         "--output",
         default="binary_packages.txt",
         help="Output file for package list (default: binary_packages.txt)",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=4, help="Number of parallel jobs (default: 4)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument(
+        "-j", "--jobs", type=int, default=4, help="Number of parallel jobs (default: 4)"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose output"
+    )
     args = parser.parse_args()
     if args.verbose:
         logger.setLevel(logging.DEBUG)
@@ -127,8 +132,7 @@ def main():
     with open(output_path, "w") as f:
         f.write("# Binary (non-pure Python) packages found in site-packages\n")
         f.write("# Format: package_name==version\n\n")
-        for pkg, ver in sorted(binary_packages):
-            f.write(f"{pkg}=={ver}\n")
+        f.writelines(f"{pkg}=={ver}\n" for pkg, ver in sorted(binary_packages))
     logger.info("\n" + "=" * 42)
     logger.info("SUMMARY")
     logger.info("=" * 42)

@@ -14,7 +14,10 @@ from typing import NamedTuple
 try:
     import astor
 except Exception:
-    print("This script requires the 'astor' package. Install with: pip install astor", file=sys.stderr)
+    print(
+        "This script requires the 'astor' package. Install with: pip install astor",
+        file=sys.stderr,
+    )
     sys.exit(2)
 
 
@@ -138,7 +141,12 @@ def process_file(path: Path) -> tuple[str, bool, str | None, RemovalStats]:
     try:
         ast.parse(combined)
     except SyntaxError as exc:
-        return (str(path), False, f"syntax-error-transformed: {exc}", RemovalStats(0, 0))
+        return (
+            str(path),
+            False,
+            f"syntax-error-transformed: {exc}",
+            RemovalStats(0, 0),
+        )
     if combined == original:
         return (str(path), False, None, RemovalStats(0, 0))
     try:
@@ -150,7 +158,9 @@ def process_file(path: Path) -> tuple[str, bool, str | None, RemovalStats]:
     return (str(path), True, None, stats)
 
 
-def reattach_inline_comments(new_source: str, preserved_comments: dict[int, list[str]]) -> str:
+def reattach_inline_comments(
+    new_source: str, preserved_comments: dict[int, list[str]]
+) -> str:
     if not preserved_comments:
         return new_source
     new_lines = new_source.splitlines()
@@ -207,7 +217,9 @@ def collect_py_files(paths: list[Path]) -> list[Path]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Strip docstrings and comments from Python files", prog="strip-py")
+    parser = argparse.ArgumentParser(
+        description="Strip docstrings and comments from Python files", prog="strip-py"
+    )
     parser.add_argument(
         "paths",
         nargs="*",
@@ -250,7 +262,9 @@ def main() -> int:
             print(
                 f"  {Path(path_str).name}: {stats.docstrings_removed} docstring(s), {stats.comments_removed} comment(s)"
             )
-        print(f"\nTotals: {total_docstrings} docstring(s), {total_comments} comment(s) removed\n")
+        print(
+            f"\nTotals: {total_docstrings} docstring(s), {total_comments} comment(s) removed\n"
+        )
     if errors:
         print("Errors:", file=sys.stderr)
         for p, e in sorted(errors):

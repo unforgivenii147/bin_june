@@ -8,7 +8,9 @@ EXT = {".py", ".h", ".c", ".cpp", ".cc", ".cxx", ".hh", ".hpp", ".hxx"}
 
 def get_first_13(path: Path) -> str:
     try:
-        lines = path.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
+        lines = path.read_text(encoding="utf-8", errors="ignore").splitlines(
+            keepends=True
+        )
         return "".join(lines[:23])
     except OSError:
         return ""

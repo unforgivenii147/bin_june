@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of trans_py.py for Python 3.12.
-Translates docstrings and comments in Python files using AST and parallel threads.
-"""
 
 from __future__ import annotations
 

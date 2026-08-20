@@ -54,7 +54,9 @@ def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
                 found_urls.add(url)
                 print(f"  📄 (via Content-Type): {url}")
                 continue
-            if "html" not in content_type and not url.lower().endswith((".html", ".htm")):
+            if "html" not in content_type and not url.lower().endswith(
+                (".html", ".htm")
+            ):
                 continue
             soup = BeautifulSoup(resp.content, "html.parser")
             for a in soup.find_all("a", href=True):
@@ -70,7 +72,14 @@ def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
                 elif full_url not in visited:
                     if not any(
                         full_url.lower().endswith(extension)
-                        for extension in (".jpg", ".jpeg", ".png", ".gif", ".css", ".js")
+                        for extension in (
+                            ".jpg",
+                            ".jpeg",
+                            ".png",
+                            ".gif",
+                            ".css",
+                            ".js",
+                        )
                     ):
                         queue.append(full_url)
         except requests.RequestException as e:

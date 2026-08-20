@@ -13,7 +13,9 @@ WHEELS_OUTPUT_DIR = None
 
 
 def find_dist_info_dir(pkg_dir: Path) -> Path | None:
-    candidates = [p for p in pkg_dir.iterdir() if p.is_dir() and p.name.endswith(".dist-info")]
+    candidates = [
+        p for p in pkg_dir.iterdir() if p.is_dir() and p.name.endswith(".dist-info")
+    ]
     if not candidates:
         return None
     if len(candidates) > 1:
@@ -68,7 +70,9 @@ def main() -> None:
                     create_wheel_for_dir(entry, dest_dir=WHEELS_OUTPUT_DIR)
                     processed_count += 1
                 except Exception as e:
-                    print(f"Critical error while processing {entry}: {e}", file=sys.stderr)
+                    print(
+                        f"Critical error while processing {entry}: {e}", file=sys.stderr
+                    )
     print(f"\nDone. Processed {processed_count} directories.")
 
 

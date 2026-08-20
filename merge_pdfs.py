@@ -17,7 +17,9 @@ def extract_index(filename: str) -> tuple:
 
 def merge_pdfs(input_paths=None, output_file: str = "merged.pdf") -> None:
     if input_paths is None or len(input_paths) == 0:
-        pdf_files = sorted(Path.cwd().glob("*.pdf"), key=lambda p: extract_index(p.name))
+        pdf_files = sorted(
+            Path.cwd().glob("*.pdf"), key=lambda p: extract_index(p.name)
+        )
     else:
         pdf_files = []
         for path in input_paths:

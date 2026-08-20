@@ -1,14 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-unused_imports.py — detect (and optionally fix) unused imports in Python files.
-Supports:
-  • Multiple file(s) and/or directory(s) as input
-  • Recursive directory scanning via pathlib
-  • Parallel processing via multiprocessing
-  • .whl and .tar.zst archive scanning
-  • --autofix with .bak backup
-  • --dry-run and --verbose modes
-"""
 
 from __future__ import annotations
 
@@ -78,7 +68,9 @@ def _collect_all_names(tree: ast.AST) -> set[str]:
                     if isinstance(node.value, (ast.List, ast.Tuple)):
                         names = set()
                         for elt in node.value.elts:
-                            if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                            if isinstance(elt, ast.Constant) and isinstance(
+                                elt.value, str
+                            ):
                                 names.add(elt.value)
                         return names
     return set()
@@ -144,7 +136,11 @@ def analyse_source(source: str, display_path: str) -> FileReport:
             continue
         if _is_under_type_checking(node, tree):
             continue
-        if isinstance(node, ast.ImportFrom) and node.module and _is_module_used_in_docstring(tree, node.module):
+        if (
+            isinstance(node, ast.ImportFrom)
+            and node.module
+            and _is_module_used_in_docstring(tree, node.module)
+        ):
             continue
         unused_names: list[str] = []
         if isinstance(node, ast.Import):
@@ -199,8 +195,7 @@ def _remove_names_from_import(line: str, names_to_remove: set[str]) -> str | Non
         prefix, import_part = stripped.split(" import ", 1)
         if import_part.strip().startswith("("):
             paren_content = import_part.strip()[1:]
-            if paren_content.endswith(")"):
-                paren_content = paren_content[:-1]
+            paren_content = paren_content.removesuffix(")")
             parts = paren_content.split(",")
             is_parenthesized = True
         else:
@@ -294,7 +289,9 @@ def _extract_py_from_tar_zst(archive: Path) -> list[tuple[str, str]]:
                                 f = tf.extractfile(member)
                                 if f:
                                     source = f.read().decode("utf-8", errors="replace")
-                                    results.append((source, f"{archive}::{member.name}"))
+                                    results.append(
+                                        (source, f"{archive}::{member.name}")
+                                    )
                             except Exception:
                                 pass
     except ImportError:
@@ -341,12 +338,20 @@ def print_report(reports: list[FileReport], verbose: bool, use_colour: bool) -> 
         first = True
         for ui in report.unused:
             total += 1
-            label = _coloured(report.path, BOLD, use_colour) if first else " " * len(report.path)
+            label = (
+                _coloured(report.path, BOLD, use_colour)
+                if first
+                else " " * len(report.path)
+            )
             lineno_str = _coloured(f"line {ui.lineno:>4}", CYAN, use_colour)
             stmt_str = _coloured(ui.statement, YELLOW, use_colour)
             names_note = ""
             if len(ui.names) < len(ui.statement.split(",")):
-                names_note = "  [unused: " + _coloured(", ".join(ui.names), RED, use_colour) + "]"
+                names_note = (
+                    "  [unused: "
+                    + _coloured(", ".join(ui.names), RED, use_colour)
+                    + "]"
+                )
             print(f"{label}  -->  {lineno_str}  {stmt_str}{names_note}")
             first = False
     print()
@@ -411,7 +416,9 @@ def run(
 ) -> int:
     use_colour = sys.stdout.isatty()
     file_tasks, source_tasks = collect_tasks(paths, exclude)
-    print(f"  {len(file_tasks)} .py file(s), {len(source_tasks)} archive member(s) queued.\n")
+    print(
+        f"  {len(file_tasks)} .py file(s), {len(source_tasks)} archive member(s) queued.\n"
+    )
     reports: list[FileReport] = []
     with multiprocessing.Pool(processes=workers) as pool:
         if file_tasks:
@@ -498,8 +505,17 @@ Examples:
         action="store_true",
         help="Remove unused imports in-place; creates .bak backups",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be changed without writing files")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print extra progress and per-name details")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be changed without writing files",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print extra progress and per-name details",
+    )
     parser.add_argument(
         "--workers",
         type=int,
@@ -519,7 +535,9 @@ Examples:
         action="store_true",
         help="Ignore __init__.py files (treat imports as used)",
     )
-    parser.add_argument("--no-color", action="store_true", help="Disable colored output")
+    parser.add_argument(
+        "--no-color", action="store_true", help="Disable colored output"
+    )
     return parser
 
 

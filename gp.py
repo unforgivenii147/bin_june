@@ -8,7 +8,9 @@ from pathlib import Path
 try:
     from git import GitCommandError, InvalidGitRepositoryError, Repo
 except ImportError:
-    print("GitPython not found. Install it with: pip install gitpython", file=sys.stderr)
+    print(
+        "GitPython not found. Install it with: pip install gitpython", file=sys.stderr
+    )
     sys.exit(1)
 
 
@@ -43,7 +45,10 @@ def main() -> None:
         commit_msg = f"Auto-commit at {now}"
         repo.index.commit(commit_msg)
         if repo.head.is_detached:
-            print("Error: Could not detect current branch (detached HEAD?).", file=sys.stderr)
+            print(
+                "Error: Could not detect current branch (detached HEAD?).",
+                file=sys.stderr,
+            )
             sys.exit(1)
         branch = repo.active_branch.name
         origin = repo.remote("origin")

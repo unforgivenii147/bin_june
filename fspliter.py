@@ -8,7 +8,9 @@ import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 DEFAULT_MIN_CHARS = 4900
 DEFAULT_MAX_CHARS = 4990
@@ -47,11 +49,15 @@ def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Pat
             if recursive:
                 for ext in TEXT_EXTENSIONS:
                     text_files.extend(path.rglob(f"*{ext}"))
-                text_files.extend([f for f in path.rglob("*") if f.is_file() and f.suffix == ""])
+                text_files.extend(
+                    [f for f in path.rglob("*") if f.is_file() and f.suffix == ""]
+                )
             else:
                 for ext in TEXT_EXTENSIONS:
                     text_files.extend(path.glob(f"*{ext}"))
-                text_files.extend([f for f in path.glob("*") if f.is_file() and f.suffix == ""])
+                text_files.extend(
+                    [f for f in path.glob("*") if f.is_file() and f.suffix == ""]
+                )
     seen = set()
     unique_files = []
     for f in text_files:
@@ -96,7 +102,9 @@ def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
     return parts
 
 
-def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: int) -> tuple[Path, int]:
+def process_file(
+    input_file: Path, output_dir: Path, min_chars: int, max_chars: int
+) -> tuple[Path, int]:
     try:
         try:
             with open(input_file, encoding="utf-8") as f:
@@ -160,7 +168,11 @@ Examples:
         default=os.cpu_count(),
         help=f"Maximum number of parallel workers (default: {os.cpu_count()})",
     )
-    parser.add_argument("--no-recursive", action="store_true", help="Do not search directories recursively")
+    parser.add_argument(
+        "--no-recursive",
+        action="store_true",
+        help="Do not search directories recursively",
+    )
     parser.add_argument(
         "--min-chars",
         type=int,
@@ -184,11 +196,16 @@ Examples:
         return
     logger.info(f"Found {len(text_files)} file(s) to process")
     logger.info(f"Character limits: {args.min_chars}-{args.max_chars} per part")
-    process_args = [(file_path, args.output, args.min_chars, args.max_chars) for file_path in text_files]
+    process_args = [
+        (file_path, args.output, args.min_chars, args.max_chars)
+        for file_path in text_files
+    ]
     total_parts = 0
     processed_files = 0
     with ProcessPoolExecutor(max_workers=args.max_workers) as executor:
-        future_to_file = {executor.submit(process_file_wrapper, arg): arg[0] for arg in process_args}
+        future_to_file = {
+            executor.submit(process_file_wrapper, arg): arg[0] for arg in process_args
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -197,7 +214,9 @@ Examples:
                 processed_files += 1
             except Exception as e:
                 logger.error(f"Failed to process {file_path}: {e}")
-    logger.info(f"Processing complete: {processed_files} files split into {total_parts} parts")
+    logger.info(
+        f"Processing complete: {processed_files} files split into {total_parts} parts"
+    )
     logger.info(f"Output directory: {args.output.absolute()}")
 
 

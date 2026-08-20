@@ -59,7 +59,7 @@ def main() -> None:
             importz.append(extract_imports_from_py(contents))
     with Path("importz.txt").open("w", encoding="utf-8") as fo:
         for im in importz:
-            fo.writelines((str(k) + "\n" for k in im))
+            fo.writelines(str(k) + "\n" for k in im)
 
 
 if __name__ == "__main__":

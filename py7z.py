@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Compress/decompress files using pylzma with parallel processing."""
 
 from __future__ import annotations
 
@@ -34,7 +33,9 @@ def _compress(src: Path, keep: bool) -> str:
             compressed_size = dst.stat().st_size
             if not keep:
                 shutil.rmtree(src)
-            ratio = (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            ratio = (
+                (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            )
             space_freed = original_size - compressed_size
             return (
                 f"Compressed {src} -> {dst}\n"
@@ -51,7 +52,9 @@ def _compress(src: Path, keep: bool) -> str:
             compressed_size = dst.stat().st_size
             if not keep:
                 src.unlink()
-            ratio = (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            ratio = (
+                (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            )
             space_freed = original_size - compressed_size
             return (
                 f"Compressed {src} -> {dst}\n"
@@ -211,7 +214,7 @@ def main() -> None:
             total_ratio = (1 - total_compressed / total_original) * 100
             total_freed = total_original - total_compressed
             print(f"\n{'=' * 42}")
-            print(f"SUMMARY:")
+            print("SUMMARY:")
             print(f"  Total original size: {fsz(total_original)}")
             print(f"  Total compressed size: {fsz(total_compressed)}")
             print(f"  Overall compression ratio: {total_ratio:.1f}%")
@@ -226,7 +229,7 @@ def main() -> None:
             total_decompressed += gsz(dst)
         total_space_used = total_decompressed - total_original
         print(f"\n{'=' * 42}")
-        print(f"SUMMARY:")
+        print("SUMMARY:")
         print(f"  Total compressed size: {fsz(total_original)}")
         print(f"  Total decompressed size: {fsz(total_decompressed)}")
         print(f"  Total space used: {fsz(total_space_used)}")

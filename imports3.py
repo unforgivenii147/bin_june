@@ -1,14 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Generate requirements.txt by inspecting Python files recursively.
-Supports:
-- Python files without extensions
-- Compressed files (.zip, .whl, .tar.gz, .tar.xz, .tar.zst)
-- Multiprocessing for speedup
-- Excludes built-in/stdlib modules
-- Excludes local imports
-- Works offline using pip package list
-"""
 
 from __future__ import annotations
 
@@ -317,8 +307,12 @@ def extract_from_zip(zip_path: str) -> set[str]:
             for file_info in zf.filelist:
                 if file_info.filename.endswith(".py"):
                     try:
-                        content = zf.read(file_info.filename).decode("utf-8", errors="ignore")
-                        imports.update(extract_imports_from_code(content, file_info.filename))
+                        content = zf.read(file_info.filename).decode(
+                            "utf-8", errors="ignore"
+                        )
+                        imports.update(
+                            extract_imports_from_code(content, file_info.filename)
+                        )
                     except Exception:
                         pass
     except Exception:
@@ -337,7 +331,9 @@ def extract_from_tar(tar_path: str, compression: str | None = None) -> set[str]:
                         f = tf.extractfile(member)
                         if f:
                             content = f.read().decode("utf-8", errors="ignore")
-                            imports.update(extract_imports_from_code(content, member.name))
+                            imports.update(
+                                extract_imports_from_code(content, member.name)
+                            )
                     except Exception:
                         pass
     except Exception:
@@ -368,20 +364,33 @@ def process_file(file_path: str) -> set[str]:
 
 def collect_files(root_dir: str, exclude_dirs: list[str] | None = None) -> list[str]:
     if exclude_dirs is None:
-        exclude_dirs = {".venv", "venv", ".env", "__pycache__", ".git", "node_modules", ".egg-info"}
+        exclude_dirs = {
+            ".venv",
+            "venv",
+            ".env",
+            "__pycache__",
+            ".git",
+            "node_modules",
+            ".egg-info",
+        }
     files = []
     for root, dirs, filenames in os.walk(root_dir):
         dirs[:] = [d for d in dirs if d not in exclude_dirs]
         for filename in filenames:
             file_path = os.path.join(root, filename)
-            if is_python_file(file_path):
-                files.append(file_path)
-            elif filename.endswith((".zip", ".whl", ".tar.gz", ".tar.xz", ".tar.zst", ".tar")):
+            if is_python_file(file_path) or filename.endswith(
+                (".zip", ".whl", ".tar.gz", ".tar.xz", ".tar.zst", ".tar")
+            ):
                 files.append(file_path)
     return files
 
 
-def filter_packages(imports: set[str], stdlib: set[str], pip_cache: PIPPackageCache, local_files: set[str]) -> set[str]:
+def filter_packages(
+    imports: set[str],
+    stdlib: set[str],
+    pip_cache: PIPPackageCache,
+    local_files: set[str],
+) -> set[str]:
     filtered = set()
     for package in imports:
         pkg_lower = package.lower()
@@ -396,8 +405,15 @@ def filter_packages(imports: set[str], stdlib: set[str], pip_cache: PIPPackageCa
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate requirements.txt by inspecting Python files recursively")
-    parser.add_argument("-d", "--directory", default=".", help="Root directory to scan (default: current directory)")
+    parser = argparse.ArgumentParser(
+        description="Generate requirements.txt by inspecting Python files recursively"
+    )
+    parser.add_argument(
+        "-d",
+        "--directory",
+        default=".",
+        help="Root directory to scan (default: current directory)",
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -414,7 +430,15 @@ def main():
         "-e",
         "--exclude",
         nargs="+",
-        default=[".venv", "venv", ".env", "__pycache__", ".git", "node_modules", ".egg-info"],
+        default=[
+            ".venv",
+            "venv",
+            ".env",
+            "__pycache__",
+            ".git",
+            "node_modules",
+            ".egg-info",
+        ],
         help="Directories to exclude from scan",
     )
     parser.add_argument(

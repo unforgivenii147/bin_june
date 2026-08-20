@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Non-English text detector for files.
-Recursively scans directories for text files and identifies non-English lines
-using high-confidence language detection with parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -13,21 +8,22 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 try:
     from langdet import LanguageDetector
 except ImportError:
-    print("Error: langdetect package not found. Install with: pip install langdetect-hc")
+    print(
+        "Error: langdetect package not found. Install with: pip install langdetect-hc"
+    )
     sys.exit(1)
 
 
 @dataclass
 class DetectionResult:
     file_path: Path
-    non_english_lines: List[Dict] = field(default_factory=list)
+    non_english_lines: list[dict] = field(default_factory=list)
     total_lines: int = 0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -145,7 +141,9 @@ class ScanConfig:
 class NonEnglishDetector:
     def __init__(self, config: ScanConfig):
         self.config = config
-        self.detector = LanguageDetector(confidence_threshold=config.confidence_threshold)
+        self.detector = LanguageDetector(
+            confidence_threshold=config.confidence_threshold
+        )
 
     def is_text_file(self, file_path: Path) -> bool:
         if file_path.suffix.lower() in self.config.text_extensions:
@@ -233,8 +231,14 @@ class NonEnglishDetector:
             return True
         return False
 
-    def read_file_lines(self, file_path: Path) -> Optional[List[str]]:
-        encodings = [self.config.encoding, "latin-1", "cp1252", "iso-8859-1", "utf-8-sig"]
+    def read_file_lines(self, file_path: Path) -> list[str] | None:
+        encodings = [
+            self.config.encoding,
+            "latin-1",
+            "cp1252",
+            "iso-8859-1",
+            "utf-8-sig",
+        ]
         for encoding in encodings:
             try:
                 with open(file_path, "r", encoding=encoding, errors="ignore") as f:
@@ -243,7 +247,7 @@ class NonEnglishDetector:
                 continue
         return None
 
-    def filter_lines(self, lines: List[str]) -> List[Tuple[int, str]]:
+    def filter_lines(self, lines: list[str]) -> list[tuple[int, str]]:
         filtered = []
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
@@ -338,7 +342,9 @@ class NonEnglishDetector:
             for i in range(0, len(candidates), self.config.batch_size):
                 batch = candidates[i : i + self.config.batch_size]
                 batch_texts = [text for _, text in batch]
-                detections = self.detector.detect_batch(batch_texts, min_confidence=self.config.confidence_threshold)
+                detections = self.detector.detect_batch(
+                    batch_texts, min_confidence=self.config.confidence_threshold
+                )
                 for (line_num, text), detection in zip(batch, detections, strict=False):
                     if detection["language"] is None:
                         result.non_english_lines.append(
@@ -362,19 +368,25 @@ class NonEnglishDetector:
             result.error = f"Error processing file: {e!s}"
         return result
 
-    def scan_directory(self, root_dir: Path = Path(".")) -> List[DetectionResult]:
+    def scan_directory(self, root_dir: Path = Path(".")) -> list[DetectionResult]:
         results = []
         file_paths = []
         print(f"Scanning directory: {root_dir.absolute()}")
         for file_path in root_dir.rglob("*"):
-            if file_path.is_file() and self.is_text_file(file_path) and not self.should_ignore(file_path):
+            if (
+                file_path.is_file()
+                and self.is_text_file(file_path)
+                and not self.should_ignore(file_path)
+            ):
                 file_paths.append(file_path)
         print(f"Found {len(file_paths)} text files to process")
         if not file_paths:
             return results
         num_workers = max(1, mp.cpu_count() - 1)
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
-            future_to_path = {executor.submit(self.process_file, path): path for path in file_paths}
+            future_to_path = {
+                executor.submit(self.process_file, path): path for path in file_paths
+            }
             completed = 0
             total = len(file_paths)
             for future in as_completed(future_to_path):
@@ -389,12 +401,16 @@ class NonEnglishDetector:
                             f"{len(result.non_english_lines)} non-English lines"
                         )
                     else:
-                        print(f"[{completed}/{total}] ✓ {file_path.relative_to(root_dir)}")
+                        print(
+                            f"[{completed}/{total}] ✓ {file_path.relative_to(root_dir)}"
+                        )
                 except Exception as e:
-                    print(f"[{completed}/{total}] ✗ {file_path.relative_to(root_dir)}: {e!s}")
+                    print(
+                        f"[{completed}/{total}] ✗ {file_path.relative_to(root_dir)}: {e!s}"
+                    )
         return results
 
-    def save_results(self, results: List[DetectionResult], output_file: Path):
+    def save_results(self, results: list[DetectionResult], output_file: Path):
         with open(output_file, "w", encoding="utf-8") as f:
             f.write("Non-English Content Detection Results\n")
             f.write("=" * 42 + "\n")
@@ -410,7 +426,9 @@ class NonEnglishDetector:
             f.write(f"Files with non-English content: {files_with_non_english}\n")
             f.write(f"Total non-English lines found: {total_non_english_lines}\n")
             f.write("=" * 42 + "\n\n")
-            for result in sorted(results, key=lambda r: len(r.non_english_lines), reverse=True):
+            for result in sorted(
+                results, key=lambda r: len(r.non_english_lines), reverse=True
+            ):
                 if not result.non_english_lines and not result.error:
                     continue
                 f.write(f"\n{'=' * 42}\n")
@@ -450,16 +468,44 @@ Examples:
   %(prog)s . --output custom_report.txt
         """,
     )
-    parser.add_argument("directory", nargs="?", default=".", help="Root directory to scan (default: current directory)")
     parser.add_argument(
-        "--confidence", "-c", type=float, default=0.85, help="Minimum confidence threshold (default: 0.85)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory to scan (default: current directory)",
     )
-    parser.add_argument("--output", "-o", default="noneng.txt", help="Output file path (default: noneng.txt)")
-    parser.add_argument("--min-length", type=int, default=10, help="Minimum line length to check (default: 10)")
-    parser.add_argument("--extensions", nargs="+", help="Additional file extensions to scan")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed progress for each file")
+    parser.add_argument(
+        "--confidence",
+        "-c",
+        type=float,
+        default=0.85,
+        help="Minimum confidence threshold (default: 0.85)",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        default="noneng.txt",
+        help="Output file path (default: noneng.txt)",
+    )
+    parser.add_argument(
+        "--min-length",
+        type=int,
+        default=10,
+        help="Minimum line length to check (default: 10)",
+    )
+    parser.add_argument(
+        "--extensions", nargs="+", help="Additional file extensions to scan"
+    )
+    parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show detailed progress for each file",
+    )
     args = parser.parse_args()
-    config = ScanConfig(confidence_threshold=args.confidence, min_line_length=args.min_length)
+    config = ScanConfig(
+        confidence_threshold=args.confidence, min_line_length=args.min_length
+    )
     if args.extensions:
         config.text_extensions.update(args.extensions)
     start_time = time.time()

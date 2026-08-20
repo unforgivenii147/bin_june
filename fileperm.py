@@ -116,7 +116,9 @@ def apply_changes(stats, dry_run=False):
     print(f"\nApplying changes to {len(changes)} files...")
     success = 0
     failed = 0
-    for filepath, _current, target in tqdm(changes, desc="Changing permissions", unit="files"):
+    for filepath, _current, target in tqdm(
+        changes, desc="Changing permissions", unit="files"
+    ):
         if process_file(filepath, target, dry_run):
             success += 1
         else:
@@ -169,13 +171,22 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"\nRules:\n  - Files that are already executable: no changes\n  - Files with shebang (#!) or in 'bin' directory: set to 0755\n  - All other files: set to 0644\n\nSkipped directories: {', '.join(sorted(SKIP_DIRS))}\n\nExamples:\n  %(prog)s                    # Process current directory\n  %(prog)s /path/to/project   # Process specific path\n  %(prog)s . --dry-run        # Preview changes\n  %(prog)s . --show-examples  # Show examples of changes\n        ",
     )
-    parser.add_argument("path", nargs="?", default=".", help="Root path to start from (default: current directory)")
+    parser.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Root path to start from (default: current directory)",
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Show what would be done without actually changing permissions",
     )
-    parser.add_argument("--show-examples", action="store_true", help="Show example files that would be changed")
+    parser.add_argument(
+        "--show-examples",
+        action="store_true",
+        help="Show example files that would be changed",
+    )
     args = parser.parse_args()
     print(f"Skip directories: {', '.join(sorted(SKIP_DIRS))}")
     if args.dry_run:

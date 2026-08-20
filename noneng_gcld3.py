@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Find non-English lines in text files recursively using Google's Compact Language Detector v3 (gcld3).
-Uses parallel processing for faster execution.
-"""
 
 from __future__ import annotations
 
@@ -116,13 +112,31 @@ def find_text_files(root_dir=".", extensions=TEXT_EXTENSIONS):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Find non-English lines in text files using gcld3")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("-o", "--output", default="noneng.txt", help="Output report file (default: noneng.txt)")
-    parser.add_argument(
-        "-w", "--workers", type=int, default=cpu_count(), help=f"Number of parallel workers (default: {cpu_count()})"
+    parser = argparse.ArgumentParser(
+        description="Find non-English lines in text files using gcld3"
     )
-    parser.add_argument("--extensions", nargs="+", help="Additional file extensions to scan")
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="noneng.txt",
+        help="Output report file (default: noneng.txt)",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of parallel workers (default: {cpu_count()})",
+    )
+    parser.add_argument(
+        "--extensions", nargs="+", help="Additional file extensions to scan"
+    )
     args = parser.parse_args()
     extensions = TEXT_EXTENSIONS
     if args.extensions:
@@ -136,7 +150,9 @@ def main():
     total_non_eng_lines = 0
     print(f"Processing files using {args.workers} workers...")
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        future_to_file = {executor.submit(process_file, file): file for file in text_files}
+        future_to_file = {
+            executor.submit(process_file, file): file for file in text_files
+        }
         completed = 0
         for future in as_completed(future_to_file):
             completed += 1
@@ -178,7 +194,7 @@ def main():
             for file_path, error in errors:
                 f.write(f"  {file_path}: {error}\n")
     print(f"\n{'=' * 42}")
-    print(f"Scan complete!")
+    print("Scan complete!")
     print(f"Files scanned: {len(text_files)}")
     print(f"Files with non-English content: {files_with_findings}")
     print(f"Total non-English lines found: {total_non_eng_lines}")

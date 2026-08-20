@@ -91,7 +91,11 @@ def extract_burned_subs_ocr(
     print(f"[2/3] Running OCR with {workers} worker(s)…")
     with multiprocessing.Pool(processes=4) as pool:
         results: list[tuple[float, str]] = pool.map(worker_fn, frames)
-    subtitles = [{"start": t, "end": t + 1.0 / sample_fps, "text": txt} for t, txt in results if txt]
+    subtitles = [
+        {"start": t, "end": t + 1.0 / sample_fps, "text": txt}
+        for t, txt in results
+        if txt
+    ]
     subtitles.sort(key=lambda s: s["start"])
     subtitles = _merge_subtitles(subtitles)
     print(f"[3/3] Writing {len(subtitles)} subtitle(s) → {output_srt_path}")
@@ -113,7 +117,9 @@ def format_time(seconds: float) -> str:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python script.py &lt;video&gt; [output.srt] [sample_fps] [workers]")
+        print(
+            "Usage: python script.py &lt;video&gt; [output.srt] [sample_fps] [workers]"
+        )
         sys.exit(1)
     video = sys.argv[1]
     output = sys.argv[2] if len(sys.argv) > 2 else "extracted_subs.srt"

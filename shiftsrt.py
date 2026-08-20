@@ -25,6 +25,7 @@ def from_ms(ms: int) -> str:
 
 
 def shift_content(text: str, shift_ms: int) -> str:
+
     def repl(m) -> str:
         a, b = m.groups()
         return f"{from_ms(to_ms(a) + shift_ms)} --> {from_ms(to_ms(b) + shift_ms)}"
@@ -34,7 +35,9 @@ def shift_content(text: str, shift_ms: int) -> str:
 
 def process_file(path: Path, shift_ms: int) -> None:
     path = Path(path)
-    path.write_text(shift_content(path.read_text(encoding="utf-8"), shift_ms), encoding="utf-8")
+    path.write_text(
+        shift_content(path.read_text(encoding="utf-8"), shift_ms), encoding="utf-8"
+    )
     print(f"✔ {path}")
 
 
@@ -44,7 +47,9 @@ def main() -> None:
     if raw and raw[0] in {"+", "-"}:
         force_shift = ONE_SEC_MS if raw[0] == "+" else -ONE_SEC_MS
         raw = raw[1:]
-    ap = argparse.ArgumentParser(description="Shift SRT subtitles inplace (batch supported)")
+    ap = argparse.ArgumentParser(
+        description="Shift SRT subtitles inplace (batch supported)"
+    )
     ap.add_argument("path", nargs="?", default=".")
     ap.add_argument("-r", "--recursive", action="store_true")
     ap.add_argument("-s", "--shift", type=float, default=0.0)

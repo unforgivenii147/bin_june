@@ -58,14 +58,21 @@ def process_file(filepath, autofix=False):
         if misspelled_count == 0:
             print("No misspelled words found.")
         else:
-            print(f"\nFound {misspelled_count} misspelled word(s). Run with -a to autofix.")
+            print(
+                f"\nFound {misspelled_count} misspelled word(s). Run with -a to autofix."
+            )
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Detect and optionally autofix misspelled words in a file.")
+    parser = argparse.ArgumentParser(
+        description="Detect and optionally autofix misspelled words in a file."
+    )
     parser.add_argument("file", help="Path to the text file to check")
     parser.add_argument(
-        "-a", "--autofix", action="store_true", help="Automatically correct misspelled words in the file"
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Automatically correct misspelled words in the file",
     )
     args = parser.parse_args()
     process_file(args.file, args.autofix)

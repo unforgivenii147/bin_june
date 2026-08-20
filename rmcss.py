@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove HTML comments (<!-- ... -->) from HTML and CSS files recursively.
-Processes files in parallel and updates them in-place.
-"""
 
 from __future__ import annotations
 
@@ -44,8 +40,15 @@ def find_files(directory, extensions=None):
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Remove HTML comments from HTML and CSS files recursively.")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to process (default: current directory)")
+    parser = argparse.ArgumentParser(
+        description="Remove HTML comments from HTML and CSS files recursively."
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to process (default: current directory)",
+    )
     parser.add_argument(
         "-e",
         "--extensions",
@@ -54,10 +57,17 @@ def main():
         help="File extensions to process (default: .html .htm .css)",
     )
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)"
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count)",
     )
     args = parser.parse_args()
-    extensions = {ext.lower() if ext.startswith(".") else f".{ext.lower()}" for ext in args.extensions}
+    extensions = {
+        ext.lower() if ext.startswith(".") else f".{ext.lower()}"
+        for ext in args.extensions
+    }
     try:
         files = list(find_files(args.directory, extensions))
         if not files:
@@ -69,7 +79,10 @@ def main():
         updated_count = 0
         error_count = 0
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
-            future_to_file = {executor.submit(remove_comments_from_file, file_path): file_path for file_path in files}
+            future_to_file = {
+                executor.submit(remove_comments_from_file, file_path): file_path
+                for file_path in files
+            }
             for future in as_completed(future_to_file):
                 file_path, was_updated, error = future.result()
                 rel_path = file_path.relative_to(args.directory)

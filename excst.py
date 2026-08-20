@@ -35,7 +35,9 @@ class TopLevelExtractor(cst.CSTVisitor):
         self.constants: dict[str, str] = {}
         self.imports: set[str] = set()
 
-    def save_to_file(self, directory: Path, filename: str, content: str, node_name: str) -> None:
+    def save_to_file(
+        self, directory: Path, filename: str, content: str, node_name: str
+    ) -> None:
         if not content.strip().endswith("\n"):
             content += "\n\n"
         if not content.startswith(("#!", "# -*-", '"""')):
@@ -44,7 +46,9 @@ class TopLevelExtractor(cst.CSTVisitor):
         if content.startswith('"""'):
             parts = content.split('"""', 2)
             if len(parts) >= 3:
-                content = '"""'.join([parts[0], parts[1], source_comment + '"""' + parts[2]])
+                content = '"""'.join(
+                    [parts[0], parts[1], source_comment + '"""' + parts[2]]
+                )
         else:
             content = source_comment + content
         if validate_python_code(content, node_name):
@@ -71,7 +75,9 @@ class TopLevelExtractor(cst.CSTVisitor):
         try:
             code = cst.Module([node]).code.strip()
             self.functions[node.name.value] = code
-            self.save_to_file(FUNCTIONS_DIR, node.name.value, code, f"function_{node.name.value}")
+            self.save_to_file(
+                FUNCTIONS_DIR, node.name.value, code, f"function_{node.name.value}"
+            )
         except Exception as e:
             print(f"Error extracting function {node.name.value}: {e}")
 
@@ -81,7 +87,9 @@ class TopLevelExtractor(cst.CSTVisitor):
         try:
             code = cst.Module([node]).code.strip()
             self.classes[node.name.value] = code
-            self.save_to_file(CLASSES_DIR, node.name.value, code, f"class_{node.name.value}")
+            self.save_to_file(
+                CLASSES_DIR, node.name.value, code, f"class_{node.name.value}"
+            )
         except Exception as e:
             print(f"Error extracting class {node.name.value}: {e}")
 
@@ -97,14 +105,19 @@ class TopLevelExtractor(cst.CSTVisitor):
                     constant_code = cst.Module([node]).code.strip()
                     if validate_python_code(constant_code, f"constant_{name}"):
                         self.constants[name] = constant_code
-                        self.save_to_file(CONSTANTS_DIR, name, constant_code, f"constant_{name}")
+                        self.save_to_file(
+                            CONSTANTS_DIR, name, constant_code, f"constant_{name}"
+                        )
         except Exception as e:
             print(f"Error extracting constant: {e}")
 
     def _is_top_level(self, node) -> bool:
         current = node
         while hasattr(current, "parent") and current.parent:
-            if isinstance(current.parent, (cst.FunctionDef, cst.ClassDef, cst.If, cst.For, cst.While, cst.With)):
+            if isinstance(
+                current.parent,
+                (cst.FunctionDef, cst.ClassDef, cst.If, cst.For, cst.While, cst.With),
+            ):
                 return False
             current = current.parent
         return True
@@ -133,7 +146,8 @@ def collect_python_files(root_dir: Path = Path(".")) -> list[Path]:
     return [
         p
         for p in root_dir.rglob("*.py")
-        if not any(part.startswith(".") or part == "__pycache__" for part in p.parts) and p.name != Path(__file__).name
+        if not any(part.startswith(".") or part == "__pycache__" for part in p.parts)
+        and p.name != Path(__file__).name
     ]
 
 
@@ -164,7 +178,10 @@ def main() -> None:
     error_files = []
     max_workers = min(os.cpu_count() or 1, len(python_files))
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(process_file, filepath): filepath for filepath in python_files}
+        future_to_file = {
+            executor.submit(process_file, filepath): filepath
+            for filepath in python_files
+        }
         try:
             for future in as_completed(future_to_file):
                 filepath = future_to_file[future]
@@ -176,10 +193,14 @@ def main() -> None:
                         total_classes += len(result["classes"])
                         total_constants += len(result["constants"])
                         all_imports.update(result["imports"])
-                        print(f"✓ Processed [{processed_files}/{len(python_files)}]: {result['filepath']}")
+                        print(
+                            f"✓ Processed [{processed_files}/{len(python_files)}]: {result['filepath']}"
+                        )
                     else:
                         error_files.append((result["filepath"], result.get("error")))
-                        print(f"✗ Error processing {result['filepath']}: {result.get('error')}")
+                        print(
+                            f"✗ Error processing {result['filepath']}: {result.get('error')}"
+                        )
                 except Exception as e:
                     error_files.append((str(filepath), str(e)))
                     print(f"✗ Unexpected error processing {filepath}: {e}")
@@ -190,7 +211,9 @@ def main() -> None:
         write_imports_file(all_imports)
     print("\n" + "=" * 42)
     print(f"Extraction Complete!\nFiles: {processed_files}/{len(python_files)}")
-    print(f"Functions: {total_functions} | Classes: {total_classes} | Constants: {total_constants}")
+    print(
+        f"Functions: {total_functions} | Classes: {total_classes} | Constants: {total_constants}"
+    )
     print("-" * 42)
 
 

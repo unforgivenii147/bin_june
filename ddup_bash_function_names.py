@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Check for duplicate function names in bash functions file.
-"""
 
 from __future__ import annotations
 
@@ -56,7 +53,9 @@ def display_results(functions, duplicates, filepath: Path) -> bool:
     for dup_name, count in sorted(duplicates.items()):
         print(f"\n📌 Duplicate function: '{dup_name}' (defined {count} times)")
         print("-" * 42)
-        occurrences = [(line_num, line) for name, line_num, line in functions if name == dup_name]
+        occurrences = [
+            (line_num, line) for name, line_num, line in functions if name == dup_name
+        ]
         for idx, (line_num, line) in enumerate(occurrences, 1):
             print(f"  {idx}. Line {line_num}: {line}")
     print("\n" + "=" * 42)
@@ -99,15 +98,21 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
     print("   2. Decide which definition(s) to keep")
     print("   3. Remove or comment out the duplicate definitions")
     print(f"   4. Edit the file: {filepath}")
-    print("\n   Tip: Use 'keep' to mark a definition to keep, 'remove' to mark for deletion")
+    print(
+        "\n   Tip: Use 'keep' to mark a definition to keep, 'remove' to mark for deletion"
+    )
     decisions = {}
     for dup_name in duplicates:
         print(f"\n   --- Function: {dup_name} ---")
-        occurrences = [(line_num, line) for name, line_num, line in functions if name == dup_name]
+        occurrences = [
+            (line_num, line) for name, line_num, line in functions if name == dup_name
+        ]
         for idx, (line_num, line) in enumerate(occurrences, 1):
             print(f"   {idx}. Line {line_num}: {line[:80]}")
         while True:
-            choice = input(f"   Which one to keep? (1-{len(occurrences)} or 'skip'): ").strip()
+            choice = input(
+                f"   Which one to keep? (1-{len(occurrences)} or 'skip'): "
+            ).strip()
             if choice.lower() == "skip":
                 decisions[dup_name] = None
                 break
@@ -115,8 +120,12 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
                 keep_idx = int(choice) - 1
                 if 0 <= keep_idx < len(occurrences):
                     decisions[dup_name] = occurrences[keep_idx][0]
-                    to_remove = [occ[0] for i, occ in enumerate(occurrences) if i != keep_idx]
-                    print(f"   ✓ Will keep line {occurrences[keep_idx][0]}, remove lines: {to_remove}")
+                    to_remove = [
+                        occ[0] for i, occ in enumerate(occurrences) if i != keep_idx
+                    ]
+                    print(
+                        f"   ✓ Will keep line {occurrences[keep_idx][0]}, remove lines: {to_remove}"
+                    )
                     break
                 else:
                     print(f"   Invalid choice. Enter 1-{len(occurrences)} or 'skip'")

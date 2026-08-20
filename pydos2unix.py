@@ -1,16 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-A Linux dos2unix command implementation in Python.
-Converts DOS/Windows line endings (CRLF) to Unix line endings (LF).
-Features:
-- Uses pathlib for cross-platform path handling
-- Parallel processing for memory efficiency
-- In-place file updates
-- Accepts multiple files/folders as input
-- Processes current directory recursively if no input is given
-- Memory-optimized chunk-based reading/writing
-- Automatically skips binary files and common directories
-"""
 
 from __future__ import annotations
 
@@ -26,7 +14,15 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 CHUNK_SIZE = 8192
 BINARY_EXTENSIONS = BIN_EXT
-SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".coverage", ".egg-info", ".idea"}
+SKIP_DIRS = {
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".coverage",
+    ".egg-info",
+    ".idea",
+}
 TEXT_EXTENSIONS = TXT_EXT
 
 
@@ -40,7 +36,14 @@ def is_text_file(file_path: Path) -> bool:
     if file_path.suffix.lower() in TEXT_EXTENSIONS:
         return True
     name_lower = file_path.name.lower()
-    if name_lower in {"makefile", "dockerfile", "dockerfile.prod", "dockerfile.dev", "gemfile", "rakefile"}:
+    if name_lower in {
+        "makefile",
+        "dockerfile",
+        "dockerfile.prod",
+        "dockerfile.dev",
+        "gemfile",
+        "rakefile",
+    }:
         return True
     try:
         with open(file_path, "rb") as f:
@@ -123,12 +126,27 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="\nExamples:\n  %(prog)s file.txt\n  %(prog)s file1.txt file2.txt file3.txt\n  %(prog)s /path/to/folder\n  %(prog)s /path/to/folder file.txt\n  %(prog)s                    # Process current directory recursively\n\nSkip Directories: .git, __pycache__, .venv, venv, node_modules, .env, \n                  .pytest_cache, .tox, .mypy_cache, .coverage, dist, build\n        ",
     )
-    parser.add_argument("paths", nargs="*", help="Files or folders to process (default: current directory)")
     parser.add_argument(
-        "-j", "--jobs", type=int, default=cpu_count(), help=f"Number of parallel jobs (default: {cpu_count()})"
+        "paths",
+        nargs="*",
+        help="Files or folders to process (default: current directory)",
     )
-    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress output messages")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed output for each file")
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of parallel jobs (default: {cpu_count()})",
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress output messages"
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show detailed output for each file",
+    )
     args = parser.parse_args()
     input_paths = get_input_paths(args.paths if args.paths else None)
     if not input_paths:
@@ -140,7 +158,9 @@ def main():
             logger.info("No text files found to process")
         return 0
     if not args.quiet and (not args.verbose):
-        logger.info(f"Processing {len(files_to_process)} file(s) with {args.jobs} worker(s)...")
+        logger.info(
+            f"Processing {len(files_to_process)} file(s) with {args.jobs} worker(s)..."
+        )
     converted_count = 0
     skipped_count = 0
     error_count = 0

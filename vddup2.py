@@ -43,9 +43,15 @@ def find_repeated_definitions(file_paths):
         for const in constants:
             definition_counts["constants"][const] += 1
     repeated_definitions = {
-        "functions": [name for name, count in definition_counts["functions"].items() if count > 1],
-        "classes": [name for name, count in definition_counts["classes"].items() if count > 1],
-        "constants": [name for name, count in definition_counts["constants"].items() if count > 1],
+        "functions": [
+            name for name, count in definition_counts["functions"].items() if count > 1
+        ],
+        "classes": [
+            name for name, count in definition_counts["classes"].items() if count > 1
+        ],
+        "constants": [
+            name for name, count in definition_counts["constants"].items() if count > 1
+        ],
     }
     return repeated_definitions
 
@@ -65,19 +71,28 @@ def process_file(file_path, repeated_definitions, move) -> None:
         lines = file.readlines()
     new_lines = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name in repeated_definitions["functions"]:
+        if (
+            isinstance(node, ast.FunctionDef)
+            and node.name in repeated_definitions["functions"]
+        ):
             func_code = "".join(lines[node.lineno - 1 : node.end_lineno])
             write_to_file("func.py", func_code)
             if move:
                 continue
-        elif isinstance(node, ast.ClassDef) and node.name in repeated_definitions["classes"]:
+        elif (
+            isinstance(node, ast.ClassDef)
+            and node.name in repeated_definitions["classes"]
+        ):
             class_code = "".join(lines[node.lineno - 1 : node.end_lineno])
             write_to_file("class.py", class_code)
             if move:
                 continue
         elif isinstance(node, ast.Assign):
             for target in node.targets:
-                if isinstance(target, ast.Name) and target.id in repeated_definitions["constants"]:
+                if (
+                    isinstance(target, ast.Name)
+                    and target.id in repeated_definitions["constants"]
+                ):
                     const_code = "".join(lines[node.lineno - 1 : node.end_lineno])
                     write_to_file("const.py", const_code)
                     if move:
@@ -92,8 +107,12 @@ def process_file(file_path, repeated_definitions, move) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Inspect Python files and copy/move repeated definitions.")
-    parser.add_argument("-m", "--move", action="store_true", help="Move definitions instead of copying")
+    parser = argparse.ArgumentParser(
+        description="Inspect Python files and copy/move repeated definitions."
+    )
+    parser.add_argument(
+        "-m", "--move", action="store_true", help="Move definitions instead of copying"
+    )
     args = parser.parse_args()
     python_files = []
     for root, _, files in os.walk("."):
@@ -104,7 +123,10 @@ def main() -> None:
     with Pool(cpu_count()) as pool:
         pool.starmap(
             process_file,
-            [(file_path, repeated_definitions, args.move) for file_path in python_files],
+            [
+                (file_path, repeated_definitions, args.move)
+                for file_path in python_files
+            ],
         )
 
 

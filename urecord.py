@@ -41,7 +41,9 @@ def update_record_file(record_path: Path) -> bool:
         with record_path.open("w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(filtered_lines)
-        print(f"  Updated: {record_path} (removed {original_count - len(filtered_lines)} entries)")
+        print(
+            f"  Updated: {record_path} (removed {original_count - len(filtered_lines)} entries)"
+        )
         return True
     except Exception as e:
         print(f"  Error processing {record_path}: {e}", file=sys.stderr)
@@ -72,7 +74,9 @@ def main() -> None:
         action="append",
         help="Specific site-packages directory to scan (can be used multiple times)",
     )
-    parser.add_argument("--verbose", "-v", action="store_true", help="Print more detailed information")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Print more detailed information"
+    )
     args = parser.parse_args()
     site_dirs = args.site_dir or find_site_packages()
     if not site_dirs:

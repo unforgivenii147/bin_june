@@ -30,7 +30,9 @@ def main() -> None:
     if not duplicates:
         print("No duplicates found.")
         return
-    modified_lines = [line for idx, line in enumerate(lines) if idx not in {d[0] for d in duplicates}]
+    modified_lines = [
+        line for idx, line in enumerate(lines) if idx not in {d[0] for d in duplicates}
+    ]
     src_path.write_text("".join(modified_lines))
     with dup_path.open("a") as f:
         f.write(f"\n# Duplicate declarations from {src_path.name}\n")

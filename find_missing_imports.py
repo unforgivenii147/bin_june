@@ -481,11 +481,22 @@ def main():
             "\n            Examples:\n              python find_missing_imports.py\n              python find_missing_imports.py --autofix\n              python find_missing_imports.py --workers 8\n        "
         ),
     )
-    parser.add_argument("-a", "--autofix", action="store_true", help="Automatically add missing imports")
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of worker processes (default: CPU count)"
+        "-a", "--autofix", action="store_true", help="Automatically add missing imports"
     )
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count)",
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
     args = parser.parse_args()
     root_dir = Path(args.directory).resolve()
     if not root_dir.is_dir():
@@ -495,11 +506,15 @@ def main():
     if not py_files:
         print(f"No Python files found in {root_dir}")
         sys.exit(0)
-    print(f"Scanning {len(py_files)} Python files with {args.workers or 'default'} workers...")
+    print(
+        f"Scanning {len(py_files)} Python files with {args.workers or 'default'} workers..."
+    )
     total_missing = 0
     fixed_files = 0
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        futures = {executor.submit(analyze_file, py_file): py_file for py_file in py_files}
+        futures = {
+            executor.submit(analyze_file, py_file): py_file for py_file in py_files
+        }
         completed = 0
         for future in as_completed(futures):
             completed += 1

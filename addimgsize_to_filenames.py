@@ -13,7 +13,15 @@ class ImageDimensionRenamer:
     def __init__(self, root_dir: str = ".", separator: str = "_"):
         self.root_dir = Path(root_dir)
         self.separator = separator
-        self.supported_formats = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp"}
+        self.supported_formats = {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".bmp",
+            ".tiff",
+            ".gif",
+            ".webp",
+        }
         print("-" * 42)
         print("IMAGE DIMENSION RENAMER")
         print("-" * 42)
@@ -62,7 +70,11 @@ class ImageDimensionRenamer:
             new_filename = f"{stem}{separator}{dimensions}{suffix}"
             new_path = image_path.parent / new_filename
             if new_path.exists() and new_path != image_path:
-                return (image_path, False, f"Target filename already exists: {new_filename}")
+                return (
+                    image_path,
+                    False,
+                    f"Target filename already exists: {new_filename}",
+                )
             image_path.rename(new_path)
             rel_old = image_path.relative_to(root_dir)
             rel_new = new_path.relative_to(root_dir)
@@ -75,9 +87,13 @@ class ImageDimensionRenamer:
         if not image_paths:
             print("[WARN] No images to process!")
             return
-        print(f"\n[PROCESS] Renaming {len(image_paths)} image(s) with {cpu_count()} process(es)...")
+        print(
+            f"\n[PROCESS] Renaming {len(image_paths)} image(s) with {cpu_count()} process(es)..."
+        )
         root_dir_str = str(self.root_dir.resolve())
-        args_list = [(img_path, self.separator, root_dir_str) for img_path in image_paths]
+        args_list = [
+            (img_path, self.separator, root_dir_str) for img_path in image_paths
+        ]
         successful = 0
         failed = 0
         already_processed = 0
@@ -130,7 +146,9 @@ def main():
     if len(sys.argv) > 1:
         separator = sys.argv[1]
         if len(separator) > 1:
-            print(f"[WARN] Separator should be single character, using first character: '{separator[0]}'")
+            print(
+                f"[WARN] Separator should be single character, using first character: '{separator[0]}'"
+            )
             separator = separator[0]
     renamer = ImageDimensionRenamer(root_dir=".", separator=separator)
     renamer.run()

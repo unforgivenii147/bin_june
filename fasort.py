@@ -94,8 +94,7 @@ def sort_persian_dict(file_path):
         words = [line.rstrip("\n\r") for line in lines]
         sorted_words = sorted(words, key=lambda w: (persian_sort_key(w), w))
         with open(file_path, "w", encoding="utf-8") as f:
-            for word in sorted_words:
-                f.write(word + "\n")
+            f.writelines(word + "\n" for word in sorted_words)
         print(f"Successfully sorted {len(sorted_words)} words in '{file_path}'")
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found.")

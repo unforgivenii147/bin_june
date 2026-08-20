@@ -80,13 +80,17 @@ def process_files_with_retry(files: list[Path]) -> None:
         if failed_files:
             logger.warning(f"{len(failed_files)} files failed and will be retried.")
     if files_to_process:
-        logger.error(f"""Failed to process {len(files_to_process)} files after {MAX_RETRIES} retries:""")
+        logger.error(
+            f"""Failed to process {len(files_to_process)} files after {MAX_RETRIES} retries:"""
+        )
         for f in files_to_process:
             logger.error(f"  - {f}")
 
 
 def safe_overwrite(filepath: Path, content: str) -> None:
-    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", delete=False, dir=filepath.parent
+    ) as tmp:
         tmp.write(content)
         tmp_path = Path(tmp.name)
     shutil.move(tmp_path, filepath)
@@ -95,7 +99,9 @@ def safe_overwrite(filepath: Path, content: str) -> None:
 def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
     for attempt in range(retries):
         try:
-            return GoogleTranslator(source="auto", target="en").translate_file(str(path))
+            return GoogleTranslator(source="auto", target="en").translate_file(
+                str(path)
+            )
         except Exception as e:
             if attempt < (retries - 1):
                 logger.warning(
@@ -103,7 +109,9 @@ def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
                 )
                 time.sleep(RETRY_DELAY)
             else:
-                logger.error(f"File translation failed after {retries} attempts for {path}: {e}")
+                logger.error(
+                    f"File translation failed after {retries} attempts for {path}: {e}"
+                )
                 return path.read_text(encoding="utf-8", errors="ignore")
 
 

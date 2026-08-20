@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Translate non-English lines in files to English in-place using parallel processing.
-Optimized for Python 3.12.
-"""
 
 from __future__ import annotations
 
@@ -80,7 +76,9 @@ def process_file(file_path: Path, batch_size: int = 10) -> None:
     try:
         source = file_path.read_text(encoding="utf-8", errors="ignore")
         lines = source.splitlines(keepends=True)
-        non_english_indices = [i for i, line in enumerate(lines) if is_non_english(line)]
+        non_english_indices = [
+            i for i, line in enumerate(lines) if is_non_english(line)
+        ]
         if not non_english_indices:
             logger.info("  No non-English lines found, skipping.")
             return
@@ -95,7 +93,11 @@ def process_file(file_path: Path, batch_size: int = 10) -> None:
             lines[idx] = f"{leading_ws}{translated}{trailing_ws}"
             translated_count += 1
             if (i + 1) % batch_size == 0:
-                logger.info("  Progress: %d/%d lines translated", i + 1, len(non_english_indices))
+                logger.info(
+                    "  Progress: %d/%d lines translated",
+                    i + 1,
+                    len(non_english_indices),
+                )
         file_path.write_text("".join(lines), encoding="utf-8", errors="ignore")
         logger.info("  ✓ Completed: %d lines translated", translated_count)
     except Exception as e:
@@ -107,7 +109,9 @@ def worker(args: tuple[Path, int]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Translate non-English lines in-place.")
+    parser = argparse.ArgumentParser(
+        description="Translate non-English lines in-place."
+    )
     parser.add_argument("files", nargs="+", help="Files or directories to process")
     parser.add_argument(
         "--extensions",
@@ -116,9 +120,14 @@ def main() -> None:
         help="File extensions to process",
     )
     parser.add_argument(
-        "--workers", type=int, default=mp.cpu_count(), help=f"Number of parallel workers (default: {mp.cpu_count()})"
+        "--workers",
+        type=int,
+        default=mp.cpu_count(),
+        help=f"Number of parallel workers (default: {mp.cpu_count()})",
     )
-    parser.add_argument("--batch-size", type=int, default=10, help="Batch size for progress logging")
+    parser.add_argument(
+        "--batch-size", type=int, default=10, help="Batch size for progress logging"
+    )
     parser.add_argument("--exclude", nargs="+", default=[], help="Paths to exclude")
     args = parser.parse_args()
     exclude_paths = {Path(p).resolve() for p in args.exclude}
@@ -140,7 +149,9 @@ def main() -> None:
     if not files_to_process:
         logger.info("No files to process.")
         return
-    logger.info("Found %d files. Using %d workers...", len(files_to_process), args.workers)
+    logger.info(
+        "Found %d files. Using %d workers...", len(files_to_process), args.workers
+    )
     tasks = [(fp, args.batch_size) for fp in files_to_process]
     if args.workers == 1:
         for t in tasks:

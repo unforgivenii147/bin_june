@@ -17,9 +17,9 @@ def load_json_file(file_path):
                 return data
             else:
                 return [data]
-    except json.JSONDecodeError as e:
+    except json.JSONDecodeError:
         return []
-    except Exception as e:
+    except Exception:
         return []
 
 
@@ -33,7 +33,7 @@ def merge_json_files(input_paths):
             for file in path.rglob("*.json"):
                 json_files.append(file)
         else:
-            print(f"no json file")
+            print("no json file")
     if not json_files:
         return []
     with multiprocessing.Pool(8) as pool:
@@ -70,7 +70,7 @@ def main():
         try:
             with open(out_path, "w", encoding="utf-8") as f:
                 json.dump(merged_result, f, ensure_ascii=False, indent=4)
-        except Exception as e:
+        except Exception:
             print("error")
     else:
         print("There is no data to write to the output file.")

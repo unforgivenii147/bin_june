@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-File Encoding Decoder Tool
-Attempts to decode a file using various encodings and saves as UTF-8
-"""
 
 from __future__ import annotations
 
@@ -117,7 +113,9 @@ def decode_file(file_path: str, output_path: str | None = None, show_chunk: int 
         print(f"  - {enc}")
     print(f"\n📌 Best match: {best_encoding}")
     if len(successful_encodings) > 1:
-        print("\nMultiple encodings found. Which one should be used for UTF-8 conversion?")
+        print(
+            "\nMultiple encodings found. Which one should be used for UTF-8 conversion?"
+        )
         print("0: Cancel")
         for i, enc in enumerate(successful_encodings, 1):
             print(f"{i}: {enc}")

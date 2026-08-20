@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert .rst files to .md in-place using pandoc.
-"""
 
 from __future__ import annotations
 
@@ -44,7 +41,9 @@ def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
         return False
 
 
-def convert_recursive(directory: Path, backup: bool = True, remove_original: bool = False) -> None:
+def convert_recursive(
+    directory: Path, backup: bool = True, remove_original: bool = False
+) -> None:
     directory = Path(directory)
     if not directory.exists():
         print(f"Error: {directory} not found")
@@ -62,11 +61,19 @@ def convert_recursive(directory: Path, backup: bool = True, remove_original: boo
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Convert .rst files to .md using pandoc")
+    parser = argparse.ArgumentParser(
+        description="Convert .rst files to .md using pandoc"
+    )
     parser.add_argument("paths", nargs="+", help="Files or directories to convert")
-    parser.add_argument("-r", "--recursive", action="store_true", help="Process directories recursively")
-    parser.add_argument("--no-backup", action="store_true", help="Do not create backup files")
-    parser.add_argument("--remove-original", action="store_true", help="Remove original .rst files")
+    parser.add_argument(
+        "-r", "--recursive", action="store_true", help="Process directories recursively"
+    )
+    parser.add_argument(
+        "--no-backup", action="store_true", help="Do not create backup files"
+    )
+    parser.add_argument(
+        "--remove-original", action="store_true", help="Remove original .rst files"
+    )
     args = parser.parse_args()
     try:
         subprocess.run(["pandoc", "--version"], capture_output=True, check=True)

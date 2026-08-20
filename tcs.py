@@ -8,10 +8,17 @@ from pathlib import Path
 
 def send_to_process(txt: str) -> None:
     try:
-        process = subprocess.Popen(["termux-clipboard-set"], stdin=subprocess.PIPE, text=True, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            ["termux-clipboard-set"],
+            stdin=subprocess.PIPE,
+            text=True,
+            stderr=subprocess.PIPE,
+        )
         _stdout, stderr = process.communicate(input=txt)
         if process.returncode != 0:
-            print(f"Error: Failed to copy to clipboard. STDERR: {stderr}", file=sys.stderr)
+            print(
+                f"Error: Failed to copy to clipboard. STDERR: {stderr}", file=sys.stderr
+            )
             sys.exit(1)
     except FileNotFoundError:
         print(
@@ -20,7 +27,10 @@ def send_to_process(txt: str) -> None:
         )
         sys.exit(1)
     except Exception as e:
-        print(f"An unexpected error occurred while copying to clipboard: {e}", file=sys.stderr)
+        print(
+            f"An unexpected error occurred while copying to clipboard: {e}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 
@@ -36,7 +46,9 @@ def selective_copy(path: Path, lines: list[str]) -> None:
     send_to_process(content)
 
 
-def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end_line: int | None = None) -> None:
+def copy_lines_to_clipboard(
+    path: str | Path, start_line: int | None = None, end_line: int | None = None
+) -> None:
     content = ""
     path = Path(path)
     if not path.is_file():

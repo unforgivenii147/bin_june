@@ -43,7 +43,11 @@ def main() -> int:
     pure = []
     notpure = []
     for dist in metadata.distributions():
-        name = dist.metadata.get("Name") or dist.metadata.get("Summary") or dist.metadata.get("name")
+        name = (
+            dist.metadata.get("Name")
+            or dist.metadata.get("Summary")
+            or dist.metadata.get("name")
+        )
         if not name:
             continue
         if not is_in_system_site_packages(dist):
@@ -54,8 +58,12 @@ def main() -> int:
             pure.append(name)
     pure = sorted(set(pure), key=str.lower)
     notpure = sorted(set(notpure), key=str.lower)
-    Path("pure.txt").write_text("\n".join(pure) + ("\n" if pure else ""), encoding="utf-8")
-    Path("notpure.txt").write_text("\n".join(notpure) + ("\n" if notpure else ""), encoding="utf-8")
+    Path("pure.txt").write_text(
+        "\n".join(pure) + ("\n" if pure else ""), encoding="utf-8"
+    )
+    Path("notpure.txt").write_text(
+        "\n".join(notpure) + ("\n" if notpure else ""), encoding="utf-8"
+    )
     print(f"Wrote {len(pure)} pure-python packages to pure.txt")
     print(f"Wrote {len(notpure)} packages with C extensions to notpure.txt")
     return 0

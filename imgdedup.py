@@ -51,7 +51,9 @@ Examples:
         default=True,
         help="preview duplicates without deleting (default: True)",
     )
-    ap.add_argument("--remove", action="store_true", help="actually delete duplicate images")
+    ap.add_argument(
+        "--remove", action="store_true", help="actually delete duplicate images"
+    )
     args = vars(ap.parse_args())
     dataset_path = args["path"]
     if not Path(dataset_path).is_dir():
@@ -76,7 +78,9 @@ Examples:
                     montage = image if montage is None else np.hstack([montage, image])
                 print(f"[INFO] found {len(hashedPaths) - 1} duplicates with hash: {h}")
             else:
-                print(f"[INFO] removing {len(hashedPaths) - 1} duplicates with hash: {h}")
+                print(
+                    f"[INFO] removing {len(hashedPaths) - 1} duplicates with hash: {h}"
+                )
                 for p in hashedPaths[1:]:
                     Path(p).unlink()
 

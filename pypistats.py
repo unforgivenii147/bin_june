@@ -11,7 +11,9 @@ PACKAGE = sys.argv[1]
 
 
 def get_stats(stats_type, package=PACKAGE, period="month"):
-    stats_url = f"https://pypistats.org/api/packages/{package}/{stats_type}?period={period}"
+    stats_url = (
+        f"https://pypistats.org/api/packages/{package}/{stats_type}?period={period}"
+    )
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
@@ -32,7 +34,11 @@ def aggregate(stats):
 
 def version_sorter(version_and_count):
     version = version_and_count[0]
-    return tuple(map(int, version.split("."))) if version.replace(".", "").isdigit() else (2**32,)
+    return (
+        tuple(map(int, version.split(".")))
+        if version.replace(".", "").isdigit()
+        else (2**32,)
+    )
 
 
 def system_sorter(name_and_count):
@@ -50,7 +56,9 @@ def print_agg_stats(stats, sort_key=None):
     agg_sum = 0.0
     for category, count in sorted(stats.items(), key=sort_key, reverse=True):
         agg_sum += count
-        print(f"  {category:{max_len}}: {count:-12.1f} / day ({agg_sum / total * 100:-5.1f}%)")
+        print(
+            f"  {category:{max_len}}: {count:-12.1f} / day ({agg_sum / total * 100:-5.1f}%)"
+        )
 
 
 def main():

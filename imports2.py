@@ -331,10 +331,16 @@ class PythonImportExtractor:
                 for info in zf.filelist:
                     if info.filename.endswith((".py", ".pyw")):
                         try:
-                            code = zf.read(info.filename).decode("utf-8", errors="ignore")
-                            imports.update(self._extract_imports_from_ast(code, info.filename))
+                            code = zf.read(info.filename).decode(
+                                "utf-8", errors="ignore"
+                            )
+                            imports.update(
+                                self._extract_imports_from_ast(code, info.filename)
+                            )
                         except Exception as e:
-                            logger.debug(f"Error reading {info.filename} from {zippath}: {e}")
+                            logger.debug(
+                                f"Error reading {info.filename} from {zippath}: {e}"
+                            )
         except Exception as e:
             logger.debug(f"Error processing zip {zippath}: {e}")
         return imports
@@ -348,9 +354,13 @@ class PythonImportExtractor:
                         try:
                             f = tf.extractfile(member)
                             code = f.read().decode("utf-8", errors="ignore")
-                            imports.update(self._extract_imports_from_ast(code, member.name))
+                            imports.update(
+                                self._extract_imports_from_ast(code, member.name)
+                            )
                         except Exception as e:
-                            logger.debug(f"Error reading {member.name} from {tarpath}: {e}")
+                            logger.debug(
+                                f"Error reading {member.name} from {tarpath}: {e}"
+                            )
         except Exception as e:
             logger.debug(f"Error processing tar {tarpath}: {e}")
         return imports
@@ -361,9 +371,13 @@ class PythonImportExtractor:
     def process_file(self, filepath: Path) -> set[str]:
         if filepath.suffix == ".zip" or filepath.suffix == ".whl":
             return self.extract_from_zip(filepath)
-        elif filepath.suffixes[-2:] == [".tar", ".gz"] or filepath.name.endswith((".tar.xz", ".tar.zst")):
+        elif filepath.suffixes[-2:] == [".tar", ".gz"] or filepath.name.endswith(
+            (".tar.xz", ".tar.zst")
+        ):
             return self.extract_from_tar(filepath)
-        elif filepath.suffix in {".py", ".pyw"} or (filepath.is_file() and filepath.suffix == ""):
+        elif filepath.suffix in {".py", ".pyw"} or (
+            filepath.is_file() and filepath.suffix == ""
+        ):
             return self.extract_from_file(filepath)
         return set()
 
@@ -375,13 +389,24 @@ class PythonImportExtractor:
                 continue
             if imp in self.local_modules or imp_lower in self.local_modules:
                 continue
-            if imp_lower in self.pip_packages or imp.replace("_", "-") in self.pip_packages:
+            if (
+                imp_lower in self.pip_packages
+                or imp.replace("_", "-") in self.pip_packages
+            ):
                 pip_packages.add(imp_lower)
         return pip_packages
 
 
 def find_python_files(directory: str = ".") -> list[Path]:
-    exclude_dirs = {".git", "__pycache__", ".pytest_cache", "dist", "build", ".mypy_cache", ".ruff_cache"}
+    exclude_dirs = {
+        ".git",
+        "__pycache__",
+        ".pytest_cache",
+        "dist",
+        "build",
+        ".mypy_cache",
+        ".ruff_cache",
+    }
     python_files = []
     dir_path = Path(directory)
     for item in dir_path.rglob("*"):
@@ -400,12 +425,16 @@ def find_python_files(directory: str = ".") -> list[Path]:
                             python_files.append(item)
                 except:
                     pass
-            elif item.name.endswith((".zip", ".whl")) or item.name.endswith((".tar.gz", ".tar.xz", ".tar.zst")):
+            elif item.name.endswith((".zip", ".whl")) or item.name.endswith(
+                (".tar.gz", ".tar.xz", ".tar.zst")
+            ):
                 python_files.append(item)
     return python_files
 
 
-def process_single_file(args: tuple[Path, PythonImportExtractor]) -> tuple[Path, set[str]]:
+def process_single_file(
+    args: tuple[Path, PythonImportExtractor],
+) -> tuple[Path, set[str]]:
     filepath, extractor = args
     imports = extractor.process_file(filepath)
     filtered = extractor.filter_packages(imports)
@@ -415,10 +444,20 @@ def process_single_file(args: tuple[Path, PythonImportExtractor]) -> tuple[Path,
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Create requirements.txt by inspecting Python files")
-    parser.add_argument("-d", "--directory", default=".", help="Directory to scan (default: current directory)")
+    parser = argparse.ArgumentParser(
+        description="Create requirements.txt by inspecting Python files"
+    )
     parser.add_argument(
-        "-o", "--output", default="requirements.txt", help="Output file name (default: requirements.txt)"
+        "-d",
+        "--directory",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="requirements.txt",
+        help="Output file name (default: requirements.txt)",
     )
     parser.add_argument(
         "-p",
@@ -427,7 +466,10 @@ def main():
         help="Path to pip packages file (default: /sdcard/data/pip.txt)",
     )
     parser.add_argument(
-        "--workers", type=int, default=cpu_count(), help=f"Number of worker processes (default: {cpu_count()})"
+        "--workers",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of worker processes (default: {cpu_count()})",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args()

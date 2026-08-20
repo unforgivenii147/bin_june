@@ -22,7 +22,10 @@ CSS_PROPS_TEXT = "\nalignment-adjust alignment-baseline animation animation-dela
 
 
 def _compile_props(props_text: str, grouped: bool = False) -> tuple:
-    props, prefixes = ([], ["-webkit-", "-khtml-", "-epub-", "-moz-", "-ms-", "-o-", ""])
+    props, prefixes = (
+        [],
+        ["-webkit-", "-khtml-", "-epub-", "-moz-", "-ms-", "-o-", ""],
+    )
     for propline in props_text.strip().lower().splitlines():
         props += [pre + pro for pro in propline.split(" ") for pre in prefixes]
     props = filter(lambda line: not line.startswith("#"), props)
@@ -43,7 +46,10 @@ def _prioritify(line_of_css: str, css_props_text_as_list: tuple) -> tuple:
     sorted_css_properties, groups_by_alphabetic_order = css_props_text_as_list
     priority_integer, group_integer = (9999, 0)
     for css_property in sorted_css_properties:
-        if css_property.lower() == line_of_css.split(":", maxsplit=1)[0].lower().strip():
+        if (
+            css_property.lower()
+            == line_of_css.split(":", maxsplit=1)[0].lower().strip()
+        ):
             priority_integer = sorted_css_properties.index(css_property)
             group_integer = groups_by_alphabetic_order[priority_integer]
             break
@@ -55,8 +61,13 @@ def _props_grouper(props, pgs):
         return props
     props_pg = zip((_prioritify(prop, pgs) for prop in props), props, strict=False)
     props_pg = sorted(props_pg, key=lambda item: item[0][1])
-    props_by_groups = (list(item[1]) for item in itertools.groupby(props_pg, key=lambda item: item[0][1]))
-    props_by_groups = (sorted(item, key=lambda item: item[0][0]) for item in props_by_groups)
+    props_by_groups = (
+        list(item[1])
+        for item in itertools.groupby(props_pg, key=lambda item: item[0][1])
+    )
+    props_by_groups = (
+        sorted(item, key=lambda item: item[0][0]) for item in props_by_groups
+    )
     props = []
     for group in props_by_groups:
         group = (item[1] for item in group)
@@ -91,7 +102,9 @@ def remove_empty_rules(css: str) -> str:
 
 def condense_zero_units(css: str) -> str:
     return re.sub(
-        r"([\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)", r"\1\2", css
+        r"([\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)",
+        r"\1\2",
+        css,
     )
 
 
@@ -169,7 +182,11 @@ def split_long_selectors(css: str) -> str:
 
 
 def simple_replace(css: str) -> str:
-    return css.replace("}\n#", "}\n\n#").replace("}\n.", "}\n\n.").replace("}\n*", "}\n\n*")
+    return (
+        css.replace("}\n#", "}\n\n#")
+        .replace("}\n.", "}\n\n.")
+        .replace("}\n*", "}\n\n*")
+    )
 
 
 def css_prettify(css: str, justify: bool = False, extraline: bool = False) -> str:
@@ -191,7 +208,9 @@ if BeautifulSoup:
     orig_prettify = BeautifulSoup.prettify
     regez = re.compile("^(\\s*)", re.MULTILINE)
 
-    def prettify(self, encoding=None, formatter: str = "minimal", indent_width: int = 4) -> str:
+    def prettify(
+        self, encoding=None, formatter: str = "minimal", indent_width: int = 4
+    ) -> str:
         print("Monkey Patching BeautifulSoup on-the-fly to process HTML...")
         return regez.sub("\\1" * indent_width, orig_prettify(self, encoding, formatter))
 
@@ -287,16 +306,49 @@ def make_arguments_parser() -> Namespace:
         epilog="CSS-HTML-Prettify:\n    Takes file or folder full path string and process all CSS/SCSS/HTML found.\n    If argument is not file/folder will fail. Check Updates works on Python3.\n    StdIn to StdOut is deprecated since may fail with unicode characters.\n    CSS Properties are AlphaSorted,to help spot cloned ones,Selectors not.\n    Watch works for whole folders, with minimum of ~60 Secs between runs.",
     )
     parser.add_argument("--version", action="version", version=__version__)
-    parser.add_argument("fullpath", metavar="fullpath", type=str, help="Full path to local file or folder.")
-    parser.add_argument("--prefix", type=str, help="Prefix string to prepend on output filenames.")
-    parser.add_argument("--timestamp", action="store_true", help="Add a Time Stamp on all CSS/SCSS output files.")
-    parser.add_argument("--quiet", action="store_true", help="Quiet, Silent, force disable all Logging.")
-    parser.add_argument("--after", type=str, help="Command to execute after run (Experimental).")
-    parser.add_argument("--before", type=str, help="Command to execute before run (Experimental).")
-    parser.add_argument("--watch", action="store_true", help="Re-Compress if file changes (Experimental).")
-    parser.add_argument("--group", action="store_true", help="Group Alphabetically CSS Poperties by name.")
-    parser.add_argument("--justify", action="store_true", help="Right Justify CSS Properties (Experimental).")
-    parser.add_argument("--extraline", action="store_true", help="Add 1 New Line for each New Line (Experimental)")
+    parser.add_argument(
+        "fullpath",
+        metavar="fullpath",
+        type=str,
+        help="Full path to local file or folder.",
+    )
+    parser.add_argument(
+        "--prefix", type=str, help="Prefix string to prepend on output filenames."
+    )
+    parser.add_argument(
+        "--timestamp",
+        action="store_true",
+        help="Add a Time Stamp on all CSS/SCSS output files.",
+    )
+    parser.add_argument(
+        "--quiet", action="store_true", help="Quiet, Silent, force disable all Logging."
+    )
+    parser.add_argument(
+        "--after", type=str, help="Command to execute after run (Experimental)."
+    )
+    parser.add_argument(
+        "--before", type=str, help="Command to execute before run (Experimental)."
+    )
+    parser.add_argument(
+        "--watch",
+        action="store_true",
+        help="Re-Compress if file changes (Experimental).",
+    )
+    parser.add_argument(
+        "--group",
+        action="store_true",
+        help="Group Alphabetically CSS Poperties by name.",
+    )
+    parser.add_argument(
+        "--justify",
+        action="store_true",
+        help="Right Justify CSS Properties (Experimental).",
+    )
+    parser.add_argument(
+        "--extraline",
+        action="store_true",
+        help="Add 1 New Line for each New Line (Experimental)",
+    )
     global args
     args = parser.parse_args()
     return args
@@ -318,7 +370,9 @@ def main() -> None:
     elif Path(args.fullpath).is_dir():
         print("Target is a Folder with CSS / SCSS, HTML, JS.")
         print("Processing a whole Folder may take some time...")
-        list_of_files = walk2list(args.fullpath, (".css", ".scss", ".html", ".htm"), ".min.css")
+        list_of_files = walk2list(
+            args.fullpath, (".css", ".scss", ".html", ".htm"), ".min.css"
+        )
         pool = get_context("spawn").Pool(4)
         pool.map(process_multiple_files, list_of_files)
         pool.close()
@@ -329,7 +383,9 @@ def main() -> None:
     if args.after and getoutput:
         print(getoutput(str(args.after)))
     print(f"\n {'-' * 42} \n Files Processed: {list_of_files}.")
-    print(f"Number of Files Processed:\n          {(len(list_of_files) if isinstance(list_of_files, tuple) else 1)}")
+    print(
+        f"Number of Files Processed:\n          {(len(list_of_files) if isinstance(list_of_files, tuple) else 1)}"
+    )
 
 
 if __name__ in "__main__":

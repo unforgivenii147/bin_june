@@ -71,7 +71,9 @@ def process_html(path: Path) -> None:
             continue
         css = style.string.encode("utf-8")
         path = save_hashed_asset(css, "text/css")
-        style.replace_with(f'<link rel="stylesheet" href="{path.relative_to(OUTPUT_DIR)}">')
+        style.replace_with(
+            f'<link rel="stylesheet" href="{path.relative_to(OUTPUT_DIR)}">'
+        )
     for script in soup.find_all("script"):
         if script.get("src"):
             src = script["src"]
@@ -96,7 +98,9 @@ def process_html(path: Path) -> None:
             data_url = m.group(1)
             path = extract_base64(data_url)
             if path:
-                tag["style"] = tag["style"].replace(data_url, str(path.relative_to(OUTPUT_DIR)))
+                tag["style"] = tag["style"].replace(
+                    data_url, str(path.relative_to(OUTPUT_DIR))
+                )
     for svg in soup.find_all("svg"):
         svg_bytes = str(svg).encode("utf-8")
         path = save_hashed_asset(svg_bytes, "image/svg+xml")
@@ -126,7 +130,9 @@ def build_single_page() -> None:
         encoded = base64.b64encode(data).decode()
         data_url = f"data:{mime};base64,{encoded}"
         merged_str = str(merged)
-        merged_str = merged_str.replace(str(asset_file.relative_to(OUTPUT_DIR)), data_url)
+        merged_str = merged_str.replace(
+            str(asset_file.relative_to(OUTPUT_DIR)), data_url
+        )
         merged = BeautifulSoup(merged_str, "html.parser")
     for link in merged.find_all("link", rel="stylesheet"):
         href = link.get("href", "")

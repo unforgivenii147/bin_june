@@ -112,14 +112,20 @@ def process_item(path, target_mode, dry_run=False):
 
 
 def apply_changes(stats, dry_run=False):
-    all_changes = stats["dirs_to_change"] + stats["files_make_executable"] + stats["files_set_standard"]
+    all_changes = (
+        stats["dirs_to_change"]
+        + stats["files_make_executable"]
+        + stats["files_set_standard"]
+    )
     if not all_changes:
         print("\nNo changes needed!")
         return (0, 0)
     print(f"\nApplying changes to {len(all_changes)} items...")
     success = 0
     failed = 0
-    for path, _current, target in tqdm(all_changes, desc="Changing permissions", unit="items"):
+    for path, _current, target in tqdm(
+        all_changes, desc="Changing permissions", unit="items"
+    ):
         if process_item(path, target, dry_run):
             success += 1
         else:
@@ -130,7 +136,9 @@ def apply_changes(stats, dry_run=False):
 def print_report(stats, success=None, failed=None):
     total_items = stats["total_dirs"] + stats["total_files"]
     total_changes = (
-        len(stats["dirs_to_change"]) + len(stats["files_make_executable"]) + len(stats["files_set_standard"])
+        len(stats["dirs_to_change"])
+        + len(stats["files_make_executable"])
+        + len(stats["files_set_standard"])
     )
     print(f"\n{'=' * 42}")
     print("Scan Summary:")
@@ -190,7 +198,12 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"\nRules for directories:\n  - All directories: set to 0775 (rwxrwxr-x)\n\nRules for files:\n  - Files that are already executable: no changes\n  - Files with shebang (#!) or in 'bin' directory: set to 0755 (rwxr-xr-x)\n  - All other files: set to 0644 (rw-r--r--)\n\nSkipped directories: {', '.join(sorted(SKIP_DIRS))}\n\nExamples:\n  %(prog)s                    # Process current directory\n  %(prog)s /path/to/project   # Process specific path\n  %(prog)s . --dry-run        # Preview changes\n  %(prog)s . --show-examples  # Show examples of changes\n  %(prog)s . --dirs-only      # Only process directories\n  %(prog)s . --files-only     # Only process files\n        ",
     )
-    parser.add_argument("path", nargs="?", default=".", help="Root path to start from (default: current directory)")
+    parser.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Root path to start from (default: current directory)",
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -201,8 +214,12 @@ def main():
         action="store_true",
         help="Show example files/directories that would be changed",
     )
-    parser.add_argument("--dirs-only", action="store_true", help="Only process directories, skip files")
-    parser.add_argument("--files-only", action="store_true", help="Only process files, skip directories")
+    parser.add_argument(
+        "--dirs-only", action="store_true", help="Only process directories, skip files"
+    )
+    parser.add_argument(
+        "--files-only", action="store_true", help="Only process files, skip directories"
+    )
     args = parser.parse_args()
     print(f"Skip directories: {', '.join(sorted(SKIP_DIRS))}")
     if args.dirs_only:
@@ -269,7 +286,9 @@ def main():
             print(f"{'=' * 42}")
     else:
         total_changes = (
-            len(stats["dirs_to_change"]) + len(stats["files_make_executable"]) + len(stats["files_set_standard"])
+            len(stats["dirs_to_change"])
+            + len(stats["files_make_executable"])
+            + len(stats["files_set_standard"])
         )
         if total_changes > 0:
             print(f"\nWould apply {total_changes} changes")

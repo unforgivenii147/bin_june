@@ -11,7 +11,10 @@ SKIP_DIRS = {".git"}
 
 
 def remove_string_from_names(
-    string_to_remove: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
+    string_to_remove: str,
+    dry_run: bool = False,
+    recursive: bool = False,
+    current_path: Path = Path.cwd(),
 ) -> int:
     renamed_count = 0
     try:
@@ -25,7 +28,9 @@ def remove_string_from_names(
         if (item.is_file() or item.is_dir()) and string_to_remove in item.name:
             new_name = item.name.replace(string_to_remove, "")
             if not new_name.strip():
-                print(f"Warning: Removing '{string_to_remove}' would make name empty for '{item.name}'")
+                print(
+                    f"Warning: Removing '{string_to_remove}' would make name empty for '{item.name}'"
+                )
                 continue
             new_path = current_path / new_name
             if new_path.exists():
@@ -40,12 +45,18 @@ def remove_string_from_names(
                 except OSError as e:
                     print(f"Error renaming '{item.name}': {e}")
         if recursive and item.is_dir():
-            renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
+            renamed_count += remove_string_from_names(
+                string_to_remove, dry_run, recursive, item
+            )
     return renamed_count
 
 
 def replace_string_in_names(
-    str1: str, str2: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
+    str1: str,
+    str2: str,
+    dry_run: bool = False,
+    recursive: bool = False,
+    current_path: Path = Path.cwd(),
 ) -> int:
     renamed_count = 0
     try:
@@ -59,7 +70,9 @@ def replace_string_in_names(
         if (item.is_file() or item.is_dir()) and str1 in item.name:
             new_name = item.name.replace(str1, str2)
             if not new_name.strip():
-                print(f"Warning: Replacing '{str1}' with '{str2}' would make name empty for '{item.name}'")
+                print(
+                    f"Warning: Replacing '{str1}' with '{str2}' would make name empty for '{item.name}'"
+                )
                 continue
             new_path = current_path / new_name
             if new_path.exists():
@@ -74,7 +87,9 @@ def replace_string_in_names(
                 except OSError as e:
                     print(f"Error renaming '{item.name}': {e}")
         if recursive and item.is_dir():
-            renamed_count += replace_string_in_names(str1, str2, dry_run, recursive, item)
+            renamed_count += replace_string_in_names(
+                str1, str2, dry_run, recursive, item
+            )
     return renamed_count
 
 
@@ -86,11 +101,16 @@ def should_skip(path):
 
 
 def rename_by_template(
-    template: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
+    template: str,
+    dry_run: bool = False,
+    recursive: bool = False,
+    current_path: Path = Path.cwd(),
 ) -> int:
     renamed_count = 0
     try:
-        files = [f for f in current_path.iterdir() if f.is_file() and (not should_skip(f))]
+        files = [
+            f for f in current_path.iterdir() if f.is_file() and (not should_skip(f))
+        ]
         script_name = Path(__file__).name
         files = [f for f in files if f.name != script_name]
         if files:
@@ -128,7 +148,9 @@ def rename_by_template(
         try:
             for item in current_path.iterdir():
                 if item.is_dir() and (not should_skip(item)):
-                    renamed_count += rename_by_template(template, dry_run, recursive, item)
+                    renamed_count += rename_by_template(
+                        template, dry_run, recursive, item
+                    )
         except PermissionError:
             print(f"Permission denied accessing subdirectory in {current_path}")
     return renamed_count
@@ -141,13 +163,33 @@ def main() -> None:
         epilog='\n  Examples:\n  python pnr.py -r "old_string"\n        ',
     )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-r", "--remove", metavar="STRING", help="Remove specified string from file and directory names")
     group.add_argument(
-        "-s", "--replace", nargs=2, metavar=("STR1", "STR2"), help="Replace STR1 with STR2 in file and directory names"
+        "-r",
+        "--remove",
+        metavar="STRING",
+        help="Remove specified string from file and directory names",
     )
-    group.add_argument("-t", "--template", metavar="NAME", help="Rename files using template with sequential numbering")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be renamed without actually doing it")
-    parser.add_argument("--recursive", action="store_true", help="Process directories recursively")
+    group.add_argument(
+        "-s",
+        "--replace",
+        nargs=2,
+        metavar=("STR1", "STR2"),
+        help="Replace STR1 with STR2 in file and directory names",
+    )
+    group.add_argument(
+        "-t",
+        "--template",
+        metavar="NAME",
+        help="Rename files using template with sequential numbering",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be renamed without actually doing it",
+    )
+    parser.add_argument(
+        "--recursive", action="store_true", help="Process directories recursively"
+    )
     args = parser.parse_args()
     cwd = Path.cwd()
     print(f"Working in directory: {cwd}")

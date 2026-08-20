@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Remove comments from Lua files using tree-sitter.
-Processes files in place using parallel workers.
-Supports both line comments (-- ...) and block comments (--[[ ... ]]).
-"""
 
 from __future__ import annotations
 
@@ -87,7 +83,9 @@ def iter_lua_files(paths: list[Path]):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Remove comments from Lua files in place (tree-sitter powered).")
+    ap = argparse.ArgumentParser(
+        description="Remove comments from Lua files in place (tree-sitter powered)."
+    )
     ap.add_argument(
         "paths",
         nargs="*",

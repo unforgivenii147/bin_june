@@ -43,13 +43,22 @@ def extract_archive(file_path, extract_to) -> None:
             with tarfile.open(file_path, "r") as t:
                 t.extractall(extract_to)
         elif file_path.suffix == ".gz":
-            with gzip.open(file_path, "rb") as g, open(extract_to / file_path.stem, "wb") as f:
+            with (
+                gzip.open(file_path, "rb") as g,
+                open(extract_to / file_path.stem, "wb") as f,
+            ):
                 copy_chunks(g, f)
         elif file_path.suffix == ".bz2":
-            with bz2.open(file_path, "rb") as b, open(extract_to / file_path.stem, "wb") as f:
+            with (
+                bz2.open(file_path, "rb") as b,
+                open(extract_to / file_path.stem, "wb") as f,
+            ):
                 copy_chunks(b, f)
         elif file_path.suffix == ".xz":
-            with lzma.open(file_path, "rb") as x, open(extract_to / file_path.stem, "wb") as f:
+            with (
+                lzma.open(file_path, "rb") as x,
+                open(extract_to / file_path.stem, "wb") as f,
+            ):
                 copy_chunks(x, f)
         elif file_path.suffix == ".zst":
             with open(file_path, "rb") as z:
@@ -115,7 +124,9 @@ def process_directory(directory):
                 if result:
                     for key in repeated_definitions:
                         for content_hash, nodes in result[key].items():
-                            repeated_definitions[key].setdefault(content_hash, []).extend(nodes)
+                            repeated_definitions[key].setdefault(
+                                content_hash, []
+                            ).extend(nodes)
     return repeated_definitions
 
 
@@ -137,9 +148,21 @@ def write_definitions_to_file(definitions, output_dir: Path, move=False) -> None
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Inspect Python files for repeated definitions.")
-    parser.add_argument("-m", "--move", action="store_true", help="Move repeated definitions to utils directory.")
-    parser.add_argument("-c", "--copy", action="store_true", help="Copy repeated definitions to utils directory.")
+    parser = argparse.ArgumentParser(
+        description="Inspect Python files for repeated definitions."
+    )
+    parser.add_argument(
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move repeated definitions to utils directory.",
+    )
+    parser.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy repeated definitions to utils directory.",
+    )
     args = parser.parse_args()
     cwd = Path.cwd()
     utils_dir = cwd / "utils"

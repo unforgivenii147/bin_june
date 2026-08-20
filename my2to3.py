@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import sys
 from lib2to3 import refactor
-from os import scandir as os_scandir
 from pathlib import Path
 
 from dh import get_pyfiles, mpf3
@@ -16,7 +15,9 @@ def collect_fixers():
     from lib2to3 import fixes
 
     fixer_names = []
-    for _, modname, is_pkg in pkgutil.iter_modules(fixes.__path__, prefix="lib2to3.fixes."):
+    for _, modname, is_pkg in pkgutil.iter_modules(
+        fixes.__path__, prefix="lib2to3.fixes."
+    ):
         if not is_pkg:
             fixer_names.append(modname)
     return fixer_names

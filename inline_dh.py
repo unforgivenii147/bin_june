@@ -80,16 +80,12 @@ def get_all_dependencies(path: Path, target_symbol: str) -> tuple[set[str], list
                     to_resolve.append(ref)
     needed_imports = set()
     all_code_text = "\n".join(
-        ("\n".join(lines[nodes_by_name[sym].lineno - 1 : nodes_by_name[sym].end_lineno]) for sym in needed_symbols)
+        "\n".join(lines[nodes_by_name[sym].lineno - 1 : nodes_by_name[sym].end_lineno])
+        for sym in needed_symbols
     )
     for imp in global_imports:
         imp_text = ast.unparse(imp)
-        if isinstance(imp, ast.Import):
-            for alias in imp.names:
-                name = alias.asname or alias.name
-                if name in all_code_text:
-                    needed_imports.add(imp_text)
-        elif isinstance(imp, ast.ImportFrom):
+        if isinstance(imp, ast.Import) or isinstance(imp, ast.ImportFrom):
             for alias in imp.names:
                 name = alias.asname or alias.name
                 if name in all_code_text:
@@ -137,7 +133,9 @@ def process_file(path: Path, mapping: dict):
                     if block not in file_source_blocks:
                         file_source_blocks.append(block)
             else:
-                file_source_blocks.append(f"# WARNING: Source code for '{symbol}' not found.")
+                file_source_blocks.append(
+                    f"# WARNING: Source code for '{symbol}' not found."
+                )
         if file_source_blocks:
             injection_parts = []
             if file_imports:
@@ -168,7 +166,9 @@ def process_file(path: Path, mapping: dict):
                 insert_idx = last_import_end
             if insert_idx > 0 and lines[insert_idx - 1].strip():
                 inlined_code = "\n" + inlined_code
-            new_content = "".join(lines[:insert_idx]) + inlined_code + "".join(lines[insert_idx:])
+            new_content = (
+                "".join(lines[:insert_idx]) + inlined_code + "".join(lines[insert_idx:])
+            )
             path.write_text(new_content, encoding="utf-8")
             print(f"Refactored: {path} -> Inlined: {', '.join(used_dh_symbols)}")
     except Exception as e:

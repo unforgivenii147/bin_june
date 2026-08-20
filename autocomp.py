@@ -26,7 +26,9 @@ ALGORITHMS = [
     ("lz4", ".lz4", compress_lz4),
     ("blosc", ".blosc", compress_blosc),
 ]
-CompressionResult = namedtuple("CompressionResult", ["name", "ext", "size", "ratio", "elapsed", "output_path"])
+CompressionResult = namedtuple(
+    "CompressionResult", ["name", "ext", "size", "ratio", "elapsed", "output_path"]
+)
 
 
 def compress_brotli(data: bytes) -> bytes:
@@ -110,8 +112,12 @@ def run_benchmark(target: Path) -> None:
             output_path.write_bytes(compressed)
             size = len(compressed)
             ratio = size / original_size
-            print(f"✓ {name:<10} | Size: {size:>12,} | Ratio: {ratio:.4f} | Time: {elapsed:.3f}s")
-            results.append(CompressionResult(name, ext, size, ratio, elapsed, output_path))
+            print(
+                f"✓ {name:<10} | Size: {size:>12,} | Ratio: {ratio:.4f} | Time: {elapsed:.3f}s"
+            )
+            results.append(
+                CompressionResult(name, ext, size, ratio, elapsed, output_path)
+            )
         except Exception as e:
             elapsed = time.perf_counter() - t0 if "t0" in dir() else 0.0
             print(f"✗ {name:<10} | ERROR: {e}")
@@ -124,8 +130,12 @@ def run_benchmark(target: Path) -> None:
         elapsed = time.perf_counter() - t0
         size = output_path_7z.stat().st_size
         ratio = size / original_size
-        print(f"✓ {'7z':<10} | Size: {size:>12,} | Ratio: {ratio:.4f} | Time: {elapsed:.3f}s")
-        results.append(CompressionResult("7z", ".7z", size, ratio, elapsed, output_path_7z))
+        print(
+            f"✓ {'7z':<10} | Size: {size:>12,} | Ratio: {ratio:.4f} | Time: {elapsed:.3f}s"
+        )
+        results.append(
+            CompressionResult("7z", ".7z", size, ratio, elapsed, output_path_7z)
+        )
     except Exception as e:
         print(f"✗ {'7z':<10} | ERROR: {e}")
         if output_path_7z.exists():
@@ -141,7 +151,9 @@ def run_benchmark(target: Path) -> None:
     print("-" * 42)
     for rank, r in enumerate(top3, 1):
         saved = original_size - r.size
-        print(f"{rank}. {r.name:<10} | Size: {r.size:>12,} | Ratio: {r.ratio:.4f} | Saved: {saved:>12,} bytes")
+        print(
+            f"{rank}. {r.name:<10} | Size: {r.size:>12,} | Ratio: {r.ratio:.4f} | Saved: {saved:>12,} bytes"
+        )
     print(f"\n✓ Keeping best: {best.name} ({best.output_path.name})")
     for r in results[1:]:
         try:

@@ -73,7 +73,10 @@ class WheelBuilder:
                 if not row or not row[0]:
                     continue
                 path = row[0]
-                records[path] = {"hash": row[1] if len(row) > 1 else "", "size": row[2] if len(row) > 2 else ""}
+                records[path] = {
+                    "hash": row[1] if len(row) > 1 else "",
+                    "size": row[2] if len(row) > 2 else "",
+                }
         return records
 
     def _find_scripts_for_package(self, records: dict) -> list[Path]:
@@ -114,7 +117,7 @@ class WheelBuilder:
         for item in self.share_dir.rglob("*"):
             if not item.is_file():
                 continue
-            if any((pkg_normalized in p.name.lower() for p in item.parents)):
+            if any(pkg_normalized in p.name.lower() for p in item.parents):
                 try:
                     rel_path = item.relative_to(self.share_dir)
                     data_files.append((item, str(rel_path)))
@@ -140,7 +143,7 @@ class WheelBuilder:
             return (python_tag, abi_tag, platform_tag)
 
     def _detect_purity(self, records: dict) -> bool:
-        return all((not path.endswith((".so", ".pyd", ".dll")) for path in records))
+        return all(not path.endswith((".so", ".pyd", ".dll")) for path in records)
 
     def build_wheel(self, dist_info_dir: Path) -> Path | None:
         if not dist_info_dir.is_dir():
@@ -307,16 +310,36 @@ def main() -> int:
         epilog="\nExamples:\n  # Run from inside site-packages directory:\n  cd /path/to/venv/lib/python3.x/site-packages\n  python /path/to/script.py\n\n  # Force rebuild all packages with parallel processing (default)\n  python /path/to/script.py -a\n\n  # Build with serial processing (no parallel)\n  python /path/to/script.py --no-parallel\n\n  # Build specific package\n  python /path/to/script.py -p requests\n\n  # Force rebuild specific package\n  python /path/to/script.py -a -p requests\n\n  # Specify number of workers\n  python /path/to/script.py -a -w 4\n\n  # Specify output directory\n  python /path/to/script.py -o /path/to/wheels\n        ",
     )
     parser.add_argument(
-        "--output", "-o", type=Path, default=Path("./wheels"), help="Output directory for wheels (default: ./wheels)"
+        "--output",
+        "-o",
+        type=Path,
+        default=Path("./wheels"),
+        help="Output directory for wheels (default: ./wheels)",
     )
     parser.add_argument("--package", "-p", help="Build only this package (by name)")
-    parser.add_argument("--all", "-a", action="store_true", help="Repack all packages (overwrite existing wheels)")
-    parser.add_argument("--no-parallel", action="store_true", help="Disable parallel processing (use serial mode)")
     parser.add_argument(
-        "--workers", "-w", type=int, default=None, help="Number of worker processes (default: CPU count, max 8)"
+        "--all",
+        "-a",
+        action="store_true",
+        help="Repack all packages (overwrite existing wheels)",
     )
     parser.add_argument(
-        "--site-packages", "-s", type=Path, help="Path to site-packages directory (default: current directory)"
+        "--no-parallel",
+        action="store_true",
+        help="Disable parallel processing (use serial mode)",
+    )
+    parser.add_argument(
+        "--workers",
+        "-w",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count, max 8)",
+    )
+    parser.add_argument(
+        "--site-packages",
+        "-s",
+        type=Path,
+        help="Path to site-packages directory (default: current directory)",
     )
     args = parser.parse_args()
     if args.site_packages:
@@ -335,7 +358,13 @@ def main() -> int:
             return 1
     print(f"📂 Using site-packages: {site_packages}")
     parallel = not args.no_parallel
-    builder = WheelBuilder(site_packages, args.output, args.all, parallel=parallel, max_workers=args.workers)
+    builder = WheelBuilder(
+        site_packages,
+        args.output,
+        args.all,
+        parallel=parallel,
+        max_workers=args.workers,
+    )
     if args.package:
         matches = list(site_packages.glob(f"{args.package}*.dist-info"))
         if not matches:

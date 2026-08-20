@@ -15,9 +15,14 @@ def search_github_repos() -> None:
         raise ValueError(f"GITHUB_TOKEN not found in {env_path}")
     date_10_days_ago = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%d")
     query = f"language:Python created:>{date_10_days_ago}"
-    headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "Authorization": f"token {token}",
+    }
     params = {"q": query, "sort": "stars", "order": "desc", "per_page": 50}
-    response = requests.get("https://api.github.com/search/repositories", headers=headers, params=params)
+    response = requests.get(
+        "https://api.github.com/search/repositories", headers=headers, params=params
+    )
     response.raise_for_status()
     data = response.json()
     output_file = Path("ghpy10.txt")

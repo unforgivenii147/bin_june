@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to find Python packages in system site directories that don't have entry_points.txt
-Separates pure Python packages from non-pure (binary/extension) packages based on RECORD file.
-Optimized for Linux/Termux - only checks for .so files.
-Uses multiprocessing for parallel scanning and pathlib for path operations.
-"""
 
 from __future__ import annotations
 
@@ -28,7 +22,10 @@ def get_site_packages_dirs() -> list[Path]:
     if user_site:
         site_dirs.append(Path(user_site))
     common_paths = [
-        Path(sys.prefix) / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages",
+        Path(sys.prefix)
+        / "lib"
+        / f"python{sys.version_info.major}.{sys.version_info.minor}"
+        / "site-packages",
         Path(sys.prefix)
         / "local"
         / "lib"
@@ -67,7 +64,9 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
                     record_file = dist_info / "RECORD"
                     if record_file.exists():
                         try:
-                            content = record_file.read_text(encoding="utf-8", errors="ignore")
+                            content = record_file.read_text(
+                                encoding="utf-8", errors="ignore"
+                            )
                             if ".so" in content:
                                 return False
                         except Exception:
@@ -83,7 +82,9 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
                     sources_file = egg_info / "SOURCES.txt"
                     if sources_file.exists():
                         try:
-                            content = sources_file.read_text(encoding="utf-8", errors="ignore")
+                            content = sources_file.read_text(
+                                encoding="utf-8", errors="ignore"
+                            )
                             if ".so" in content:
                                 return False
                         except:
@@ -91,7 +92,11 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
                     native_libs = egg_info / "native_libs.txt"
                     if native_libs.exists():
                         return False
-        package_dir_patterns = [pkg_name, pkg_name.replace("-", "_"), pkg_name.replace("_", "-")]
+        package_dir_patterns = [
+            pkg_name,
+            pkg_name.replace("-", "_"),
+            pkg_name.replace("_", "-"),
+        ]
         for pattern in package_dir_patterns:
             for package_dir in site_dir.glob(pattern):
                 if (
@@ -102,7 +107,11 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
                     for item in package_dir.rglob("*"):
                         if item.is_file() and item.suffix == ".so":
                             return False
-                        if item.is_file() and ".cpython-" in str(item) and item.suffix == ".so":
+                        if (
+                            item.is_file()
+                            and ".cpython-" in str(item)
+                            and item.suffix == ".so"
+                        ):
                             return False
         return True
     except Exception:
@@ -111,7 +120,12 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
 
 def scan_package(package_path: Path, site_dir: Path) -> dict[str, any]:
     pkg_name = get_package_name_from_path(package_path)
-    result = {"name": pkg_name, "has_entry_points": False, "is_pure_python": True, "error": None}
+    result = {
+        "name": pkg_name,
+        "has_entry_points": False,
+        "is_pure_python": True,
+        "error": None,
+    }
     try:
         has_entry_points = False
         dist_info_patterns = [
@@ -204,7 +218,9 @@ def main():
         default="noep_nopure.txt",
         help="Output file for non-pure packages (default: noep_nopure.txt)",
     )
-    parser.add_argument("-j", "--json", action="store_true", help="Output in JSON format")
+    parser.add_argument(
+        "-j", "--json", action="store_true", help="Output in JSON format"
+    )
     parser.add_argument(
         "-p",
         "--processes",
@@ -212,7 +228,9 @@ def main():
         default=None,
         help=f"Number of processes to use (default: {cpu_count()})",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Print verbose output"
+    )
     args = parser.parse_args()
     site_dirs = get_site_packages_dirs()
     if not site_dirs:

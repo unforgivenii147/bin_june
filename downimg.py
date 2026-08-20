@@ -13,15 +13,27 @@ class ImageDownscaler:
     def __init__(self, root_dir: str = ".", scale_factor: float = 0.5):
         self.root_dir = Path(root_dir)
         self.scale_factor = scale_factor
-        self.supported_formats = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp"}
+        self.supported_formats = {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".bmp",
+            ".tiff",
+            ".gif",
+            ".webp",
+        }
         print("-" * 42)
         print("IMAGE DOWNSCALER")
         print("-" * 42)
         print(f"[INIT] Root directory: {self.root_dir.resolve()}")
-        print(f"[INIT] Scale factor: {scale_factor} (new size = original × {scale_factor})")
+        print(
+            f"[INIT] Scale factor: {scale_factor} (new size = original × {scale_factor})"
+        )
         print(f"[INIT] CPU cores available: {cpu_count()}")
         if not 0 < scale_factor <= 1.0:
-            raise ValueError("Scale factor must be between 0 (exclusive) and 1.0 (inclusive)")
+            raise ValueError(
+                "Scale factor must be between 0 (exclusive) and 1.0 (inclusive)"
+            )
         if scale_factor == 1.0:
             print("[WARN] Scale factor is 1.0 - no downscaling will occur")
 
@@ -98,7 +110,9 @@ class ImageDownscaler:
                 rel_path = image_path.relative_to(self.root_dir)
                 print(f"{status}  {rel_path:<50} {message}")
         print("-" * 42)
-        print(f"[SUMMARY] Successful: {successful} | Failed: {failed} | Total: {len(image_paths)}")
+        print(
+            f"[SUMMARY] Successful: {successful} | Failed: {failed} | Total: {len(image_paths)}"
+        )
 
     def run(self) -> None:
         image_paths = self.get_all_images()

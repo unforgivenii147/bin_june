@@ -46,7 +46,9 @@ class DiskAnalyzer:
             return FSItem(path=path, name=path.name, is_dir=False, size=0, flag="@")
         if path.is_file():
             try:
-                return FSItem(path=path, name=path.name, is_dir=False, size=path.stat().st_size)
+                return FSItem(
+                    path=path, name=path.name, is_dir=False, size=path.stat().st_size
+                )
             except Exception:
                 return FSItem(path=path, name=path.name, is_dir=False, size=0, flag="!")
         dir_item = FSItem(path=path, name=path.name, is_dir=True)

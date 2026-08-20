@@ -43,7 +43,9 @@ def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
     before = gsz(cwd)
-    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".css", ".min.css"])
+    files = (
+        [Path(p) for p in args] if args else get_files(cwd, ext=[".css", ".min.css"])
+    )
     _ = mpf3(process_file, files)
     diff_size = before - gsz(cwd)
     cprint(f"space freed : {fsz(diff_size)}", "green")

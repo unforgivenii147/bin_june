@@ -1,13 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Detect and optionally remove repeated multi-line blocks in all text-based files
-under the current directory.
-Repeated means the exact same consecutive group of lines (2 or more lines)
-appears in at least two places (across files or within the same file).
-Uses multiprocessing with joblib for speedup.
-Excluded lines:
-  - Shebang lines (e.g.,
-"""
 
 from __future__ import annotations
 
@@ -30,7 +21,9 @@ def is_text_file(filepath: Path) -> bool:
         return False
 
 
-def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> list[tuple[str, int, list[str]]]:
+def extract_blocks_from_file(
+    filepath: Path, min_lines: int = 2
+) -> list[tuple[str, int, list[str]]]:
     try:
         with open(filepath, encoding="utf-8", errors="replace") as f:
             lines = f.readlines()
@@ -63,7 +56,9 @@ def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> list[tuple[s
 def collect_blocks_parallel(
     root: Path, min_lines: int = 2, n_jobs: int = 8
 ) -> dict[str, list[tuple[Path, int, list[str]]]]:
-    all_files = [path for path in root.rglob("*") if path.is_file() and is_text_file(path)]
+    all_files = [
+        path for path in root.rglob("*") if path.is_file() and is_text_file(path)
+    ]
     total_files = len(all_files)
     if not total_files:
         return defaultdict(list)
@@ -109,7 +104,9 @@ def report(repeated: dict[str, list[tuple[Path, int, list[str]]]], root: Path) -
             print(f"    {rel_path}:{lineno}")
 
 
-def process_file_removal(filepath: Path, removals: list[tuple[int, list[str]]], root: Path) -> tuple[Path, int, bool]:
+def process_file_removal(
+    filepath: Path, removals: list[tuple[int, list[str]]], root: Path
+) -> tuple[Path, int, bool]:
     try:
         with open(filepath, encoding="utf-8", errors="replace") as f:
             original_lines = f.readlines()
@@ -123,7 +120,9 @@ def process_file_removal(filepath: Path, removals: list[tuple[int, list[str]]], 
     if any(idx >= len(original_lines) for idx in lines_to_remove):
         print(f"Warning: Invalid line numbers in {filepath}", file=sys.stderr)
         return filepath, 0, False
-    new_lines = [line for idx, line in enumerate(original_lines) if idx not in lines_to_remove]
+    new_lines = [
+        line for idx, line in enumerate(original_lines) if idx not in lines_to_remove
+    ]
     removed_count = len(original_lines) - len(new_lines)
     if removed_count == 0:
         return filepath, 0, False
@@ -149,7 +148,9 @@ def process_file_removal(filepath: Path, removals: list[tuple[int, list[str]]], 
         return filepath, 0, False
 
 
-def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]], root: Path, n_jobs: int = 8) -> None:
+def remove_repeated_blocks(
+    repeated: dict[str, list[tuple[Path, int, list[str]]]], root: Path, n_jobs: int = 8
+) -> None:
     file_removals: dict[Path, list[tuple[int, list[str]]]] = defaultdict(list)
     for _block_text, occurrences in repeated.items():
         for filepath, start_lineno, original_lines in occurrences:
@@ -159,7 +160,8 @@ def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]
         return
     print(f"Removing blocks from {len(file_removals)} files...", file=sys.stderr)
     results = Parallel(n_jobs=n_jobs, prefer="threads", verbose=0)(
-        delayed(process_file_removal)(path, removals, root) for path, removals in file_removals.items()
+        delayed(process_file_removal)(path, removals, root)
+        for path, removals in file_removals.items()
     )
     removed_total = 0
     files_changed = 0
@@ -173,7 +175,9 @@ def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]
                 rel_path = filepath
             print(f"Removed {file_removed} line(s) from {rel_path}")
     if files_changed > 0:
-        print(f"\nDone. Removed {removed_total} repeated line(s) from {files_changed} file(s).")
+        print(
+            f"\nDone. Removed {removed_total} repeated line(s) from {files_changed} file(s)."
+        )
     else:
         print("No files were modified.")
 
@@ -192,13 +196,18 @@ def main() -> None:
         default=2,
         help="Minimum consecutive lines to consider a block (default: 2)",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=8, help="Number of parallel jobs (default: 8)")
+    parser.add_argument(
+        "-j", "--jobs", type=int, default=8, help="Number of parallel jobs (default: 8)"
+    )
     args = parser.parse_args()
     root = Path.cwd()
     start_time = time.time()
     blocks = collect_blocks_parallel(root, args.min_lines, args.jobs)
     scan_time = time.time() - start_time
-    print(f"Scan completed in {scan_time:.2f}s, found {len(blocks)} unique blocks", file=sys.stderr)
+    print(
+        f"Scan completed in {scan_time:.2f}s, found {len(blocks)} unique blocks",
+        file=sys.stderr,
+    )
     repeated = find_repeated_blocks(blocks)
     if args.remove:
         if not repeated:

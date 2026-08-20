@@ -83,7 +83,11 @@ def scan_dir(path: Path, args: Namespace):
         return []
     if not args.a:
         if args.A:
-            entries = [e for e in entries if e.name not in {".", ".."} and not e.name.startswith(".")]
+            entries = [
+                e
+                for e in entries
+                if e.name not in {".", ".."} and not e.name.startswith(".")
+            ]
         else:
             entries = [e for e in entries if not e.name.startswith(".")]
 

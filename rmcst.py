@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -107,7 +106,9 @@ class StripTransformer(cst.CSTTransformer):
     ) -> cst.ClassDef:
         body = updated_node.body
         if isinstance(body, cst.IndentedBlock):
-            return updated_node.with_changes(body=body.with_changes(body=self._strip_suite(body.body)))
+            return updated_node.with_changes(
+                body=body.with_changes(body=self._strip_suite(body.body))
+            )
         return updated_node
 
 

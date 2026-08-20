@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import ast
 from ast import Call
-from os import scandir as os_scandir
 from pathlib import Path
 
 from dh import get_pyfiles

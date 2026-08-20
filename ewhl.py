@@ -55,7 +55,9 @@ def move_empty_wheels(source_dir, dest_dir_name: str = "empty_wheels") -> None:
         if dest_file.exists():
             counter = 1
             while dest_file.exists():
-                dest_file = dest_path / f"{wheel_file.stem}_{counter}{wheel_file.suffix}"
+                dest_file = (
+                    dest_path / f"{wheel_file.stem}_{counter}{wheel_file.suffix}"
+                )
                 counter += 1
         shutil.move(str(wheel_file), str(dest_file))
         print(f"Moved: {wheel_file.name} -> {dest_dir_name}/{dest_file.name}")
@@ -81,7 +83,9 @@ def main() -> None:
         default="empty_wheels",
         help="Destination subdirectory name (default: 'empty_wheels')",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed output")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Show detailed output"
+    )
     args = parser.parse_args()
     directory_path = Path(args.directory)
     if not directory_path.exists():

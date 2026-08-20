@@ -20,7 +20,11 @@ def parse_file_definitions(file_path: Path) -> dict:
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             node_key = ("function", node.name, ast.unparse(node))
-            definitions[node_key] = {"name": node.name, "type": "function", "node": node}
+            definitions[node_key] = {
+                "name": node.name,
+                "type": "function",
+                "node": node,
+            }
         elif isinstance(node, ast.ClassDef):
             node_key = ("class", node.name, ast.unparse(node))
             definitions[node_key] = {"name": node.name, "type": "class", "node": node}
@@ -32,7 +36,9 @@ def parse_file_definitions(file_path: Path) -> dict:
     return {node_key: (str(file_path), data) for node_key, data in definitions.items()}
 
 
-def modify_affected_file(file_path_str: str, obj_name: str, obj_type: str, raw_obj_code: str) -> str:
+def modify_affected_file(
+    file_path_str: str, obj_name: str, obj_type: str, raw_obj_code: str
+) -> str:
     file_path = Path(file_path_str)
     source = file_path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(file_path))
@@ -53,7 +59,9 @@ def modify_affected_file(file_path_str: str, obj_name: str, obj_type: str, raw_o
         new_body.append(node)
     if not removed:
         return source
-    import_node = ast.ImportFrom(module="dh", names=[ast.alias(name=obj_name, asname=None)], level=0)
+    import_node = ast.ImportFrom(
+        module="dh", names=[ast.alias(name=obj_name, asname=None)], level=0
+    )
     new_body.insert(0, import_node)
     tree.body = new_body
     modified_source = ast.unparse(tree)
@@ -75,7 +83,11 @@ def main():
     current_dir = Path(".")
     dh_path = current_dir / "dh.py"
     script_path = Path(__file__).resolve()
-    py_files = [f for f in current_dir.rglob("*.py") if f.resolve() != script_path and f.resolve() != dh_path.resolve()]
+    py_files = [
+        f
+        for f in current_dir.rglob("*.py")
+        if f.resolve() != script_path and f.resolve() != dh_path.resolve()
+    ]
     if not py_files:
         print("🔍 No Python files found to scan.")
         return
@@ -97,7 +109,9 @@ def main():
     files_to_update = defaultdict(list)
     for (obj_type, obj_name, raw_code), occurrences in duplicates.items():
         files_listed = [occ[0] for occ in occurrences]
-        print(f"[{obj_type.upper()}] '{obj_name}' is repeated in {len(files_listed)} files:")
+        print(
+            f"[{obj_type.upper()}] '{obj_name}' is repeated in {len(files_listed)} files:"
+        )
         for f in files_listed:
             print(f"   -> {f}")
         print()
@@ -116,7 +130,9 @@ def main():
             dh_path.write_text(new_dh_content, encoding="utf-8")
             print(f"✅ Extracted duplicate definitions safely written to: {dh_path}")
         except Exception as e:
-            print(f"❌ Aborted: Merged definitions inside dh.py failed AST parsing logic: {e}")
+            print(
+                f"❌ Aborted: Merged definitions inside dh.py failed AST parsing logic: {e}"
+            )
             sys.exit(1)
         updated_count = 0
         for file_str, objects in files_to_update.items():
@@ -124,12 +140,16 @@ def main():
                 current_file_path = Path(file_str)
                 updated_source = current_file_path.read_text(encoding="utf-8")
                 for obj_name, obj_type, raw_code in objects:
-                    updated_source = modify_affected_file(file_str, obj_name, obj_type, raw_code)
+                    updated_source = modify_affected_file(
+                        file_str, obj_name, obj_type, raw_code
+                    )
                 current_file_path.write_text(updated_source, encoding="utf-8")
                 print(f"✅ In-place code updated & verified: {file_str}")
                 updated_count += 1
             except Exception as e:
-                print(f"❌ Failed to parse or modify file safely {file_str}: {e}. Skipping structural changes.")
+                print(
+                    f"❌ Failed to parse or modify file safely {file_str}: {e}. Skipping structural changes."
+                )
         print(f"\n📊 Refactor complete. Adjusted and verified {updated_count} files.")
 
 

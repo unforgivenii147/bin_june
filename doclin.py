@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove image references (including shields.io badges) from .rst and .md files.
-Processes files in parallel and reports statistics.
-"""
 
 from __future__ import annotations
 
@@ -11,7 +7,6 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -28,9 +23,15 @@ class FileStats:
 RST_IMAGE_PATTERNS = [
     re.compile(r"^\s*\.\.\s+image::\s+https?://[^\s]+", re.IGNORECASE | re.MULTILINE),
     re.compile(r"^\s*\.\.\s+figure::\s+https?://[^\s]+", re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^\s*\.\.\s+\|.*\|\s+image::\s+https?://[^\s]+", re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^\s*\.\.\s+image::\s+(?!https?://)[^\s]+", re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^\s*\.\.\s+figure::\s+(?!https?://)[^\s]+", re.IGNORECASE | re.MULTILINE),
+    re.compile(
+        r"^\s*\.\.\s+\|.*\|\s+image::\s+https?://[^\s]+", re.IGNORECASE | re.MULTILINE
+    ),
+    re.compile(
+        r"^\s*\.\.\s+image::\s+(?!https?://)[^\s]+", re.IGNORECASE | re.MULTILINE
+    ),
+    re.compile(
+        r"^\s*\.\.\s+figure::\s+(?!https?://)[^\s]+", re.IGNORECASE | re.MULTILINE
+    ),
     re.compile(
         r"^\s*\.\.\s+\|.*\|\s+replace::\s+https?://[^\s]+\.(?:png|jpg|jpeg|gif|svg|ico)(?:\?[^\s]*)?",
         re.IGNORECASE | re.MULTILINE,
@@ -41,7 +42,10 @@ MD_IMAGE_PATTERNS = [
     re.compile(r"!\[.*?\]\(https?://[^\)]+\)", re.MULTILINE),
     re.compile(r"!\[.*?\]\((?!https?://)[^\)]+\)", re.MULTILINE),
     re.compile(r'<img[^>]+src\s*=\s*["\'][^"\']+["\'][^>]*>', re.IGNORECASE),
-    re.compile(r"^\[.*?\]:\s+https?://[^\s]+\.(?:png|jpg|jpeg|gif|svg|ico)(?:\?[^\s]*)?", re.IGNORECASE | re.MULTILINE),
+    re.compile(
+        r"^\[.*?\]:\s+https?://[^\s]+\.(?:png|jpg|jpeg|gif|svg|ico)(?:\?[^\s]*)?",
+        re.IGNORECASE | re.MULTILINE,
+    ),
 ]
 BADGE_DOMAINS = [
     "shields.io",
@@ -115,7 +119,9 @@ def remove_image_lines_md(content: str) -> tuple[str, int]:
     for line in lines:
         original_line = line
         should_remove = False
-        linked_badge_pattern = re.compile(r"^\[!\[.*?\]\(https?://[^\)]+\)\]\(https?://[^\)]+\)")
+        linked_badge_pattern = re.compile(
+            r"^\[!\[.*?\]\(https?://[^\)]+\)\]\(https?://[^\)]+\)"
+        )
         if linked_badge_pattern.match(line):
             should_remove = True
         if not should_remove:
@@ -140,11 +146,7 @@ def remove_image_lines_md(content: str) -> tuple[str, int]:
         if should_remove:
             removed_count += 1
         else:
-            if line.strip():
-                new_lines.append(line)
-            elif new_lines and new_lines[-1].strip():
-                new_lines.append(line)
-            elif not new_lines:
+            if line.strip() or new_lines and new_lines[-1].strip() or not new_lines:
                 new_lines.append(line)
     while new_lines and not new_lines[-1].strip():
         new_lines.pop()
@@ -154,7 +156,7 @@ def remove_image_lines_md(content: str) -> tuple[str, int]:
     return result, removed_count
 
 
-def process_file(file_path: Path) -> Optional[FileStats]:
+def process_file(file_path: Path) -> FileStats | None:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -192,10 +194,16 @@ def collect_files(directories: list[Path]) -> list[Path]:
     files = []
     for directory in directories:
         if not directory.exists():
-            print(f"Warning: Directory '{directory}' does not exist, skipping...", file=sys.stderr)
+            print(
+                f"Warning: Directory '{directory}' does not exist, skipping...",
+                file=sys.stderr,
+            )
             continue
         if not directory.is_dir():
-            print(f"Warning: '{directory}' is not a directory, skipping...", file=sys.stderr)
+            print(
+                f"Warning: '{directory}' is not a directory, skipping...",
+                file=sys.stderr,
+            )
             continue
         for ext in ["*.rst", "*.md"]:
             files.extend(directory.rglob(ext))
@@ -228,7 +236,9 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
         change_symbol = "↓" if size_change > 0 else "→"
         print(f"\n📄 {rel_path}")
         print(f"   ├─ Image references removed: {stats.removed_refs}")
-        print(f"   ├─ Lines: {stats.lines_before} → {stats.lines_after} ({stats.removed_lines:+d})")
+        print(
+            f"   ├─ Lines: {stats.lines_before} → {stats.lines_after} ({stats.removed_lines:+d})"
+        )
         print(
             f"   ├─ Size: {fsz(stats.size_before)} → {fsz(stats.size_after)} ({change_symbol} {fsz(abs(size_change))})"
         )
@@ -244,13 +254,17 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
     print("-" * 42)
     print(f"Files modified: {len(all_stats)}")
     print(f"Total image references removed: {total_removed_refs}")
-    print(f"Total lines: {total_lines_before} → {total_lines_after} ({total_lines_before - total_lines_after:+d})")
+    print(
+        f"Total lines: {total_lines_before} → {total_lines_after} ({total_lines_before - total_lines_after:+d})"
+    )
     print(
         f"Total size: {fsz(total_size_before)} → {fsz(total_size_after)} "
         f"({fsz(total_size_before - total_size_after)} saved)"
     )
     if total_size_before > 0:
-        print(f"Overall reduction: {((total_size_before - total_size_after) / total_size_before * 100):.1f}%")
+        print(
+            f"Overall reduction: {((total_size_before - total_size_after) / total_size_before * 100):.1f}%"
+        )
     print("-" * 42)
 
 
@@ -278,7 +292,10 @@ def main():
                 if stats:
                     stats_list.append(stats)
                 if completed % 10 == 0 or completed == len(files):
-                    print(f"  Progress: {completed}/{len(files)} files processed", end="\r")
+                    print(
+                        f"  Progress: {completed}/{len(files)} files processed",
+                        end="\r",
+                    )
             except Exception as e:
                 print(f"\nError processing {file}: {e}", file=sys.stderr)
     print(f"\n✅ Processed {len(files)} files")

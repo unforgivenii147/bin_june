@@ -94,8 +94,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Morse Code Encryptor/Decryptor")
     parser.add_argument("input_file", help="Input file name")
     parser.add_argument("output_file", help="Output file name")
-    parser.add_argument("--encrypt", action="store_true", help="Encrypt text to Morse code")
-    parser.add_argument("--decrypt", action="store_true", help="Decrypt Morse code to text")
+    parser.add_argument(
+        "--encrypt", action="store_true", help="Encrypt text to Morse code"
+    )
+    parser.add_argument(
+        "--decrypt", action="store_true", help="Decrypt Morse code to text"
+    )
     args = parser.parse_args()
     if args.encrypt and args.decrypt:
         sys.exit(1)

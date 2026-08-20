@@ -194,12 +194,15 @@ class DiffViewerApp(App):
                 panels.first().focus()
 
     def action_search(self) -> None:
+
         def on_input(submitted_text: str) -> None:
             if submitted_text:
                 self.search_term = submitted_text
                 self.highlight_search_results()
 
-        self.push_screen("input", on_input, title="Search", instructions="Enter text to search for:")
+        self.push_screen(
+            "input", on_input, title="Search", instructions="Enter text to search for:"
+        )
 
     def highlight_search_results(self) -> None:
         if not self.search_term:

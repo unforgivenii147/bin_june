@@ -1,37 +1,22 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Replace literal \n with actual newlines in files.
-
-Features:
-- Parallel processing with joblib (4 workers)
-- Handles multiple files/directories recursively
-- In-place file updates
-- Detailed statistics reporting
-- Streaming/chunked processing for memory efficiency
-- Comprehensive error handling
-- Python 3.12+ compatible
-"""
 
 import argparse
 import logging
 import shutil
 import sys
 import tempfile
+from collections.abc import Generator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator
 
 from joblib import Parallel, delayed
 
-# Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)-8s %(message)s")
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class FileStats:
-    """Statistics for a processed file."""
-
     filepath: Path
     success: bool
     replacements: int = 0
@@ -44,25 +29,22 @@ class FileStats:
         if not self.success:
             return f"✗ {relpath}: {self.error_msg}"
         size_delta = self.new_size - self.original_size
-        size_change = f"({size_delta:+d} bytes)" if size_delta != 0 else "(no size change)"
+        size_change = (
+            f"({size_delta:+d} bytes)" if size_delta != 0 else "(no size change)"
+        )
         return f"✓ {relpath}: {self.replacements} replacements {size_change}"
 
 
 def is_text_file(filepath: Path, max_sample: int = 8192) -> bool:
-    """
-    Efficiently check if a file is likely text-based.
-    Reads first few bytes to detect null bytes (binary indicator).
-    """
     try:
         with open(filepath, "rb") as f:
             chunk = f.read(max_sample)
             return b"\x00" not in chunk
-    except (OSError, IOError):
+    except OSError:
         return False
 
 
 def should_process_file(filepath: Path, text_only: bool = True) -> bool:
-    """Check if a file should be processed."""
     if filepath.is_dir() or filepath.is_symlink():
         return False
     if text_only and not is_text_file(filepath):
@@ -71,10 +53,6 @@ def should_process_file(filepath: Path, text_only: bool = True) -> bool:
 
 
 def collect_files(inputs: list[str | Path]) -> Generator[Path, None, None]:
-    """
-    Collect all files to process from given paths.
-    Recursively traverses directories.
-    """
     for input_path in inputs:
         path = Path(input_path).resolve()
 
@@ -91,29 +69,22 @@ def collect_files(inputs: list[str | Path]) -> Generator[Path, None, None]:
 
 def process_file_chunked(
     filepath: Path,
-    chunk_size: int = 1024 * 1024,  # 1MB chunks
+    chunk_size: int = 1024 * 1024,
 ) -> FileStats:
-    """
-    Process a file in chunks to handle large files memory-efficiently.
-    Replaces literal '\\n' with actual newlines.
-    """
     stats = FileStats(filepath=filepath, success=True)
 
     try:
-        # Get original file size
         stats.original_size = filepath.stat().st_size
 
-        # Use temp file for atomic write
         with tempfile.NamedTemporaryFile(
             mode="w",
             delete=False,
             encoding="utf-8",
-            newline="",  # Preserve original line endings
+            newline="",
         ) as temp_file:
             temp_path = Path(temp_file.name)
 
             try:
-                # Read and process in chunks
                 total_replacements = 0
 
                 with open(filepath, "r", encoding="utf-8", errors="replace") as f:
@@ -121,18 +92,17 @@ def process_file_chunked(
                     while True:
                         chunk = f.read(chunk_size)
                         if not chunk:
-                            # Process remaining buffer
                             if buffer:
-                                new_buffer, count = buffer.replace("\\n", "\n"), buffer.count("\\n")
+                                new_buffer, count = (
+                                    buffer.replace("\\n", "\n"),
+                                    buffer.count("\\n"),
+                                )
                                 temp_file.write(new_buffer)
                                 total_replacements += count
                             break
 
-                        # Keep partial escape sequences across chunk boundaries
                         buffer += chunk
 
-                        # Find last complete non-escape position
-                        # Process all but potentially incomplete trailing escape
                         last_safe_pos = len(buffer)
                         if buffer.endswith("\\"):
                             last_safe_pos -= 1
@@ -140,8 +110,10 @@ def process_file_chunked(
                         processable = buffer[:last_safe_pos]
                         buffer = buffer[last_safe_pos:]
 
-                        # Replace and count
-                        new_content, count = processable.replace("\\n", "\n"), processable.count("\\n")
+                        new_content, count = (
+                            processable.replace("\\n", "\n"),
+                            processable.count("\\n"),
+                        )
                         temp_file.write(new_content)
                         total_replacements += count
 
@@ -153,10 +125,8 @@ def process_file_chunked(
 
             temp_path.chmod(filepath.stat().st_mode)
 
-        # Get new file size
         stats.new_size = temp_path.stat().st_size
 
-        # Atomic replace
         shutil.move(str(temp_path), str(filepath))
 
     except UnicodeDecodeError as e:
@@ -181,7 +151,6 @@ def process_file_chunked(
 
 
 def main() -> int:
-    """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Replace literal \\n with actual newlines in files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -194,20 +163,38 @@ Examples:
         """,
     )
 
-    parser.add_argument("inputs", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
     parser.add_argument(
-        "-c", "--chunk-size", default="1M", help="Chunk size for streaming (default: 1M, e.g., 512K, 2M)"
+        "inputs",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
     )
-    parser.add_argument("--include-binary", action="store_true", help="Process binary files (not recommended)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed logging")
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4)",
+    )
+    parser.add_argument(
+        "-c",
+        "--chunk-size",
+        default="1M",
+        help="Chunk size for streaming (default: 1M, e.g., 512K, 2M)",
+    )
+    parser.add_argument(
+        "--include-binary",
+        action="store_true",
+        help="Process binary files (not recommended)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Show detailed logging"
+    )
 
     args = parser.parse_args()
 
     if args.verbose:
         logger.setLevel(logging.DEBUG)
 
-    # Parse chunk size
     chunk_size_str = args.chunk_size.upper()
     multipliers = {"K": 1024, "M": 1024**2, "G": 1024**3}
     try:
@@ -219,14 +206,12 @@ Examples:
         logger.error(f"Invalid chunk size: {args.chunk_size}")
         return 1
 
-    # Determine inputs
     if not args.inputs:
         inputs = [Path.cwd()]
         logger.info("No inputs provided, processing current directory recursively")
     else:
         inputs = args.inputs
 
-    # Collect files
     files = list(collect_files(inputs))
 
     if not files:
@@ -236,12 +221,10 @@ Examples:
     logger.info(f"Found {len(files)} files to process")
     logger.info(f"Starting parallel processing with {args.workers} workers")
 
-    # Process files in parallel
     results = Parallel(n_jobs=args.workers, verbose=0)(
         delayed(process_file_chunked)(filepath, chunk_size) for filepath in files
     )
 
-    # Report statistics
     print("\n" + "=" * 70)
     print("PROCESSING RESULTS")
     print("=" * 70)
@@ -260,7 +243,9 @@ Examples:
     failed = len(results) - successful
 
     print("=" * 70)
-    print(f"Summary: {successful} succeeded, {failed} failed out of {len(results)} files")
+    print(
+        f"Summary: {successful} succeeded, {failed} failed out of {len(results)} files"
+    )
     print(f"Total replacements: {total_replacements}")
     print(f"Total size change: {total_size_change:+d} bytes")
     print("=" * 70 + "\n")

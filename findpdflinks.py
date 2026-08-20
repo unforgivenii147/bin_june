@@ -54,7 +54,9 @@ def crawl_for_pdfs(start_url: str, max_pages: int = 100, delay: float = 1.0):
                 pdf_urls.add(url)
                 print(f"  📄 PDF (via Content-Type): {url}")
                 continue
-            if "html" not in content_type and not url.lower().endswith((".html", ".htm")):
+            if "html" not in content_type and not url.lower().endswith(
+                (".html", ".htm")
+            ):
                 continue
             soup = BeautifulSoup(resp.content, "html.parser")
             for a in soup.find_all("a", href=True):
@@ -69,7 +71,8 @@ def crawl_for_pdfs(start_url: str, max_pages: int = 100, delay: float = 1.0):
                     print(f"  📄 PDF (via link): {full_url}")
                 elif full_url not in visited:
                     if not any(
-                        full_url.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".gif", ".css", ".js")
+                        full_url.lower().endswith(ext)
+                        for ext in (".jpg", ".jpeg", ".png", ".gif", ".css", ".js")
                     ):
                         queue.append(full_url)
         except requests.RequestException as e:

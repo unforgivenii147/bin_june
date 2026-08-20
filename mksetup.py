@@ -65,13 +65,22 @@ def read_metadata(root: Path) -> dict:
 
 
 def find_extensions(root: Path) -> list[str]:
-    return [".".join(f.relative_to(root).with_suffix("").parts) for f in root.rglob("*") if f.suffix in EXT_SUFFIXES]
+    return [
+        ".".join(f.relative_to(root).with_suffix("").parts)
+        for f in root.rglob("*")
+        if f.suffix in EXT_SUFFIXES
+    ]
 
 
-def generate_setup_py(meta: dict, extensions: list[str], entry_points: dict[str, list[str]]) -> str:
+def generate_setup_py(
+    meta: dict, extensions: list[str], entry_points: dict[str, list[str]]
+) -> str:
     ext_block = (
         "from setuptools import Extension\n\next_modules = [\n"
-        + "\n".join(f"""    Extension("{m}", sources=["{m.replace(".", "/")}.*"]),""" for m in extensions)
+        + "\n".join(
+            f"""    Extension("{m}", sources=["{m.replace(".", "/")}.*"]),"""
+            for m in extensions
+        )
         + "\n]\n"
         if extensions
         else "ext_modules = []\n"

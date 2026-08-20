@@ -34,7 +34,9 @@ def get_matching_packages(pattern: str) -> list[str]:
     return matching
 
 
-def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -> tuple[list[str], list[str]]:
+def resolve_package_list(
+    patterns: list[str], entry_points_only: bool = False
+) -> tuple[list[str], list[str]]:
     if entry_points_only:
         packages_with_eps = get_packages_with_entry_points()
         if not patterns:
@@ -43,7 +45,11 @@ def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -
         unmatched_patterns = []
         for pattern in patterns:
             if any(c in pattern for c in "*?[]"):
-                matches = [pkg for pkg in packages_with_eps if fnmatch.fnmatch(pkg.lower(), pattern.lower())]
+                matches = [
+                    pkg
+                    for pkg in packages_with_eps
+                    if fnmatch.fnmatch(pkg.lower(), pattern.lower())
+                ]
                 if matches:
                     matched_packages.extend(matches)
                 else:
@@ -74,7 +80,9 @@ def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -
         return matched_packages, unmatched_patterns
 
 
-def copy_single_file(record_row: list[str], dist_location: Path, target_dir: Path) -> bool:
+def copy_single_file(
+    record_row: list[str], dist_location: Path, target_dir: Path
+) -> bool:
     if not record_row:
         return False
     relative_path_str = record_row[0]
@@ -127,7 +135,10 @@ def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> st
         return f"❌ Failed to parse RECORD file for '{pkg_name}': {e}"
     copied_count = 0
     with concurrent.futures.ThreadPoolExecutor() as file_executor:
-        futures = [file_executor.submit(copy_single_file, row, dist_location, pkg_target_dir) for row in records]
+        futures = [
+            file_executor.submit(copy_single_file, row, dist_location, pkg_target_dir)
+            for row in records
+        ]
         for future in concurrent.futures.as_completed(futures):
             if future.result():
                 copied_count += 1
@@ -153,7 +164,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "patterns", nargs="*", help='Package names or wildcard patterns (e.g., "a*" for all packages starting with "a")'
+        "patterns",
+        nargs="*",
+        help='Package names or wildcard patterns (e.g., "a*" for all packages starting with "a")',
     )
     parser.add_argument(
         "-e",
@@ -161,13 +174,21 @@ def main():
         action="store_true",
         help="Extract only packages that have entry points (console scripts, plugins, etc.)",
     )
-    parser.add_argument("--list-only", action="store_true", help="Only list matching packages without extracting")
     parser.add_argument(
-        "--show-entry-points", action="store_true", help="Show detailed entry point information when listing"
+        "--list-only",
+        action="store_true",
+        help="Only list matching packages without extracting",
+    )
+    parser.add_argument(
+        "--show-entry-points",
+        action="store_true",
+        help="Show detailed entry point information when listing",
     )
     args = parser.parse_args()
     if not args.entry_points and not args.patterns:
-        parser.error("Either provide package patterns or use -e flag for entry point packages")
+        parser.error(
+            "Either provide package patterns or use -e flag for entry point packages"
+        )
     matched_packages, unmatched_patterns = resolve_package_list(
         args.patterns if args.patterns else [], args.entry_points
     )
@@ -188,7 +209,9 @@ def main():
     if args.entry_points:
         print(f"📦 Found {len(matched_packages)} package(s) with entry points:")
     else:
-        print(f"📦 Found {len(matched_packages)} matching package(s) with entry points:")
+        print(
+            f"📦 Found {len(matched_packages)} matching package(s) with entry points:"
+        )
     for pkg in matched_packages:
         if args.show_entry_points or args.list_only:
             try:
@@ -223,7 +246,8 @@ def main():
     print(f"🔄 Extracting {len(packages_to_extract)} packages with entry points...")
     with concurrent.futures.ThreadPoolExecutor() as pkg_executor:
         future_to_pkg = {
-            pkg_executor.submit(process_package, pkg, user_site, base_target_dir): pkg for pkg in packages_to_extract
+            pkg_executor.submit(process_package, pkg, user_site, base_target_dir): pkg
+            for pkg in packages_to_extract
         }
         for future in concurrent.futures.as_completed(future_to_pkg):
             pkg_name = future_to_pkg[future]
@@ -231,7 +255,9 @@ def main():
                 result_message = future.result()
                 print(result_message)
             except Exception as exc:
-                print(f"❌ Package '{pkg_name}' generated an unhandled exception: {exc}")
+                print(
+                    f"❌ Package '{pkg_name}' generated an unhandled exception: {exc}"
+                )
 
 
 if __name__ == "__main__":

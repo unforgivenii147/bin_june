@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Reverse inlined functions by replacing with dh package imports."""
 
 from __future__ import annotations
 
@@ -17,7 +16,11 @@ def normalize_function_source(node: ast.FunctionDef) -> str:
         body=[
             n
             for n in node.body
-            if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str))
+            if not (
+                isinstance(n, ast.Expr)
+                and isinstance(n.value, ast.Constant)
+                and isinstance(n.value.value, str)
+            )
         ],
         decorator_list=node.decorator_list,
         returns=node.returns,
@@ -70,7 +73,10 @@ def get_function_source_lines(filepath: Path, func_name: str) -> int:
 
 
 def transform_file(
-    filepath: Path, dh_functions: dict[str, tuple[str, str]], apply: bool, debug: bool = False
+    filepath: Path,
+    dh_functions: dict[str, tuple[str, str]],
+    apply: bool,
+    debug: bool = False,
 ) -> tuple[Path, bool, str]:
     try:
         content = filepath.read_text()
@@ -106,7 +112,9 @@ def transform_file(
     import_added = False
     skip_next_funcs = to_import
     for node in tree.body:
-        is_removable_func = isinstance(node, ast.FunctionDef) and node.name in skip_next_funcs
+        is_removable_func = (
+            isinstance(node, ast.FunctionDef) and node.name in skip_next_funcs
+        )
         if is_removable_func:
             if not import_added:
                 import_line = f"from dh import {', '.join(sorted(to_import))}\n"
@@ -128,7 +136,11 @@ def transform_file(
         filepath.write_text(new_content)
         return filepath, True, f"Updated {filepath.name}: removed {sorted(to_import)}"
     else:
-        return filepath, False, f"Would update {filepath.name}: remove {sorted(to_import)}"
+        return (
+            filepath,
+            False,
+            f"Would update {filepath.name}: remove {sorted(to_import)}",
+        )
 
 
 def main():
@@ -175,7 +187,10 @@ def main():
     print(f"Mode: {mode}\n")
     updated_count = 0
     with ProcessPoolExecutor() as executor:
-        futures = {executor.submit(transform_file, f, dh_functions, args.apply, args.debug): f for f in target_files}
+        futures = {
+            executor.submit(transform_file, f, dh_functions, args.apply, args.debug): f
+            for f in target_files
+        }
         for future in as_completed(futures):
             _filepath, updated, message = future.result()
             if message:

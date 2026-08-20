@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Fix mis-extracted .zst files where a directory contains a file with the same name.
-Example: __init__.py/__init__.py -> __init__.py (file)
-"""
 
 from __future__ import annotations
 
@@ -13,7 +9,9 @@ from pathlib import Path
 
 def fix_mis_extracted(root_dir: Path, dry_run: bool = True, verbose: bool = True):
     fixed = 0
-    for dir_path in sorted(root_dir.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+    for dir_path in sorted(
+        root_dir.rglob("*"), key=lambda p: len(p.parts), reverse=True
+    ):
         if not dir_path.is_dir():
             continue
         contents = list(dir_path.iterdir())
@@ -69,7 +67,9 @@ def main():
         description="Fix directories containing a file with the same name (mis-extracted .zst files)"
     )
     parser.add_argument("-d", "--dir", default=".", help="Root directory to scan")
-    parser.add_argument("--fix", action="store_true", help="Apply fixes (default: dry-run)")
+    parser.add_argument(
+        "--fix", action="store_true", help="Apply fixes (default: dry-run)"
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args()
     root = Path(args.dir).resolve()

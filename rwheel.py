@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Repack site-packages packages into wheel files.
-Works in Termux with Python 3.12.
-"""
 
 from __future__ import annotations
 
@@ -85,7 +81,8 @@ def collect_package_files(pkg_path, verbose=False):
     if bin_path.exists():
         for script_path in bin_path.glob("*"):
             if script_path.is_file() and (
-                script_path.name.startswith(pkg_path.name) or script_path.name == pkg_path.name
+                script_path.name.startswith(pkg_path.name)
+                or script_path.name == pkg_path.name
             ):
                 rel_path = script_path.relative_to(site_packages.parent)
                 files.append((rel_path, script_path))
@@ -94,7 +91,9 @@ def collect_package_files(pkg_path, verbose=False):
     return files
 
 
-def create_wheel(pkg_path, wheels_dir, dryrun: bool = False, verbose: bool = False) -> bool:
+def create_wheel(
+    pkg_path, wheels_dir, dryrun: bool = False, verbose: bool = False
+) -> bool:
     try:
         pkg_info = get_package_info(pkg_path)
         pkg_name = pkg_info["name"]
@@ -144,7 +143,9 @@ Tag: {wheel_tag}
             record_content = "\n".join(record_entries) + f"\n{record_path},,\n"
             wheel.writestr(record_path, record_content)
         if verbose:
-            print(f"✓ Created {wheel_name} ({len(files)} files, {wheel_path.stat().st_size} bytes)")
+            print(
+                f"✓ Created {wheel_name} ({len(files)} files, {wheel_path.stat().st_size} bytes)"
+            )
         return True
     except Exception as e:
         print(f"Error repacking {pkg_path.name}: {e}")
@@ -157,16 +158,23 @@ Tag: {wheel_tag}
 
 def get_packages(site_packages_dir: Path, package_names=None):
     packages = []
-    ignore_dirs = {"__pycache__", "pip", "setuptools", "wheel", "_distutils_hack", "pkg_resources"}
+    ignore_dirs = {
+        "__pycache__",
+        "pip",
+        "setuptools",
+        "wheel",
+        "_distutils_hack",
+        "pkg_resources",
+    }
     for item in site_packages_dir.iterdir():
         if item.name in ignore_dirs:
             continue
         if item.name.startswith("_"):
             continue
         if item.is_dir():
-            if (item / "__init__.py").exists():
-                packages.append(item)
-            elif any(item.parent.glob(f"{item.name}*.dist-info")):
+            if (item / "__init__.py").exists() or any(
+                item.parent.glob(f"{item.name}*.dist-info")
+            ):
                 packages.append(item)
         elif item.suffix == ".py" and item.name != "__init__.py":
             packages.append(item)
@@ -188,18 +196,33 @@ def repack_sequential(packages, wheels_dir: Path, dryrun, verbose):
 
 
 def repack_parallel(packages, wheels_dir: Path, dryrun, verbose) -> list[bool]:
-    repack_func = partial(create_wheel, wheels_dir=wheels_dir, dryrun=dryrun, verbose=verbose)
+    repack_func = partial(
+        create_wheel, wheels_dir=wheels_dir, dryrun=dryrun, verbose=verbose
+    )
     with Pool(processes=cpu_count()) as pool:
         results = pool.map(repack_func, packages)
     return results
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Repack site-packages packages as wheel files")
-    parser.add_argument("-a", "--all", action="store_true", help="Repack all packages (uses multiprocessing)")
-    parser.add_argument("--dryrun", action="store_true", help="Show what would be done without actual repacking")
+    parser = argparse.ArgumentParser(
+        description="Repack site-packages packages as wheel files"
+    )
+    parser.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Repack all packages (uses multiprocessing)",
+    )
+    parser.add_argument(
+        "--dryrun",
+        action="store_true",
+        help="Show what would be done without actual repacking",
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    parser.add_argument("packages", nargs="*", help="Package names to repack (sequential mode)")
+    parser.add_argument(
+        "packages", nargs="*", help="Package names to repack (sequential mode)"
+    )
     args = parser.parse_args()
     wheels_dir = Path.home() / "tmp" / "wheels"
     wheels_dir.mkdir(parents=True, exist_ok=True)
@@ -210,7 +233,10 @@ def main() -> None:
         / "lib"
         / f"python{sys.version_info.major}.{sys.version_info.minor}"
         / "site-packages",
-        Path(sys.prefix) / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages",
+        Path(sys.prefix)
+        / "lib"
+        / f"python{sys.version_info.major}.{sys.version_info.minor}"
+        / "site-packages",
         Path(__file__).parent if "__file__" in dir() else Path.cwd(),
     ]
     site_packages = None
@@ -249,7 +275,9 @@ def main() -> None:
         wheel_files = list(wheels_dir.glob("*.whl"))
         if wheel_files:
             print("\nCreated wheels:")
-            for wheel in sorted(wheel_files, key=lambda x: x.stat().st_mtime, reverse=True)[:10]:
+            for wheel in sorted(
+                wheel_files, key=lambda x: x.stat().st_mtime, reverse=True
+            )[:10]:
                 size_mb = wheel.stat().st_size / (1024 * 1024)
                 print(f"  {wheel.name} ({size_mb:.2f} MB)")
             if len(wheel_files) > 10:

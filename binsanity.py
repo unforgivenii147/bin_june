@@ -66,20 +66,20 @@ def test_executable(filepath: Path) -> tuple[Path, str | None]:
     test_args = ["--help", "-h", "--version", "-v", "--info"]
     for test_arg in test_args:
         try:
-            result = subprocess.run([str(filepath), test_arg], capture_output=True, text=True, timeout=2)
+            result = subprocess.run(
+                [str(filepath), test_arg], capture_output=True, text=True, timeout=2
+            )
             if result.stderr:
                 error_lower = result.stderr.lower()
                 if any(
-                    (
-                        pattern in error_lower
-                        for pattern in [
-                            "error while loading shared libraries",
-                            "cannot open shared object file",
-                            "no such file",
-                            "not found",
-                            "failed to load",
-                        ]
-                    )
+                    pattern in error_lower
+                    for pattern in [
+                        "error while loading shared libraries",
+                        "cannot open shared object file",
+                        "no such file",
+                        "not found",
+                        "failed to load",
+                    ]
                 ):
                     return (filepath, result.stderr.strip()[:200])
             if result.returncode == 0:
@@ -95,18 +95,18 @@ def test_executable(filepath: Path) -> tuple[Path, str | None]:
                 return (filepath, "Exec format error (wrong architecture)")
             return (filepath, str(e))
     try:
-        result = subprocess.run([str(filepath)], capture_output=True, text=True, timeout=1)
+        result = subprocess.run(
+            [str(filepath)], capture_output=True, text=True, timeout=1
+        )
         if result.stderr:
             error_lower = result.stderr.lower()
             if any(
-                (
-                    pattern in error_lower
-                    for pattern in [
-                        "error while loading shared libraries",
-                        "cannot open shared object file",
-                        "no such file",
-                    ]
-                )
+                pattern in error_lower
+                for pattern in [
+                    "error while loading shared libraries",
+                    "cannot open shared object file",
+                    "no such file",
+                ]
             ):
                 return (filepath, result.stderr.strip()[:200])
         return (filepath, None)
@@ -130,8 +130,12 @@ def main() -> None:
     print("Testing binaries in parallel...")
     failed_binaries = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
-        future_to_binary = {executor.submit(test_executable, binary): binary for binary in binaries}
-        for i, future in enumerate(concurrent.futures.as_completed(future_to_binary), 1):
+        future_to_binary = {
+            executor.submit(test_executable, binary): binary for binary in binaries
+        }
+        for i, future in enumerate(
+            concurrent.futures.as_completed(future_to_binary), 1
+        ):
             binary = future_to_binary[future]
             try:
                 filepath, error_msg = future.result()
@@ -152,7 +156,10 @@ def main() -> None:
         f"Binary Analysis Results\nDirectory: {cwd}\nTotal binaries tested: {len(binaries)}\nFailed binaries: {len(failed_binaries)}\n{'=' * 42}\n\n"
         + (
             "\n".join(
-                (f"Binary: {filepath}\nError:  {error_msg}\n{'-' * 42}" for filepath, error_msg in failed_binaries)
+                (
+                    f"Binary: {filepath}\nError:  {error_msg}\n{'-' * 42}"
+                    for filepath, error_msg in failed_binaries
+                )
             )
             if failed_binaries
             else "✓ All binaries tested successfully!\n"

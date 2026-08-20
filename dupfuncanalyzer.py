@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Duplicate function analyzer and refactorer."""
 
 from __future__ import annotations
 
@@ -71,7 +70,9 @@ def analyze_files(target_dirs: list[Path] | None = None) -> list[dict[str, Any]]
     return repeated
 
 
-def save_dh_module(repeated: list[dict[str, Any]], output_path: Path = Path("repeated_functions.py")) -> None:
+def save_dh_module(
+    repeated: list[dict[str, Any]], output_path: Path = Path("repeated_functions.py")
+) -> None:
     lines = []
     for item in repeated:
         lines.append(item["source"])
@@ -79,13 +80,19 @@ def save_dh_module(repeated: list[dict[str, Any]], output_path: Path = Path("rep
     output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def apply_refactoring(repeated: list[dict[str, Any]], target_dirs: list[Path] | None = None) -> None:
+def apply_refactoring(
+    repeated: list[dict[str, Any]], target_dirs: list[Path] | None = None
+) -> None:
     if not target_dirs:
         target_dirs = [Path.cwd()]
     py_files = []
     for target_dir in target_dirs:
         py_files.extend(target_dir.rglob("*.py"))
-    py_files = [f for f in py_files if ".git" not in f.parts and f.name != "repeated_functions.py"]
+    py_files = [
+        f
+        for f in py_files
+        if ".git" not in f.parts and f.name != "repeated_functions.py"
+    ]
     with ProcessPoolExecutor() as executor:
         executor.map(lambda f: refactor_file(f, repeated), py_files)
 
@@ -113,7 +120,11 @@ def refactor_file(file_path: Path, repeated: list[dict[str, Any]]) -> None:
     for i, line in enumerate(lines):
         skip = False
         for node in nodes_to_remove:
-            if node.lineno and node.end_lineno and node.lineno - 1 <= i < node.end_lineno:
+            if (
+                node.lineno
+                and node.end_lineno
+                and node.lineno - 1 <= i < node.end_lineno
+            ):
                 skip = True
                 break
         if not skip:
@@ -129,7 +140,9 @@ def refactor_file(file_path: Path, repeated: list[dict[str, Any]]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Detect and refactor duplicate functions")
+    parser = argparse.ArgumentParser(
+        description="Detect and refactor duplicate functions"
+    )
     parser.add_argument(
         "-a",
         "--apply",

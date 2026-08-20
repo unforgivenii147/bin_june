@@ -1,13 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import argparse
 import sys
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Generator, Tuple
 
 
 def sizeof_fmt(num: float, suffix: str = "B") -> str:
-    """Human-readable file size formatting."""
     for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if abs(num) < 1024.0:
             return f"{num:3.1f}{unit}{suffix}"
@@ -16,16 +15,16 @@ def sizeof_fmt(num: float, suffix: str = "B") -> str:
 
 
 def get_size(path: Path) -> int:
-    """Calculate total size of a file or directory."""
     if path.is_file():
         return path.stat().st_size
     return sum(f.stat().st_size for f in path.glob("**/*") if f.is_file())
 
 
-def walk_filesystem(root: Path, max_workers: int = 4) -> Generator[Tuple[Path, bool], None, None]:
-    """Generator-based filesystem walker with parallel size calculation."""
+def walk_filesystem(
+    root: Path, max_workers: int = 4
+) -> Generator[tuple[Path, bool], None, None]:
 
-    def process_entry(entry: Path) -> Tuple[Path, bool]:
+    def process_entry(entry: Path) -> tuple[Path, bool]:
         is_dir = entry.is_dir()
         if is_dir:
             return (entry, True)
@@ -42,9 +41,12 @@ def walk_filesystem(root: Path, max_workers: int = 4) -> Generator[Tuple[Path, b
 
 
 def tree(
-    root: Path, show_sizes: bool = False, dirs_only: bool = False, human_readable: bool = False, max_workers: int = 4
+    root: Path,
+    show_sizes: bool = False,
+    dirs_only: bool = False,
+    human_readable: bool = False,
+    max_workers: int = 4,
 ) -> None:
-    """Print directory tree structure."""
     entries = sorted(walk_filesystem(root, max_workers), key=lambda x: (not x[1], x[0]))
 
     def print_entry(entry: Path, is_dir: bool, prefix: str = "") -> None:
@@ -70,11 +72,19 @@ def tree(
 
 def main():
     parser = argparse.ArgumentParser(description="Python tree command implementation")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to traverse")
+    parser.add_argument(
+        "directory", nargs="?", default=".", help="Directory to traverse"
+    )
     parser.add_argument("-s", "--sizes", action="store_true", help="Show sizes")
-    parser.add_argument("-d", "--dirs-only", action="store_true", help="List directories only")
-    parser.add_argument("-H", "--human-readable", action="store_true", help="Human-readable sizes")
-    parser.add_argument("-j", "--jobs", type=int, default=8, help="Number of parallel workers")
+    parser.add_argument(
+        "-d", "--dirs-only", action="store_true", help="List directories only"
+    )
+    parser.add_argument(
+        "-H", "--human-readable", action="store_true", help="Human-readable sizes"
+    )
+    parser.add_argument(
+        "-j", "--jobs", type=int, default=8, help="Number of parallel workers"
+    )
     args = parser.parse_args()
     root = Path(args.directory).resolve()
     if not root.exists():

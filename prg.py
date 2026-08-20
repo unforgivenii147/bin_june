@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Ripgrep-like implementation in Python."""
 
 from __future__ import annotations
 
@@ -23,7 +22,9 @@ def walk_paths(paths: list[str | Path]) -> Generator[Path, None, None]:
             yield from walk_files(path)
 
 
-def search_file(file_path: Path, pattern: str) -> Generator[tuple[Path, int, str], None, None]:
+def search_file(
+    file_path: Path, pattern: str
+) -> Generator[tuple[Path, int, str], None, None]:
     try:
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             for line_num, line in enumerate(f, 1):
@@ -31,7 +32,7 @@ def search_file(file_path: Path, pattern: str) -> Generator[tuple[Path, int, str
                 if matches:
                     colorized = colorize_line(line.rstrip("\n"), matches)
                     yield file_path, line_num, colorized
-    except (OSError, IOError):
+    except OSError:
         pass
 
 
@@ -50,8 +51,13 @@ def colorize_line(line: str, matches) -> str:
 
 
 def ripgrep(paths: list[str | Path], pattern: str, max_workers: int = 8):
+
     def process_file(file_path: Path):
-        if is_binary(file_path) or (file_path.suffix not in TXT_EXT) or (file_path.suffix in BIN_EXT):
+        if (
+            is_binary(file_path)
+            or (file_path.suffix not in TXT_EXT)
+            or (file_path.suffix in BIN_EXT)
+        ):
             return []
         print(f"processing {file_path.name}")
         return list(search_file(file_path, pattern))
@@ -66,7 +72,11 @@ def ripgrep(paths: list[str | Path], pattern: str, max_workers: int = 8):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ripgrep-like search tool")
     parser.add_argument("pattern", help="Search pattern (regex)")
-    parser.add_argument("paths", nargs="*", default=["."], help="Files or directories to search")
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers")
+    parser.add_argument(
+        "paths", nargs="*", default=["."], help="Files or directories to search"
+    )
+    parser.add_argument(
+        "-w", "--workers", type=int, default=4, help="Number of parallel workers"
+    )
     args = parser.parse_args()
     ripgrep(args.paths, args.pattern, args.workers)

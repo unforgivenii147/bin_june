@@ -55,14 +55,30 @@ def extract_items(path: Path, parser: Parser) -> list[Item]:
                 continue
             name = node_text(src, name_node)
             code = node_text(src, node)
-            items.append(Item(kind="function", name=name, source=code, path=str(path), hash=sha256_text(code)))
+            items.append(
+                Item(
+                    kind="function",
+                    name=name,
+                    source=code,
+                    path=str(path),
+                    hash=sha256_text(code),
+                )
+            )
         elif node.type == "class_definition":
             name_node = node.child_by_field_name("name")
             if not name_node:
                 continue
             name = node_text(src, name_node)
             code = node_text(src, node)
-            items.append(Item(kind="class", name=name, source=code, path=str(path), hash=sha256_text(code)))
+            items.append(
+                Item(
+                    kind="class",
+                    name=name,
+                    source=code,
+                    path=str(path),
+                    hash=sha256_text(code),
+                )
+            )
         elif node.type in {"expression_statement", "assignment"}:
             code = node_text(src, node)
             assign_node = node
@@ -78,7 +94,15 @@ def extract_items(path: Path, parser: Parser) -> list[Item]:
             name = node_text(src, lhs)
             if not is_const_name(name):
                 continue
-            items.append(Item(kind="const", name=name, source=code, path=str(path), hash=sha256_text(code)))
+            items.append(
+                Item(
+                    kind="const",
+                    name=name,
+                    source=code,
+                    path=str(path),
+                    hash=sha256_text(code),
+                )
+            )
     return items
 
 

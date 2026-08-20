@@ -40,8 +40,12 @@ def extract_images_from_url(url, output_dir) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Extract images from a URL and save them to an output directory.")
+    parser = argparse.ArgumentParser(
+        description="Extract images from a URL and save them to an output directory."
+    )
     parser.add_argument("url", type=str, help="URL to extract images from")
-    parser.add_argument("output_dir", default="output", type=str, help="Output directory to save images")
+    parser.add_argument(
+        "output_dir", default="output", type=str, help="Output directory to save images"
+    )
     args = parser.parse_args()
     extract_images_from_url(args.url, args.output_dir)

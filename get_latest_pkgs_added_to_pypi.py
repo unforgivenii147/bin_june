@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Fetch latest package updates from PyPI RSS feed and save to a file.
-"""
 
 from __future__ import annotations
 
@@ -10,25 +7,33 @@ import json
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Dict, List
 
 import requests
 
 
-def fetch_pypi_updates() -> List[Dict[str, str]]:
+def fetch_pypi_updates() -> list[dict[str, str]]:
     url = "https://pypi.org/rss/updates.xml"
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
         root = ET.fromstring(response.content)
-        namespaces = {"atom": "http://www.w3.org/2005/Atom", "dc": "http://purl.org/dc/elements/1.1/"}
+        namespaces = {
+            "atom": "http://www.w3.org/2005/Atom",
+            "dc": "http://purl.org/dc/elements/1.1/",
+        }
         packages = []
         for item in root.findall(".//item"):
             package_info = {
-                "title": item.find("title").text if item.find("title") is not None else "",
+                "title": item.find("title").text
+                if item.find("title") is not None
+                else "",
                 "link": item.find("link").text if item.find("link") is not None else "",
-                "description": item.find("description").text if item.find("description") is not None else "",
-                "pub_date": item.find("pubDate").text if item.find("pubDate") is not None else "",
+                "description": item.find("description").text
+                if item.find("description") is not None
+                else "",
+                "pub_date": item.find("pubDate").text
+                if item.find("pubDate") is not None
+                else "",
                 "guid": item.find("guid").text if item.find("guid") is not None else "",
             }
             if package_info["title"]:
@@ -46,13 +51,13 @@ def fetch_pypi_updates() -> List[Dict[str, str]]:
         sys.exit(1)
 
 
-def save_to_json(packages: List[Dict[str, str]], filename: str) -> None:
+def save_to_json(packages: list[dict[str, str]], filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(packages, f, indent=2, ensure_ascii=False)
     print(f"Saved {len(packages)} packages to {filename}")
 
 
-def save_to_csv(packages: List[Dict[str, str]], filename: str) -> None:
+def save_to_csv(packages: list[dict[str, str]], filename: str) -> None:
     if not packages:
         print("No packages to save", file=sys.stderr)
         return
@@ -63,9 +68,9 @@ def save_to_csv(packages: List[Dict[str, str]], filename: str) -> None:
     print(f"Saved {len(packages)} packages to {filename}")
 
 
-def save_to_text(packages: List[Dict[str, str]], filename: str) -> None:
+def save_to_text(packages: list[dict[str, str]], filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"PyPI Latest Package Updates\n")
+        f.write("PyPI Latest Package Updates\n")
         f.write(f"Fetched at: {datetime.now().isoformat()}\n")
         f.write("=" * 42 + "\n\n")
         for i, pkg in enumerate(packages, 1):
@@ -81,15 +86,28 @@ def save_to_text(packages: List[Dict[str, str]], filename: str) -> None:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Fetch latest package updates from PyPI RSS feed")
-    parser.add_argument(
-        "-o", "--output", default="pypi_updates.json", help="Output filename (default: pypi_updates.json)"
+    parser = argparse.ArgumentParser(
+        description="Fetch latest package updates from PyPI RSS feed"
     )
     parser.add_argument(
-        "-f", "--format", choices=["json", "csv", "txt"], default="json", help="Output format (default: json)"
+        "-o",
+        "--output",
+        default="pypi_updates.json",
+        help="Output filename (default: pypi_updates.json)",
     )
     parser.add_argument(
-        "-n", "--num-packages", type=int, default=None, help="Number of latest packages to save (default: all)"
+        "-f",
+        "--format",
+        choices=["json", "csv", "txt"],
+        default="json",
+        help="Output format (default: json)",
+    )
+    parser.add_argument(
+        "-n",
+        "--num-packages",
+        type=int,
+        default=None,
+        help="Number of latest packages to save (default: all)",
     )
     args = parser.parse_args()
     print("Fetching latest packages from PyPI...")
@@ -101,10 +119,12 @@ def main():
     filename = base_name + extension_map.get(args.format, ".json")
     save_functions = {"json": save_to_json, "csv": save_to_csv, "txt": save_to_text}
     save_functions[args.format](packages, filename)
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  Total packages fetched: {len(packages)}")
     if packages:
-        print(f"  Latest package: {packages[0].get('package_name', 'Unknown')} v{packages[0].get('version', '?')}")
+        print(
+            f"  Latest package: {packages[0].get('package_name', 'Unknown')} v{packages[0].get('version', '?')}"
+        )
         print(f"  Latest update time: {packages[0].get('pub_date', 'Unknown')}")
 
 

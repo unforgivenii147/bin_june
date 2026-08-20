@@ -8,12 +8,13 @@ import sys
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Optional, Tuple
 from urllib.parse import unquote, urldefrag
 
 EXT_IMAGE = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".svg"}
 HTTP_SCHEMES = ("http://", "https://")
-HTML_ATTR_RE = re.compile(r'(?P<attr>href|src)\s*=\s*(?P<q>["\'])(?P<url>.*?)(?P=q)', re.IGNORECASE)
+HTML_ATTR_RE = re.compile(
+    r'(?P<attr>href|src)\s*=\s*(?P<q>["\'])(?P<url>.*?)(?P=q)', re.IGNORECASE
+)
 MD_IMAGE_RE = re.compile(r"!\[([^\]]*?)\]\((?P<url>[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 MD_LINK_RE = re.compile(r"\[(?P<text>[^\]]*?)\]\((?P<url>[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 SPLIT_URL_RE = re.compile(r"^(?P<path>[^?#]+)(?P<rest>[?#].*)?$")
@@ -60,7 +61,7 @@ def _read_bytes(path: str) -> bytes:
         return f.read()
 
 
-def _local_target_resolve(base_dir: str, u: str) -> Optional[str]:
+def _local_target_resolve(base_dir: str, u: str) -> str | None:
     s = u.strip()
     if not s:
         return None
@@ -70,7 +71,9 @@ def _local_target_resolve(base_dir: str, u: str) -> Optional[str]:
         s = _strip_fragment_query(s)
     s = unquote(s)
     norm = os.path.normpath(os.path.join(base_dir, s))
-    if not os.path.abspath(norm).startswith(os.path.abspath(base_dir).rsplit(os.sep, 1)[0]):
+    if not os.path.abspath(norm).startswith(
+        os.path.abspath(base_dir).rsplit(os.sep, 1)[0]
+    ):
         return os.path.abspath(norm)
     return os.path.abspath(norm)
 
@@ -106,7 +109,7 @@ def _http_check(url: str, timeout: int) -> bool:
             return False
 
 
-def _replace_html(html: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
+def _replace_html(html: str, file_dir: str, timeout: int) -> tuple[str, list[str]]:
     removals = []
     changes = 0
 
@@ -147,7 +150,7 @@ def _replace_html(html: str, file_dir: str, timeout: int) -> Tuple[str, List[str
     return out, removals
 
 
-def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
+def _replace_md(md: str, file_dir: str, timeout: int) -> tuple[str, list[str]]:
     removals = []
     changes = 0
 
@@ -203,7 +206,7 @@ def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
     return out, removals
 
 
-def process_file(path: str, timeout: int) -> List[str]:
+def process_file(path: str, timeout: int) -> list[str]:
     file_dir = os.path.dirname(path)
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         content = f.read()
@@ -223,7 +226,7 @@ def process_file(path: str, timeout: int) -> List[str]:
     return report
 
 
-def iter_files(root: str, exts: Tuple[str, ...]) -> List[str]:
+def iter_files(root: str, exts: tuple[str, ...]) -> list[str]:
     out = []
     for dirpath, dirnames, filenames in os.walk(root):
         for fn in filenames:

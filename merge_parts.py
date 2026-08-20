@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Merge split part files into a single file."""
 
 from __future__ import annotations
 
@@ -13,7 +12,9 @@ PART_RE = re.compile(r"^(?P<prefix>.+)\.part(?P<num>\d+)$")
 
 def collect_paths(inputs: list[str]) -> list[Path]:
     if not inputs:
-        return [p for p in Path(".").rglob("*") if p.is_file() and PART_RE.match(p.name)]
+        return [
+            p for p in Path(".").rglob("*") if p.is_file() and PART_RE.match(p.name)
+        ]
     out: list[Path] = []
     for item in inputs:
         p = Path(item)

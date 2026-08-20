@@ -21,7 +21,9 @@ logging.basicConfig(
 def verify_and_get_files(dist_info_dir):
     record_path = dist_info_dir / "RECORD"
     if not record_path.exists():
-        logging.error(f"Missing RECORD file in metadata directory: {dist_info_dir.name}")
+        logging.error(
+            f"Missing RECORD file in metadata directory: {dist_info_dir.name}"
+        )
         return None
     site_packages_root = dist_info_dir.parent
     files_to_pack = []
@@ -36,7 +38,9 @@ def verify_and_get_files(dist_info_dir):
             if rel_path.name == "RECORD" or rel_path.suffix == ".pyc":
                 continue
             if not abs_path.exists() and not abs_path.is_dir():
-                logging.warning(f"Aborting {dist_info_dir.name}: Missing file -> {rel_path}")
+                logging.warning(
+                    f"Aborting {dist_info_dir.name}: Missing file -> {rel_path}"
+                )
                 return None
             files_to_pack.append((abs_path, rel_path))
     return files_to_pack
@@ -58,7 +62,9 @@ def build_wheel_worker(args):
         return False
     try:
         logging.info(f"📦 Packaging {name} ({version})...")
-        with zipfile.ZipFile(target_wheel_path, "w", compression=zipfile.ZIP_DEFLATED) as whl:
+        with zipfile.ZipFile(
+            target_wheel_path, "w", compression=zipfile.ZIP_DEFLATED
+        ) as whl:
             for abs_path, rel_path in files_to_pack:
                 whl.write(abs_path, rel_path)
         logging.info(f"✅ Successfully created: {wheel_filename}")

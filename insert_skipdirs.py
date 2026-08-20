@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Insert SKIP_DIRS definition after import section in Python files.
-Uses parallel processing for better performance.
-Handles edge cases like try-except blocks and validates output.
-"""
 
 from __future__ import annotations
 
@@ -113,10 +108,19 @@ def main():
     if not python_files:
         print("No Python files to process")
         return
-    stats = {"modified": 0, "already_has": 0, "validation_failed": 0, "syntax_error": 0, "other_errors": 0}
+    stats = {
+        "modified": 0,
+        "already_has": 0,
+        "validation_failed": 0,
+        "syntax_error": 0,
+        "other_errors": 0,
+    }
     print(f"Processing files using {min(len(python_files), 8)} workers...\n")
     with ProcessPoolExecutor(max_workers=min(len(python_files), 8)) as executor:
-        future_to_file = {executor.submit(process_file, file_path): file_path for file_path in python_files}
+        future_to_file = {
+            executor.submit(process_file, file_path): file_path
+            for file_path in python_files
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -157,7 +161,9 @@ def main():
     if stats["modified"] > 0:
         print(f"\n✓ Successfully modified {stats['modified']} file(s)")
     if stats["validation_failed"] > 0 or stats["syntax_error"] > 0:
-        print(f"\n⚠ Check {stats['validation_failed'] + stats['syntax_error']} file(s) with errors")
+        print(
+            f"\n⚠ Check {stats['validation_failed'] + stats['syntax_error']} file(s) with errors"
+        )
 
 
 if __name__ == "__main__":

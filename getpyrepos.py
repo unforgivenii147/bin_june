@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-GitHub Python Repositories Fetcher
-Usage: python script.py [username]
-If no username provided, fetches top trending GitHub users' Python repos
-"""
 
 from __future__ import annotations
 
@@ -98,17 +93,26 @@ def main():
         print(f"Fetching Python repositories for user: {username}")
         repos = get_user_repos(username)
         if repos:
-            output = {"username": username, "total_python_repos": len(repos), "repositories": repos}
+            output = {
+                "username": username,
+                "total_python_repos": len(repos),
+                "repositories": repos,
+            }
             filename = f"{username}_python_repos.json"
             save_to_json(output, filename)
             print(f"Found {len(repos)} Python repositories")
         else:
             print(f"No Python repositories found for user {username}")
     else:
-        print("No username provided. Fetching top trending GitHub users with Python repos...")
+        print(
+            "No username provided. Fetching top trending GitHub users with Python repos..."
+        )
         trending_data = get_top_trending_users()
         if trending_data:
-            output = {"timestamp": datetime.now().isoformat(), "trending_users": trending_data}
+            output = {
+                "timestamp": datetime.now().isoformat(),
+                "trending_users": trending_data,
+            }
             save_to_json(output, "trending_github_python_users.json")
             print(f"Found {len(trending_data)} trending users")
             for user in trending_data:

@@ -15,7 +15,9 @@ SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 
 class GoogleDriveSyncer:
-    def __init__(self, client_id=None, client_secret=None, token_file: str = "token.pickle") -> None:
+    def __init__(
+        self, client_id=None, client_secret=None, token_file: str = "token.pickle"
+    ) -> None:
         self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
         self.client_secret = client_secret or os.getenv("GOOGLE_CLIENT_SECRET")
         if not self.client_id or not self.client_secret:
@@ -36,7 +38,9 @@ class GoogleDriveSyncer:
                     "refresh_token": creds.refresh_token,
                     "grant_type": "refresh_token",
                 }
-                response = requests.post("https://oauth2.googleapis.com/token", data=refresh_data)
+                response = requests.post(
+                    "https://oauth2.googleapis.com/token", data=refresh_data
+                )
                 if response.status_code == 200:
                     token_data = response.json()
                     creds = Credentials(
@@ -77,7 +81,9 @@ class GoogleDriveSyncer:
             "grant_type": "authorization_code",
             "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
         }
-        response = requests.post("https://oauth2.googleapis.com/token", data=token_params)
+        response = requests.post(
+            "https://oauth2.googleapis.com/token", data=token_params
+        )
         if response.status_code != 200:
             raise Exception(f"Token exchange failed: {response.text}")
         token_data = response.json()
@@ -133,7 +139,9 @@ class GoogleDriveSyncer:
             print(f"✗ Failed to download {file_name}: {error}")
             return False
 
-    def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root") -> None:
+    def sync_folder(
+        self, drive_folder_id: str, local_folder_path, folder_name: str = "root"
+    ) -> None:
         print(f"\n📁 Syncing folder: {folder_name}")
         os.makedirs(local_folder_path, exist_ok=True)
         items = self.get_all_files(drive_folder_id)
@@ -151,7 +159,9 @@ class GoogleDriveSyncer:
                     local_mtime = os.path.getmtime(local_item_path)
                     from datetime import datetime
 
-                    remote_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
+                    remote_time = datetime.fromisoformat(
+                        remote_modified.replace("Z", "+00:00")
+                    ).timestamp()
                     if local_mtime >= remote_time:
                         should_download = False
                         print(f"⏭ Skipping (up to date): {item_name}")
@@ -160,7 +170,9 @@ class GoogleDriveSyncer:
                     if remote_modified:
                         from datetime import datetime
 
-                        mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
+                        mod_time = datetime.fromisoformat(
+                            remote_modified.replace("Z", "+00:00")
+                        ).timestamp()
                         os.utime(local_item_path, (mod_time, mod_time))
 
     def sync_all(self, local_base_path: str) -> None:
@@ -199,7 +211,9 @@ def main() -> None:
         print("\nTroubleshooting:")
         print("1. Ensure your ~/.env file has correct credentials")
         print("2. Check internet connection")
-        print("3. On Android, ensure Termux has storage permission: termux-setup-storage")
+        print(
+            "3. On Android, ensure Termux has storage permission: termux-setup-storage"
+        )
 
 
 if __name__ == "__main__":

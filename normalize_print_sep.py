@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Normalize print separators in Python files.
-Replaces patterns like print('-'*42) with print('-'*42)
-Usage:
-    python script.py [paths...]           # Dry-run (shows what would change)
-    python script.py -a [paths...]        # Autofix (modifies files)
-"""
 
 from __future__ import annotations
 
@@ -38,9 +31,13 @@ def process_file(args: tuple[Path, bool]) -> ProcessResult:
         new_content, replacements = normalize_separators(content)
         if replacements > 0 and autofix:
             file_path.write_text(new_content, encoding="utf-8")
-        return ProcessResult(file=file_path, replacements=replacements, status="success")
+        return ProcessResult(
+            file=file_path, replacements=replacements, status="success"
+        )
     except Exception as e:
-        return ProcessResult(file=file_path, replacements=0, status="error", error=str(e))
+        return ProcessResult(
+            file=file_path, replacements=0, status="error", error=str(e)
+        )
 
 
 def find_python_files(paths: list[str]) -> list[Path]:
@@ -62,12 +59,20 @@ def report_stats(results: list[ProcessResult], autofix: bool) -> None:
     success_count = sum(1 for r in results if r.status == "success")
     modified_count = sum(1 for r in results if r.replacements > 0)
     cwd = Path.cwd()
-    rel_results = [(r.file.relative_to(cwd) if cwd in r.file.parents or r.file == cwd else r.file, r) for r in results]
+    rel_results = [
+        (
+            r.file.relative_to(cwd)
+            if cwd in r.file.parents or r.file == cwd
+            else r.file,
+            r,
+        )
+        for r in results
+    ]
     mode = "AUTOFIX" if autofix else "DRY-RUN"
     print(f"\n[{mode}] {'File':<55} {'Replacements':<15} {'Status':<15}")
     print("-" * 42)
     for rel_path, result in rel_results:
-        status_str = "✓ Success" if result.status == "success" else f"✗ Error"
+        status_str = "✓ Success" if result.status == "success" else "✗ Error"
         if result.error:
             status_str += f": {result.error[:20]}"
         print(f"{rel_path!s:<55} {result.replacements:<15} {status_str:<15}")
@@ -78,7 +83,9 @@ def report_stats(results: list[ProcessResult], autofix: bool) -> None:
     print(f"Successful:         {success_count}")
     print(f"Errors:             {total_files - success_count}")
     if not autofix and modified_count > 0:
-        print(f"\n💡 Run with --autofix (or -a) to apply {total_replacements} change(s)")
+        print(
+            f"\n💡 Run with --autofix (or -a) to apply {total_replacements} change(s)"
+        )
 
 
 def main() -> None:
@@ -90,8 +97,17 @@ def main() -> None:
         "  %(prog)s --autofix file.py other.py  # Autofix specific files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("-a", "--autofix", action="store_true", help="Modify files in-place (default: dry-run only)")
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
+    )
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Modify files in-place (default: dry-run only)",
+    )
     args = parser.parse_args()
     python_files = find_python_files(args.paths)
     if not python_files:

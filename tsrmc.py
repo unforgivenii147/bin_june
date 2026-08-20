@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove comments and docstrings from Python files using tree-sitter.
-Supports parallel processing, AST validation, and performance comparison.
-Requirements:
-  pip install tree-sitter==0.25.2 tree-sitter-python==0.25.0
-"""
 
 from __future__ import annotations
 
@@ -51,9 +45,11 @@ class TreeSitterCommentRemover:
         captures = self.query.captures(tree.root_node)
         ranges_to_remove = []
         for node, capture_name in captures:
-            if capture_name == "comment":
-                ranges_to_remove.append((node.start_byte, node.end_byte))
-            elif capture_name == "string" and self._is_docstring(node):
+            if (
+                capture_name == "comment"
+                or capture_name == "string"
+                and self._is_docstring(node)
+            ):
                 ranges_to_remove.append((node.start_byte, node.end_byte))
         ranges_to_remove.sort(reverse=True)
         result = self._remove_ranges(source_bytes, ranges_to_remove)
@@ -62,7 +58,11 @@ class TreeSitterCommentRemover:
     def _is_docstring(self, node: Node) -> bool:
         parent = node.parent
         if parent and parent.type == "expression_statement":
-            named_children = [c for c in parent.children if c.type not in ("comment", "NEWLINE", "INDENT", "DEDENT")]
+            named_children = [
+                c
+                for c in parent.children
+                if c.type not in ("comment", "NEWLINE", "INDENT", "DEDENT")
+            ]
             return len(named_children) == 1 and named_children[0] == node
         return False
 
@@ -121,7 +121,9 @@ class ASTCommentRemover:
         source.split("\n")
         for node in ast.walk(tree):
             docstring = ast.get_docstring(node)
-            if docstring and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
+            if docstring and isinstance(
+                node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)
+            ):
                 pass
         return ranges
 
@@ -206,7 +208,9 @@ def process_directory(
         return [], 0.0
     print(f"\nProcessing {len(py_files)} files using {method}...")
     start_time = time.perf_counter()
-    process_func = process_file_tree_sitter if method == "tree-sitter" else process_file_ast
+    process_func = (
+        process_file_tree_sitter if method == "tree-sitter" else process_file_ast
+    )
     results = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(process_func, f): f for f in py_files}
@@ -271,8 +275,14 @@ Examples:
         default="tree-sitter",
         help="Processing method (default: tree-sitter)",
     )
-    parser.add_argument("--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
-    parser.add_argument("--compare", action="store_true", help="Compare both methods (dry-run, no files modified)")
+    parser.add_argument(
+        "--workers", type=int, default=4, help="Number of parallel workers (default: 4)"
+    )
+    parser.add_argument(
+        "--compare",
+        action="store_true",
+        help="Compare both methods (dry-run, no files modified)",
+    )
     args = parser.parse_args()
     directory = Path(args.directory).resolve()
     if not directory.exists():

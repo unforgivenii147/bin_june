@@ -1,12 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-excode.py - Extract Python code from text/metadata files recursively.
-Supports markdown code blocks, inline code, and REPL-style sessions.
-Usage:
-    python excode.py myfile.md myotherfile.txt
-    python excode.py mydir1 mydir2
-    python excode.py
-"""
 
 from __future__ import annotations
 
@@ -18,7 +10,8 @@ from pathlib import Path
 TARGET_NAMES = {"PKGINFO", "METADATA", "PKG-INFO"}
 TARGET_EXTENSIONS = {".md", ".txt", ".html"}
 PY_CODE_BLOCK = re.compile(
-    r"```python\s*\n(.*?)```" r"\"\"\"(.*?)\"\"\"",
+    r"```python\s*\n(.*?)```"
+    r"\"\"\"(.*?)\"\"\"",
     re.DOTALL | re.IGNORECASE,
 )
 INLINE_PY = re.compile(
@@ -57,11 +50,7 @@ def parse_repl_block(block):
     in_code = False
     for line in lines:
         stripped = line.strip()
-        if stripped.startswith(">>>"):
-            code = stripped[3:].strip()
-            result_lines.append(code)
-            in_code = True
-        elif stripped.startswith("..."):
+        if stripped.startswith(">>>") or stripped.startswith("..."):
             code = stripped[3:].strip()
             result_lines.append(code)
             in_code = True
@@ -103,7 +92,9 @@ def process_file(file_path, output_dir):
         stem = file_path.stem.replace(" ", "_")
         out_name = f"{stem}_{idx:03d}.py"
         out_path = output_dir / out_name
-        header = f"# Source: {file_path}\n# Block: {idx}\n# Extracted: {file_path.name}\n\n"
+        header = (
+            f"# Source: {file_path}\n# Block: {idx}\n# Extracted: {file_path.name}\n\n"
+        )
         out_path.write_text(header + code + "\n", encoding="utf-8")
         saved.append(out_path)
     return file_path, saved
@@ -123,7 +114,9 @@ def main():
     print(f"Found {len(target_files)} target files. Processing...")
     results = []
     with ProcessPoolExecutor() as executor:
-        futures = {executor.submit(process_file, f, output_dir): f for f in target_files}
+        futures = {
+            executor.submit(process_file, f, output_dir): f for f in target_files
+        }
         for future in as_completed(futures):
             file_path, saved = future.result()
             results.append((file_path, saved))

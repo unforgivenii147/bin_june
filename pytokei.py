@@ -94,10 +94,14 @@ def count_lines_of_code(file_path: str, lang: str) -> tuple[int, int, int]:
     return code_lines, comment_lines, blank_lines
 
 
-def scan_directory(directory: str = ".") -> dict[str, dict[str, dict[str, int]] | dict[str, int]]:
+def scan_directory(
+    directory: str = ".",
+) -> dict[str, dict[str, dict[str, int]] | dict[str, int]]:
     stats = {
         "total": {"code": 0, "comments": 0, "blank": 0},
-        "languages": {lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS},
+        "languages": {
+            lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS
+        },
     }
     base_path = Path(directory)
     for file_path in base_path.rglob("*"):

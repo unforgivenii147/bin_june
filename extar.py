@@ -79,7 +79,11 @@ def process_archive(archive_path: Path, dry_run: bool = False, quiet: bool = Fal
         else:
             current_time = time.time()
             for item in extract_path.rglob("*"):
-                if item.is_file() and item != archive_path and current_time - item.stat().st_ctime < 60:
+                if (
+                    item.is_file()
+                    and item != archive_path
+                    and current_time - item.stat().st_ctime < 60
+                ):
                     extracted_size += item.stat().st_size
         archive_path.unlink()
         if not quiet:
@@ -93,7 +97,11 @@ def process_archive(archive_path: Path, dry_run: bool = False, quiet: bool = Fal
 
 def find_archives(directory: Path) -> list[Path]:
     directory = Path(directory).resolve()
-    archives = [zst_file for zst_file in directory.rglob("*.zst") if not zst_file.name.endswith(".tar.zst")]
+    archives = [
+        zst_file
+        for zst_file in directory.rglob("*.zst")
+        if not zst_file.name.endswith(".tar.zst")
+    ]
     archives.extend(directory.rglob("*.tar.zst"))
     archives.extend(directory.rglob("*.tar.xz"))
     return sorted(set(archives))
@@ -140,7 +148,9 @@ Original archives are automatically removed after successful extraction.""",
             print(f"Processing: {target_path.name}")
         parent_dir = target_path.parent
         before = get_dir_size(parent_dir)
-        success, arch_size, ext_size = process_archive(target_path, args.dry_run, args.quiet)
+        success, arch_size, ext_size = process_archive(
+            target_path, args.dry_run, args.quiet
+        )
         if success and not args.dry_run:
             after = get_dir_size(parent_dir)
             size_change = after - before
@@ -166,7 +176,9 @@ Original archives are automatically removed after successful extraction.""",
     total_archive_size = 0
     total_extracted_size = 0
     for archive in archives:
-        success, arch_size, ext_size = process_archive(archive, args.dry_run, args.quiet)
+        success, arch_size, ext_size = process_archive(
+            archive, args.dry_run, args.quiet
+        )
         if success:
             processed_count += 1
             total_archive_size += arch_size

@@ -16,7 +16,9 @@ def main():
     for item in data:
         values = list(item.values())
         if len(values) >= 2:
-            transformed.append({f"field_{i + 1}": value for i, value in enumerate(values)})
+            transformed.append(
+                {f"field_{i + 1}": value for i, value in enumerate(values)}
+            )
         else:
             transformed.append(item)
     with open(fn, "w", encoding="utf-8") as fo:

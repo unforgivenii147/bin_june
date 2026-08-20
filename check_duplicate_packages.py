@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Report Python packages installed in both user and system site directories.
-Uses pathlib for path handling and concurrent.futures for parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -35,7 +31,9 @@ def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Pa
             elif item.is_file():
                 if item.suffix == ".py":
                     packages[item.stem] = item
-                elif (item.suffix == ".dist-info" or item.suffix == ".egg-info") and item.is_dir():
+                elif (
+                    item.suffix == ".dist-info" or item.suffix == ".egg-info"
+                ) and item.is_dir():
                     pkg_name = item.name.split("-")[0]
                     packages[pkg_name] = item
     except PermissionError:
@@ -55,11 +53,16 @@ def find_duplicate_packages(
     return duplicates
 
 
-def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
+def process_system_directories(
+    system_dirs: list[pathlib.Path],
+) -> dict[str, pathlib.Path]:
     system_packages = {}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(system_dirs) or 1) as executor:
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=len(system_dirs) or 1
+    ) as executor:
         future_to_dir = {
-            executor.submit(scan_directory_for_packages, directory): directory for directory in system_dirs
+            executor.submit(scan_directory_for_packages, directory): directory
+            for directory in system_dirs
         }
         for future in concurrent.futures.as_completed(future_to_dir):
             directory = future_to_dir[future]
@@ -73,8 +76,13 @@ def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pat
 
 def process_user_directories(user_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
     user_packages = {}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(user_dirs) or 1) as executor:
-        future_to_dir = {executor.submit(scan_directory_for_packages, directory): directory for directory in user_dirs}
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=len(user_dirs) or 1
+    ) as executor:
+        future_to_dir = {
+            executor.submit(scan_directory_for_packages, directory): directory
+            for directory in user_dirs
+        }
         for future in concurrent.futures.as_completed(future_to_dir):
             directory = future_to_dir[future]
             try:
@@ -89,7 +97,10 @@ def analyze_package_versions(
     package_name: str, system_location: pathlib.Path, user_location: pathlib.Path
 ) -> dict[str, str]:
     versions = {"system_version": "unknown", "user_version": "unknown"}
-    for location_type, location in [("system", system_location), ("user", user_location)]:
+    for location_type, location in [
+        ("system", system_location),
+        ("user", user_location),
+    ]:
         try:
             if location.suffix in [".dist-info", ".egg-info"]:
                 metadata_files = ["METADATA", "PKG-INFO"]
@@ -100,7 +111,9 @@ def analyze_package_versions(
                             for line in f:
                                 if line.startswith("Version:"):
                                     version_key = f"{location_type}_version"
-                                    versions[version_key] = line.split(":", 1)[1].strip()
+                                    versions[version_key] = line.split(":", 1)[
+                                        1
+                                    ].strip()
                                     break
             else:
                 parent_dir = location.parent if location.is_file() else location
@@ -116,7 +129,9 @@ def analyze_package_versions(
                             for line in f:
                                 if line.startswith("Version:"):
                                     version_key = f"{location_type}_version"
-                                    versions[version_key] = line.split(":", 1)[1].strip()
+                                    versions[version_key] = line.split(":", 1)[
+                                        1
+                                    ].strip()
                                     break
         except Exception:
             pass
@@ -164,7 +179,10 @@ def main():
             print(f"   User:    {user_loc}")
             if versions["user_version"] != "unknown":
                 print(f"            Version: {versions['user_version']}")
-            if versions["system_version"] != "unknown" and versions["user_version"] != "unknown":
+            if (
+                versions["system_version"] != "unknown"
+                and versions["user_version"] != "unknown"
+            ):
                 if versions["system_version"] != versions["user_version"]:
                     print("   ⚠️  Version mismatch!")
     else:

@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract functions from shell scripts (.sh files and extensionless bash scripts) recursively.
-Supports parallel processing for better performance.
-Optimized for Termux environment.
-"""
 
 from __future__ import annotations
 
@@ -14,7 +9,6 @@ import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Set, Tuple
 
 from fastwalk import walk_files
 
@@ -35,7 +29,9 @@ EXCLUDED = {
     ".pm",
     ".syntax",
 }
-IS_TERMUX = os.environ.get("TERMUX_VERSION") is not None or "com.termux" in os.environ.get("PREFIX", "")
+IS_TERMUX = os.environ.get(
+    "TERMUX_VERSION"
+) is not None or "com.termux" in os.environ.get("PREFIX", "")
 DEFAULT_WORKERS = 6 if IS_TERMUX else 8
 
 
@@ -59,14 +55,14 @@ def is_bash_script(file_path: Path) -> bool:
             if first_line.startswith("#!"):
                 shell_patterns = ["bash", "sh", "dash", "ksh", "zsh", "ash", "shell"]
                 shebang_lower = first_line.lower()
-                if any((shell in shebang_lower for shell in shell_patterns)):
+                if any(shell in shebang_lower for shell in shell_patterns):
                     return True
-    except (IOError, OSError, UnicodeDecodeError):
+    except (OSError, UnicodeDecodeError):
         return False
     return False
 
 
-def find_sh_files(paths: List[Path], include_extensionless: bool = True) -> Set[Path]:
+def find_sh_files(paths: list[Path], include_extensionless: bool = True) -> set[Path]:
     sh_files = set()
     for path in paths:
         if not path.exists():
@@ -83,11 +79,14 @@ def find_sh_files(paths: List[Path], include_extensionless: bool = True) -> Set[
                 if item.is_file() and is_bash_script(item):
                     sh_files.add(item.resolve())
         else:
-            print(f"Warning: {path} is not a file or directory, skipping...", file=sys.stderr)
+            print(
+                f"Warning: {path} is not a file or directory, skipping...",
+                file=sys.stderr,
+            )
     return sh_files
 
 
-def extract_functions_from_file(sh_file: Path) -> List[Tuple[str, str, Path]]:
+def extract_functions_from_file(sh_file: Path) -> list[tuple[str, str, Path]]:
     try:
         with open(sh_file, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
@@ -96,7 +95,9 @@ def extract_functions_from_file(sh_file: Path) -> List[Tuple[str, str, Path]]:
         return []
     functions = []
     lines = content.split("\n")
-    function_start_pattern = re.compile("^\\s*(?:function\\s+)?(\\w[\\w\\-]*)\\s*(?:\\(\\))?\\s*\\{")
+    function_start_pattern = re.compile(
+        "^\\s*(?:function\\s+)?(\\w[\\w\\-]*)\\s*(?:\\(\\))?\\s*\\{"
+    )
     i = 0
     while i < len(lines):
         line = lines[i]
@@ -125,7 +126,9 @@ def extract_functions_from_file(sh_file: Path) -> List[Tuple[str, str, Path]]:
     return functions
 
 
-def process_file(sh_file: Path, output_dir: Path, use_extension: bool = True) -> List[Tuple[str, Path]]:
+def process_file(
+    sh_file: Path, output_dir: Path, use_extension: bool = True
+) -> list[tuple[str, Path]]:
     functions = extract_functions_from_file(sh_file)
     saved_functions = []
     for func_name, func_content, source_file in functions:
@@ -146,7 +149,10 @@ def process_file(sh_file: Path, output_dir: Path, use_extension: bool = True) ->
                 f.write("\n")
             saved_functions.append((func_name, output_file))
         except Exception as e:
-            print(f"Error writing function '{func_name}' to {output_file}: {e}", file=sys.stderr)
+            print(
+                f"Error writing function '{func_name}' to {output_file}: {e}",
+                file=sys.stderr,
+            )
     return saved_functions
 
 
@@ -180,12 +186,27 @@ def main():
         default=None,
         help=f"Number of parallel workers (default: auto-detected, currently {get_optimal_workers()})",
     )
-    parser.add_argument("--no-parallel", action="store_true", help="Disable parallel processing (process sequentially)")
     parser.add_argument(
-        "--sh-only", action="store_true", help="Only process files with .sh extension (ignore extensionless scripts)"
+        "--no-parallel",
+        action="store_true",
+        help="Disable parallel processing (process sequentially)",
     )
-    parser.add_argument("--no-extension", action="store_true", help="Output functions without .sh extension")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show verbose output including skipped files")
+    parser.add_argument(
+        "--sh-only",
+        action="store_true",
+        help="Only process files with .sh extension (ignore extensionless scripts)",
+    )
+    parser.add_argument(
+        "--no-extension",
+        action="store_true",
+        help="Output functions without .sh extension",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show verbose output including skipped files",
+    )
     args = parser.parse_args()
     if args.workers is None:
         args.workers = get_optimal_workers()
@@ -195,7 +216,7 @@ def main():
         input_paths = args.inputs
     else:
         input_paths = [Path(".")]
-    print(f"Searching for shell scripts...")
+    print("Searching for shell scripts...")
     include_extensionless = not args.sh_only
     sh_files = find_sh_files(input_paths, include_extensionless)
     if not sh_files:
@@ -210,7 +231,10 @@ def main():
     try:
         args.output.mkdir(parents=True, exist_ok=True)
     except PermissionError:
-        print(f"Error: Cannot create output directory '{args.output}'. Check permissions.", file=sys.stderr)
+        print(
+            f"Error: Cannot create output directory '{args.output}'. Check permissions.",
+            file=sys.stderr,
+        )
         return 1
     total_functions = 0
     use_extension = not args.no_extension
@@ -225,7 +249,10 @@ def main():
         print(f"Processing files in parallel with {args.workers} workers...")
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
             future_to_file = {
-                executor.submit(process_file, sh_file, args.output, use_extension): sh_file for sh_file in sh_files
+                executor.submit(
+                    process_file, sh_file, args.output, use_extension
+                ): sh_file
+                for sh_file in sh_files
             }
             for future in as_completed(future_to_file):
                 sh_file = future_to_file[future]
@@ -236,7 +263,9 @@ def main():
                         print(f"  {sh_file}: extracted {len(saved)} function(s)")
                 except Exception as e:
                     print(f"Error processing {sh_file}: {e}", file=sys.stderr)
-    print(f"\nDone! Extracted {total_functions} function(s) to '{args.output.absolute()}'")
+    print(
+        f"\nDone! Extracted {total_functions} function(s) to '{args.output.absolute()}'"
+    )
     if IS_TERMUX:
         with contextlib.suppress(BaseException):
             args.output.chmod(args.output.stat().st_mode | 493)

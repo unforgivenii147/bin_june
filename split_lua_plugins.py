@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Script to split a lazy.nvim plugin configuration file into individual files."""
 
 import re
 import sys

@@ -42,11 +42,15 @@ def get_repos(username: str, token: str | None = None, timeout: int = 60) -> lis
             print("\nError: Invalid or expired token. Check your .env file.")
         elif e.status == 403:
             if "rate limit" in str(e).lower():
-                print("\nError: API rate limit exceeded. Use a token for higher limits.")
+                print(
+                    "\nError: API rate limit exceeded. Use a token for higher limits."
+                )
             else:
                 print(f"\nError: Access forbidden. {e.data.get('message', '')}")
         else:
-            print(f"\nGitHub API Error: {e.status} - {e.data.get('message', 'Unknown error')}")
+            print(
+                f"\nGitHub API Error: {e.status} - {e.data.get('message', 'Unknown error')}"
+            )
         sys.exit(1)
     except Exception as e:
         print(f"\nError: {e}")
@@ -64,7 +68,9 @@ def main() -> None:
     if token:
         print("Using authenticated access (rate limit: 5000 requests/hour)")
     else:
-        print("No token found in .env, using unauthenticated access (rate limit: 60 requests/hour)")
+        print(
+            "No token found in .env, using unauthenticated access (rate limit: 60 requests/hour)"
+        )
     repos = get_repos(username, token=token, timeout=60)
     print(f"\nRepositories of '{username}':")
     for repo in repos:

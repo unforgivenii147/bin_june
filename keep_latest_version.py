@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"\nScript to detect and keep only the\n latest version of wheel, deb, or\n tar.gz files in current directory\n  recursively.\n"
 
 from __future__ import annotations
 
@@ -25,7 +24,9 @@ def parse_wheel_version(filename: str) -> tuple[str, str] | None:
     version_parts = []
     found_version = False
     for i, part in enumerate(parts):
-        if not found_version and (re.match(r"^\d", part) or part.lower() in ["v", "ver", "version"]):
+        if not found_version and (
+            re.match(r"^\d", part) or part.lower() in ["v", "ver", "version"]
+        ):
             found_version = True
             version_parts.append(part)
         elif not found_version:
@@ -112,7 +113,9 @@ def process_file(file_path: Path, file_type: str) -> tuple[str, str, Path] | Non
     return None
 
 
-def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> dict[str, list[tuple[str, Path]]]:
+def scan_directory(
+    directory: Path, file_type: str, check_all: bool = False
+) -> dict[str, list[tuple[str, Path]]]:
     packages = defaultdict(list)
     extensions = (".whl", ".deb", ".tar.gz", ".tgz", ".metadata")
     if check_all:
@@ -132,9 +135,11 @@ def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> 
                 future = executor.submit(process_file, file_path, "wheel")
             elif file_path.suffix == ".deb":
                 future = executor.submit(process_file, file_path, "deb")
-            elif file_path.suffix == ".gz" and file_path.stem.endswith(".tar"):
-                future = executor.submit(process_file, file_path, "targz")
-            elif file_path.suffix == ".tgz":
+            elif (
+                file_path.suffix == ".gz"
+                and file_path.stem.endswith(".tar")
+                or file_path.suffix == ".tgz"
+            ):
                 future = executor.submit(process_file, file_path, "targz")
             else:
                 continue
@@ -157,7 +162,9 @@ def get_latest_version(versions: list[tuple[str, Path]]) -> tuple[str, Path]:
     return latest
 
 
-def keep_latest_versions(packages: dict[str, list[tuple[str, Path]]], dry_run: bool = False) -> tuple[int, int]:
+def keep_latest_versions(
+    packages: dict[str, list[tuple[str, Path]]], dry_run: bool = False
+) -> tuple[int, int]:
     total_deleted = 0
     total_files_kept = 0
     for pkg_name, versions in packages.items():
@@ -193,11 +200,31 @@ def main() -> int:
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--deb", action="store_true", help="Check .deb files")
     group.add_argument("-w", "--wheel", action="store_true", help="Check .whl files")
-    group.add_argument("-t", "--targz", action="store_true", help="Check .tar.gz and .tgz files")
-    group.add_argument("-a", "--all", action="store_true", help="Check all package types (.whl, .deb, .tar.gz, .tgz)")
-    parser.add_argument("--dry-run", action="store_true", help="Simulate deletion without actually removing files")
-    parser.add_argument("--dir", type=str, default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("--verbose", action="store_true", help="Show detailed information about each file")
+    group.add_argument(
+        "-t", "--targz", action="store_true", help="Check .tar.gz and .tgz files"
+    )
+    group.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Check all package types (.whl, .deb, .tar.gz, .tgz)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simulate deletion without actually removing files",
+    )
+    parser.add_argument(
+        "--dir",
+        type=str,
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show detailed information about each file",
+    )
     args = parser.parse_args()
     if not (args.deb or args.wheel or args.targz or args.all):
         args.wheel = True
@@ -224,7 +251,7 @@ def main() -> int:
     if not packages:
         print("No matching package files found.")
         return 0
-    total_versions = sum((len(versions) for versions in packages.values()))
+    total_versions = sum(len(versions) for versions in packages.values())
     print(f"\nFound {len(packages)} package(s) with {total_versions} total version(s):")
     if args.verbose:
         for pkg_name, versions in packages.items():
@@ -240,9 +267,13 @@ def main() -> int:
     if total_deleted == 0:
         print("No files to delete. All packages have only one version.")
     elif args.dry_run:
-        print(f"Dry run complete. Would delete {total_deleted} file(s), keep {total_kept} file(s).")
+        print(
+            f"Dry run complete. Would delete {total_deleted} file(s), keep {total_kept} file(s)."
+        )
     else:
-        print(f"Cleanup complete. Deleted {total_deleted} file(s), kept {total_kept} file(s).")
+        print(
+            f"Cleanup complete. Deleted {total_deleted} file(s), kept {total_kept} file(s)."
+        )
     return 0
 
 

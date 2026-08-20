@@ -120,7 +120,10 @@ def compress(data: bytes) -> bytes:
             offset = pos - candidate
             match_len = 4
             max_match = min(data_len - pos, 64)
-            while match_len < max_match and data[candidate + match_len] == data[pos + match_len]:
+            while (
+                match_len < max_match
+                and data[candidate + match_len] == data[pos + match_len]
+            ):
                 match_len += 1
             _emit_copy(output, offset, match_len)
             pos += match_len
@@ -194,12 +197,17 @@ def compress_bz2(in_path: Path, out_path: Path) -> None:
 
 
 def compress_lzma(in_path: Path, out_path: Path) -> None:
-    with lzma.open(out_path, "wb", preset=9 | lzma.PRESET_EXTREME) as fout, in_path.open("rb") as fin:
+    with (
+        lzma.open(out_path, "wb", preset=9 | lzma.PRESET_EXTREME) as fout,
+        in_path.open("rb") as fin,
+    ):
         copy_chunks(fin, fout)
 
 
 def compress_zip(in_path: Path, out_path: Path) -> None:
-    with zipfile.ZipFile(out_path, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+    with zipfile.ZipFile(
+        out_path, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+    ) as zf:
         zf.write(in_path, arcname=in_path.name)
 
 
@@ -252,12 +260,23 @@ def run_single(algo: str, in_path: Path, tmpdir: Path) -> Result:
         elapsed = time.perf_counter() - t0
         out_size = out_path.stat().st_size
         return Result(
-            algo=algo, input_path=str(in_path), out_path=str(out_path), out_size=out_size, elapsed_s=elapsed, ok=True
+            algo=algo,
+            input_path=str(in_path),
+            out_path=str(out_path),
+            out_size=out_size,
+            elapsed_s=elapsed,
+            ok=True,
         )
     except Exception as e:
         logger.exception(f"[{algo}] failed: {e}")
         return Result(
-            algo=algo, input_path=str(in_path), out_path="", out_size=0, elapsed_s=0.0, ok=False, error=str(e)
+            algo=algo,
+            input_path=str(in_path),
+            out_path="",
+            out_size=0,
+            elapsed_s=0.0,
+            ok=False,
+            error=str(e),
         )
 
 
@@ -325,7 +344,9 @@ def _worker(arg):
     return _chunk_compressor(algo)(chunk)
 
 
-def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, processes: int | None) -> Result:
+def mp_compress_chunks(
+    algo: str, in_path: Path, tmpdir: Path, chunk_size: int, processes: int | None
+) -> Result:
     if algo not in WORKER_ALGOS:
         return Result(
             algo=f"mp_{algo}",
@@ -364,7 +385,13 @@ def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, 
     except Exception as e:
         logger.exception(f"[mp_{algo}] failed: {e}")
         return Result(
-            algo=f"mp_{algo}", input_path=str(in_path), out_path="", out_size=0, elapsed_s=0.0, ok=False, error=str(e)
+            algo=f"mp_{algo}",
+            input_path=str(in_path),
+            out_path="",
+            out_size=0,
+            elapsed_s=0.0,
+            ok=False,
+            error=str(e),
         )
 
 
@@ -396,7 +423,17 @@ def main() -> None:
         logger.warning("Could not compute SHA256")
     with tempfile.TemporaryDirectory(prefix="compress_bench_") as td:
         tmpdir = Path(td)
-        single_algos = ["7z", "gz", "lzma", "bz2", "zip", "brotli", "huffman", "snappy", "zstd"]
+        single_algos = [
+            "7z",
+            "gz",
+            "lzma",
+            "bz2",
+            "zip",
+            "brotli",
+            "huffman",
+            "snappy",
+            "zstd",
+        ]
         results_single: list[Result] = []
         logger.info("=== Single-process benchmark ===")
         for algo in single_algos:
@@ -404,7 +441,9 @@ def main() -> None:
             r = run_single(algo, in_path, tmpdir)
             results_single.append(r)
             if r.ok:
-                logger.info(f"[{algo}] OK size={fsz(r.out_size)} time={r.elapsed_s:.4f}s out={Path(r.out_path).name}")
+                logger.info(
+                    f"[{algo}] OK size={fsz(r.out_size)} time={r.elapsed_s:.4f}s out={Path(r.out_path).name}"
+                )
             else:
                 logger.error(f"[{algo}] FAIL {r.error}")
         mp_algos = ["gz", "bz2", "lzma", "zstd", "brotli", "snappy"]
@@ -414,7 +453,9 @@ def main() -> None:
         mp_results: list[Result] = []
         for algo in mp_algos:
             logger.info(f"MP chunk compress {algo} (chunk_size={fsz(chunk_size)}) ...")
-            r = mp_compress_chunks(algo, in_path, tmpdir, chunk_size=chunk_size, processes=processes)
+            r = mp_compress_chunks(
+                algo, in_path, tmpdir, chunk_size=chunk_size, processes=processes
+            )
             mp_results.append(r)
             if r.ok:
                 logger.info(

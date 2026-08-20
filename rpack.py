@@ -33,7 +33,11 @@ def get_wheel_tags(dist_info: Path) -> list[str]:
     if not wheel_file.exists():
         return ["py3-none-any"]
     content = wheel_file.read_text()
-    tags = [line.split(":", 1)[1].strip() for line in content.splitlines() if line.startswith("Tag:")]
+    tags = [
+        line.split(":", 1)[1].strip()
+        for line in content.splitlines()
+        if line.startswith("Tag:")
+    ]
     return tags or ["py3-none-any"]
 
 
@@ -103,7 +107,9 @@ def repack(pkg: str, site: Path, out_repack: Path, out_whl: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Repack installed Python packages")
     parser.add_argument("packages", nargs="*", help="Package names")
-    parser.add_argument("-a", "--all", action="store_true", help="Repack all installed pkgs")
+    parser.add_argument(
+        "-a", "--all", action="store_true", help="Repack all installed pkgs"
+    )
     args = parser.parse_args()
     site = find_site_packages()
     out_repack = Path.home() / "tmp" / "repack"

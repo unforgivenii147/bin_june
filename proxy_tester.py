@@ -36,7 +36,9 @@ if __name__ == "__main__":
     total_proxies = len(proxies_list)
     valid_proxies = []
 
-    args_list = [(idx, total_proxies, proxy) for idx, proxy in enumerate(proxies_list, start=1)]
+    args_list = [
+        (idx, total_proxies, proxy) for idx, proxy in enumerate(proxies_list, start=1)
+    ]
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         for result, valid_proxy in executor.map(check_proxy, args_list):
@@ -47,12 +49,13 @@ if __name__ == "__main__":
     if valid_proxies:
         save_choice = input("Do you want to save the valid proxies to a file? (y/n): ")
         if save_choice.lower() == "y":
-            output_file = input("Enter the filename to save valid proxies (default: valid_proxies.txt): ").strip()
+            output_file = input(
+                "Enter the filename to save valid proxies (default: valid_proxies.txt): "
+            ).strip()
             if not output_file:
                 output_file = "valid_proxies.txt"
             with open(output_file, "w") as f:
-                for proxy in valid_proxies:
-                    f.write(f"{proxy}\n")
+                f.writelines(f"{proxy}\n" for proxy in valid_proxies)
             print(f"Valid proxies saved to {output_file}")
     else:
         print("No valid proxies found.")

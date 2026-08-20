@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Extract .whl files from current directory to subdirectories."""
 
 from __future__ import annotations
 

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of transasis.py for Python 3.12.
-Translates text files to English recursively or individually.
-"""
 
 from __future__ import annotations
 

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Text file chunker with parallel processing.
-Splits text files into chunks (< 5000 chars) while respecting word and sentence boundaries.
-"""
 
 from __future__ import annotations
 
@@ -17,7 +13,9 @@ BUFFER_SIZE = 500
 MAX_CHUNK_SIZE = 4999
 
 
-def find_chunk_boundary(text: str, start_pos: int, target_size: int = TARGET_32768) -> int:
+def find_chunk_boundary(
+    text: str, start_pos: int, target_size: int = TARGET_32768
+) -> int:
     end_pos = min(start_pos + target_size, len(text))
     if end_pos >= len(text):
         return len(text)
@@ -28,7 +26,10 @@ def find_chunk_boundary(text: str, start_pos: int, target_size: int = TARGET_327
     if matches:
         for match in reversed(matches):
             absolute_pos = search_start + match.end()
-            if absolute_pos <= end_pos + BUFFER_SIZE and absolute_pos > end_pos - BUFFER_SIZE:
+            if (
+                absolute_pos <= end_pos + BUFFER_SIZE
+                and absolute_pos > end_pos - BUFFER_SIZE
+            ):
                 return absolute_pos
     for i in range(end_pos, max(start_pos, end_pos - BUFFER_SIZE), -1):
         if i < len(text) and text[i] in (" ", "\n", "\t"):
@@ -89,10 +90,23 @@ def main():
     parser = argparse.ArgumentParser(
         description="Split text files into chunks (< 5000 chars) respecting word/sentence boundaries."
     )
-    parser.add_argument("inputs", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("-o", "--output", default="output", help="Output directory for chunks (default: output)")
     parser.add_argument(
-        "-j", "--jobs", type=int, default=cpu_count(), help=f"Number of parallel jobs (default: {cpu_count()})"
+        "inputs",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="output",
+        help="Output directory for chunks (default: output)",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of parallel jobs (default: {cpu_count()})",
     )
     args = parser.parse_args()
     if args.inputs:

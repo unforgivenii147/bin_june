@@ -107,8 +107,7 @@ def collect_requirements(cwd: str = ".", exclude_dirs=None, verbose=False):
 def write_requirements(packages, output_file: str = "requirements.txt") -> Path:
     output_path = Path(output_file)
     with open(output_path, "w", encoding="utf-8") as f:
-        for package in packages:
-            f.write(f"{package}\n")
+        f.writelines(f"{package}\n" for package in packages)
     print(f"\n✓ Written {len(packages)} packages to {output_path}\n")
     if packages:
         print("Contents of requirements.txt:")
@@ -124,9 +123,21 @@ def write_requirements(packages, output_file: str = "requirements.txt") -> Path:
 def main() -> None:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Generate requirements.txt by scanning Python files")
-    parser.add_argument("-d", "--dir", default=".", help="Root directory to scan (default: current directory)")
-    parser.add_argument("-o", "--output", default="requirements.txt", help="Output file (default: requirements.txt)")
+    parser = argparse.ArgumentParser(
+        description="Generate requirements.txt by scanning Python files"
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        default=".",
+        help="Root directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="requirements.txt",
+        help="Output file (default: requirements.txt)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Show debug info")
     args = parser.parse_args()
     packages = collect_requirements(args.dir, verbose=args.verbose)

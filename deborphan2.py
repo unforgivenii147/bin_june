@@ -1,26 +1,21 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-deborphan.py - Find orphaned packages in Termux
-Identifies packages that are not dependencies of any other installed package
-"""
 
-import json
 import subprocess
 import sys
 from collections import defaultdict
-from typing import List, Set, Tuple
 
 
 class TermuxDeborphan:
     def __init__(self):
         self.all_packages = set()
-        self.dependencies = defaultdict(set)  # pkg -> set of packages that depend on it
+        self.dependencies = defaultdict(set)
         self.keep_list = set()
 
-    def get_installed_packages(self) -> Set[str]:
-        """Get all installed packages"""
+    def get_installed_packages(self) -> set[str]:
         try:
-            result = subprocess.run(["pkg", "list-installed"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["pkg", "list-installed"], capture_output=True, text=True
+            )
             packages = set()
             for line in result.stdout.strip().split("\n"):
                 if line:
@@ -31,10 +26,11 @@ class TermuxDeborphan:
             print(f"Error getting installed packages: {e}")
             sys.exit(1)
 
-    def get_package_dependencies(self, package: str) -> Set[str]:
-        """Get direct dependencies of a package"""
+    def get_package_dependencies(self, package: str) -> set[str]:
         try:
-            result = subprocess.run(["pkg", "show", package], capture_output=True, text=True)
+            result = subprocess.run(
+                ["pkg", "show", package], capture_output=True, text=True
+            )
             dependencies = set()
             for line in result.stdout.split("\n"):
                 if line.startswith("Depends:"):
@@ -53,25 +49,21 @@ class TermuxDeborphan:
         except Exception:
             return set()
 
-    def analyze(self) -> List[str]:
-        """Analyze packages and find orphans"""
+    def analyze(self) -> list[str]:
         print("Analyzing installed packages...")
         self.all_packages = self.get_installed_packages()
         print(f"Found {len(self.all_packages)} installed packages")
 
-        # Build reverse dependency map
         print("Building dependency graph...")
         packages_with_dependents = set()
 
         for pkg in self.all_packages:
             deps = self.get_package_dependencies(pkg)
             for dep in deps:
-                # Track which packages are dependencies of something
                 if dep in self.all_packages:
                     packages_with_dependents.add(dep)
                     self.dependencies[dep].add(pkg)
 
-        # Find orphans - packages with no dependents
         orphans = []
         for pkg in self.all_packages:
             if pkg not in packages_with_dependents and pkg not in self.keep_list:
@@ -80,7 +72,6 @@ class TermuxDeborphan:
         return sorted(orphans)
 
     def load_keep_list(self, filename: str = None):
-        """Load list of packages to keep"""
         if filename is None:
             filename = "/data/data/com.termux/files/home/.deborphan-keep"
 
@@ -92,29 +83,24 @@ class TermuxDeborphan:
             self.keep_list = set()
 
     def save_keep_list(self, filename: str = None):
-        """Save list of packages to keep"""
         if filename is None:
             filename = "/data/data/com.termux/files/home/.deborphan-keep"
 
         try:
             with open(filename, "w") as f:
-                for pkg in sorted(self.keep_list):
-                    f.write(f"{pkg}\n")
+                f.writelines(f"{pkg}\n" for pkg in sorted(self.keep_list))
             print(f"Saved keep list to {filename}")
         except Exception as e:
             print(f"Error saving keep list: {e}")
 
     def add_to_keep(self, package: str):
-        """Add a package to the keep list"""
         self.keep_list.add(package)
 
     def remove_from_keep(self, package: str):
-        """Remove a package from the keep list"""
         self.keep_list.discard(package)
 
 
 def interactive_mode():
-    """Interactive mode for identifying orphans"""
     deborphan = TermuxDeborphan()
     deborphan.load_keep_list()
 
@@ -130,7 +116,9 @@ def interactive_mode():
         print(f"{i}. {pkg}")
 
     print("\n--- Interactive Mode ---")
-    print("Commands: 'keep <pkg>' (add to keep list), 'remove <pkg>' (remove from keep list),")
+    print(
+        "Commands: 'keep <pkg>' (add to keep list), 'remove <pkg>' (remove from keep list),"
+    )
     print("          'list' (show keep list), 'save' (save keep list), 'quit' (exit)")
     print("-" * 40)
 
@@ -170,7 +158,6 @@ def interactive_mode():
 
 
 def batch_mode(args):
-    """Batch mode for listing orphans"""
     deborphan = TermuxDeborphan()
     deborphan.load_keep_list()
 

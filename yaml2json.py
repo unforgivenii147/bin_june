@@ -1,16 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert YAML to JSON with various formatting options.
-Supports reading from files or stdin, writing to files or stdout,
-pretty printing, compact output, and strict YAML parsing.
-Examples:
-  %(prog)s config.yaml
-  %(prog)s config.yaml -o config.json
-  cat config.yaml | %(prog)s
-  %(prog)s config.yaml --indent 4 --sort-keys
-  %(prog)s config.yaml --compact --no-ensure-ascii
-  echo 'key: value' | %(prog)s --strict
-"""
 
 from __future__ import annotations
 
@@ -23,7 +11,9 @@ from typing import TextIO
 try:
     import yaml
 except ImportError:
-    print("Error: PyYAML is required. Install with: pip install PyYAML", file=sys.stderr)
+    print(
+        "Error: PyYAML is required. Install with: pip install PyYAML", file=sys.stderr
+    )
     sys.exit(1)
 
 
@@ -127,9 +117,17 @@ def main() -> int:
         help="Indentation spaces for pretty printing (default: 2, use 0 for compact)",
     )
     format_group.add_argument(
-        "-c", "--compact", action="store_true", help="Compact output (minified, overrides --indent)"
+        "-c",
+        "--compact",
+        action="store_true",
+        help="Compact output (minified, overrides --indent)",
     )
-    format_group.add_argument("-s", "--sort-keys", action="store_true", help="Sort dictionary keys alphabetically")
+    format_group.add_argument(
+        "-s",
+        "--sort-keys",
+        action="store_true",
+        help="Sort dictionary keys alphabetically",
+    )
     encoding_group = parser.add_argument_group("Encoding")
     encoding_group.add_argument(
         "--no-ensure-ascii",
@@ -146,9 +144,15 @@ def main() -> int:
     )
     parsing_group = parser.add_argument_group("Parsing")
     parsing_group.add_argument(
-        "--strict", action="store_true", help="Strict YAML parsing (disallow duplicate keys, etc.)"
+        "--strict",
+        action="store_true",
+        help="Strict YAML parsing (disallow duplicate keys, etc.)",
     )
-    parsing_group.add_argument("--validate-only", action="store_true", help="Only validate YAML, don't output JSON")
+    parsing_group.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="Only validate YAML, don't output JSON",
+    )
     args = parser.parse_args()
     if args.allow_unicode:
         args.ensure_ascii = False

@@ -114,7 +114,9 @@ def append_results(results) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-u", "--url", default=DEFAULT_URL, help="Base URL to crawl")
-    parser.add_argument("-s", "--size", type=float, default=300, help="Max size in MB (default 300)")
+    parser.add_argument(
+        "-s", "--size", type=float, default=300, help="Max size in MB (default 300)"
+    )
     args = parser.parse_args()
     max_size = args.size
     base_url = args.url if args.url.endswith("/") else args.url + "/"

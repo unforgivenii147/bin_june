@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Insert SKIP_DIRS definition after import section in Python files that use it but don't define it.
-Uses parallel processing for better performance.
-Handles edge cases like try-except blocks and validates output.
-"""
 
 from __future__ import annotations
 
@@ -13,12 +8,24 @@ from pathlib import Path
 
 SKIP_DIRS_DEF = "\n"
 IGNORE_DIRS = frozenset(
-    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv", "node_modules"}
+    {
+        "lazy",
+        ".git",
+        "__pycache__",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".pytest_cache",
+        ".venv",
+        "venv",
+        "node_modules",
+    }
 )
 
 
 def check_skip_dirs_usage(tree: ast.AST) -> bool:
-    return any(isinstance(node, ast.Name) and node.id == "SKIP_DIRS" for node in ast.walk(tree))
+    return any(
+        isinstance(node, ast.Name) and node.id == "SKIP_DIRS" for node in ast.walk(tree)
+    )
 
 
 def check_skip_dirs_defined(tree: ast.AST) -> bool:
@@ -144,7 +151,10 @@ def main():
     }
     print(f"Processing files using {min(len(python_files), 8)} workers...\n")
     with ProcessPoolExecutor(max_workers=min(len(python_files), 8)) as executor:
-        future_to_file = {executor.submit(process_file, file_path): file_path for file_path in python_files}
+        future_to_file = {
+            executor.submit(process_file, file_path): file_path
+            for file_path in python_files
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -179,7 +189,9 @@ def main():
     print(f"  Other errors:                {stats['other_errors']}")
     print(f"{'=' * 42}")
     if stats["modified"] > 0:
-        print(f"\n✓ Successfully added SKIP_DIRS definition to {stats['modified']} file(s)")
+        print(
+            f"\n✓ Successfully added SKIP_DIRS definition to {stats['modified']} file(s)"
+        )
     else:
         print("\nℹ No files needed SKIP_DIRS definition")
 

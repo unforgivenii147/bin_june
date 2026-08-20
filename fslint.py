@@ -1,25 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-fslint.py — FSLint reimplemented as a Python CLI tool.
-Checks:
-  --findup   Duplicate files (content hash)
-  --findnl   Name lint (bad characters, mixed case, leading/trailing spaces)
-  --findu8   Filenames not valid UTF-8
-  --findbl   Bad symlinks (dangling, self-referential, or cyclic)
-  --findem   Empty directories
-  --findid   Files owned by non-existent UIDs/GIDs
-  --findns   Non-stripped ELF binaries
-  --findsn   Same-name files shadowed across PATH entries
-  --findtf   Temporary / junk files
-  --findwd   World-writable files and directories
-  --findrs   Redundant whitespace in filenames
-  --all      Run every check (default when no check flag is given)
-Usage examples:
-  python fslint.py --findem /home/user
-  python fslint.py --findup --findtf /tmp
-  python fslint.py --all /var/www
-  python fslint.py --findsn
-"""
 
 from __future__ import annotations
 
@@ -73,11 +52,17 @@ def warn(msg: str) -> None:
 
 
 def walk(
-    roots: list[Path], *, follow_symlinks: bool = False, yield_dirs: bool = True, yield_files: bool = True
+    roots: list[Path],
+    *,
+    follow_symlinks: bool = False,
+    yield_dirs: bool = True,
+    yield_files: bool = True,
 ) -> Generator[Path, None, None]:
     for root in roots:
         root = root.resolve() if follow_symlinks else root
-        for dirpath, _dirnames, filenames in os.walk(root, followlinks=follow_symlinks, onerror=_walk_err):
+        for dirpath, _dirnames, filenames in os.walk(
+            root, followlinks=follow_symlinks, onerror=_walk_err
+        ):
             dp = Path(dirpath)
             if yield_dirs:
                 yield dp
@@ -125,7 +110,9 @@ def findup(roots: list[Path]) -> int:
         if len(paths) < 2:
             continue
         size = paths[0].stat().st_size
-        print(f"\n  {_c(BOLD, 'Hash:')} {digest[:16]}…  {_c(GREY, f'({size:,} bytes × {len(paths)})')}")
+        print(
+            f"\n  {_c(BOLD, 'Hash:')} {digest[:16]}…  {_c(GREY, f'({size:,} bytes × {len(paths)})')}"
+        )
         for p in paths:
             found(p)
         total += len(paths) - 1
@@ -285,7 +272,10 @@ def _is_elf(path: Path) -> bool:
 def _has_debug_symbols(path: Path) -> bool:
     try:
         result = subprocess.run(
-            ["readelf", "--sections", "--wide", str(path)], capture_output=True, text=True, timeout=10
+            ["readelf", "--sections", "--wide", str(path)],
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         output = result.stdout
         return ".symtab" in output or ".debug_info" in output
@@ -350,20 +340,20 @@ def findsn(_roots: list[Path] | None = None) -> int:
 _TF_PATTERNS: list[re.Pattern[str]] = [
     re.compile("~$"),
     re.compile("^#.*#$"),
-    re.compile(r"\.bak$", re.I),
-    re.compile(r"\.tmp$", re.I),
-    re.compile(r"\.temp$", re.I),
-    re.compile(r"\.swp$", re.I),
-    re.compile(r"\.swo$", re.I),
+    re.compile(r"\.bak$", re.IGNORECASE),
+    re.compile(r"\.tmp$", re.IGNORECASE),
+    re.compile(r"\.temp$", re.IGNORECASE),
+    re.compile(r"\.swp$", re.IGNORECASE),
+    re.compile(r"\.swo$", re.IGNORECASE),
     re.compile(r"^\.DS_Store$"),
-    re.compile(r"^Thumbs\.db$", re.I),
-    re.compile(r"^desktop\.ini$", re.I),
-    re.compile(r"\.orig$", re.I),
-    re.compile(r"\.rej$", re.I),
+    re.compile(r"^Thumbs\.db$", re.IGNORECASE),
+    re.compile(r"^desktop\.ini$", re.IGNORECASE),
+    re.compile(r"\.orig$", re.IGNORECASE),
+    re.compile(r"\.rej$", re.IGNORECASE),
     re.compile(r"core\.\d+$"),
     re.compile("^core$"),
-    re.compile(r"\.log$", re.I),
-    re.compile(r"\.pid$", re.I),
+    re.compile(r"\.log$", re.IGNORECASE),
+    re.compile(r"\.pid$", re.IGNORECASE),
     re.compile("__pycache__"),
     re.compile(r"\.pyc$"),
     re.compile(r"\.pyo$"),
@@ -440,7 +430,9 @@ ALL_CHECKS: dict[str, tuple[str, callable]] = {
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="fslint", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        prog="fslint",
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument(
         "paths",
@@ -451,9 +443,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Directory/directories to scan (default: current directory)",
     )
     p.add_argument(
-        "--all", "-a", action="store_true", dest="run_all", help="Run all checks (default when no check flag is given)"
+        "--all",
+        "-a",
+        action="store_true",
+        dest="run_all",
+        help="Run all checks (default when no check flag is given)",
     )
-    p.add_argument("--summary", "-s", action="store_true", help="Print a one-line summary table at the end")
+    p.add_argument(
+        "--summary",
+        "-s",
+        action="store_true",
+        help="Print a one-line summary table at the end",
+    )
     group = p.add_argument_group("checks")
     for flag, (desc, _fn) in ALL_CHECKS.items():
         group.add_argument(f"--{flag}", action="store_true", default=False, help=desc)
@@ -494,7 +495,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.run_all or not requested:
         requested = list(ALL_CHECKS.keys())
     print(_c(BOLD + CYAN, "\nFSLint — Filesystem Lint Tool"))
-    print(_c(GREY, f"Scanning: {', '.join((str(r) for r in roots))}"))
+    print(_c(GREY, f"Scanning: {', '.join(str(r) for r in roots)}"))
     print(_c(GREY, f"Checks:   {', '.join(requested)}"))
     results: dict[str, int] = {}
     exit_code = 0

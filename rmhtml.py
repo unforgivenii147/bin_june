@@ -41,7 +41,11 @@ def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]
-    files = [Path(f) for f in args] if args else get_files(cwd, ext=[".html", ".htm", ".xml"])
+    files = (
+        [Path(f) for f in args]
+        if args
+        else get_files(cwd, ext=[".html", ".htm", ".xml"])
+    )
     mpf3(process_file, files)
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")

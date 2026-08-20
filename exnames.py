@@ -23,7 +23,10 @@ def load_names(names_filepath):
                         names.add(
                             (
                                 name,
-                                re.compile(re.escape(name[0].upper()) + "[\\w\\s\\-']+", re.IGNORECASE),
+                                re.compile(
+                                    re.escape(name[0].upper()) + "[\\w\\s\\-']+",
+                                    re.IGNORECASE,
+                                ),
                             )
                         )
     except FileNotFoundError:
@@ -64,8 +67,10 @@ def find_names_in_files(names_db_path: str = "names.txt") -> None:
                             matched_text = match.group(0)
                             match_parts = matched_text.strip().split()
                             if len(match_parts) >= 2 and (
-                                match_parts[0][0].upper() == original_name.split()[0][0].upper()
-                                and match_parts[-1][0].upper() == original_name.split()[-1][0].upper()
+                                match_parts[0][0].upper()
+                                == original_name.split()[0][0].upper()
+                                and match_parts[-1][0].upper()
+                                == original_name.split()[-1][0].upper()
                             ):
                                 if original_name not in found_names:
                                     found_names[original_name] = []

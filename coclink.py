@@ -100,7 +100,13 @@ def main() -> None:
         for v in vids:
             links = extract_th18_links(v["description"])
             if links:
-                results.append({"title": v["title"], "video_url": v["url"], "links": list(set(links))})
+                results.append(
+                    {
+                        "title": v["title"],
+                        "video_url": v["url"],
+                        "links": list(set(links)),
+                    }
+                )
         if results:
             create_html(name, results)
         else:

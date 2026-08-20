@@ -15,7 +15,9 @@ def is_comment(line: str) -> bool:
     return any(stripped.startswith(prefix) for prefix in COMMENT_PREFIXES)
 
 
-def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comments=False):
+def process_lines(
+    lines: list[str], start_idx, end_idx, unique=False, sort_comments=False
+):
     target_slice = lines[start_idx:end_idx]
     if sort_comments:
         working_lines = target_slice[:]
@@ -63,11 +65,18 @@ def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comme
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Sort lines in a file within a given line range.")
+    parser = argparse.ArgumentParser(
+        description="Sort lines in a file within a given line range."
+    )
     parser.add_argument("filename", help="Path to file")
     parser.add_argument("start_line", type=int, help="Start line (1-based)")
     parser.add_argument("end_line", type=int, help="End line (1-based, inclusive)")
-    parser.add_argument("-u", "--unique", action="store_true", help="Remove duplicate lines within range")
+    parser.add_argument(
+        "-u",
+        "--unique",
+        action="store_true",
+        help="Remove duplicate lines within range",
+    )
     parser.add_argument(
         "-c",
         "--comments",
@@ -95,7 +104,9 @@ def main() -> None:
             lines, start_idx, end_idx, unique=args.unique, sort_comments=args.comments
         )
         new_lines = lines[:start_idx] + rebuilt_slice + lines[end_idx:]
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as tmp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, encoding="utf-8"
+        ) as tmp_file:
             tmp_file.writelines(new_lines)
             temp_name = tmp_file.name
         shutil.move(temp_name, file_path)

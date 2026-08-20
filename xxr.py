@@ -53,11 +53,18 @@ class Result:
 
 def has_compressed_suffix(path: Path) -> bool:
     name = path.name.lower()
-    return any((name.endswith(ext) for ext in SUPPORTED_EXTS))
+    return any(name.endswith(ext) for ext in SUPPORTED_EXTS)
 
 
 def output_name_for_file(path: Path, mode: str) -> Path:
-    ext_map = {"xz": ".xz", "gz": ".gz", "brotli": ".br", "zstd": ".zst", "7z": ".7z", "zip": ".zip"}
+    ext_map = {
+        "xz": ".xz",
+        "gz": ".gz",
+        "brotli": ".br",
+        "zstd": ".zst",
+        "7z": ".7z",
+        "zip": ".zip",
+    }
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return path.with_name(path.name + ext_map[mode])
@@ -82,7 +89,9 @@ def copy_chunks(src_fd, dst_fd, chunk_size: int = 32768) -> None:
         dst_fd.write(chunk)
 
 
-def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bool = False) -> None:
+def compress_streaming(
+    src: Path, dst: Path, compress_func: Callable, is_dir: bool = False
+) -> None:
     temp_path = dst.with_suffix(".tmp")
     try:
         if is_dir:
@@ -102,7 +111,10 @@ def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bo
 
 
 def compress_file_xz(src: Path, dst: Path) -> None:
-    with src.open("rb") as fin, lzma.open(dst, "wb", preset=9 | lzma.PRESET_EXTREME) as fout:
+    with (
+        src.open("rb") as fin,
+        lzma.open(dst, "wb", preset=9 | lzma.PRESET_EXTREME) as fout,
+    ):
         copy_chunks(fin, fout)
 
 
@@ -132,19 +144,27 @@ def compress_file_zstd(src: Path, dst: Path) -> None:
     if zstd is None:
         raise RuntimeError("zstandard is not installed")
     cctx = zstd.ZstdCompressor(level=22)
-    with src.open("rb") as fin, dst.open("wb") as fout, cctx.stream_writer(fout) as compressor:
+    with (
+        src.open("rb") as fin,
+        dst.open("wb") as fout,
+        cctx.stream_writer(fout) as compressor,
+    ):
         copy_chunks(fin, compressor)
 
 
 def compress_file_zip(src: Path, dst: Path) -> None:
-    with zipfile.ZipFile(dst, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+    with zipfile.ZipFile(
+        dst, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+    ) as zf:
         zf.write(src, arcname=src.name)
 
 
 def compress_file_7z(src: Path, dst: Path) -> None:
     if py7zr is None:
         raise RuntimeError("py7zr is not installed")
-    with py7zr.SevenZipFile(dst, "w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": 9}]) as zf:
+    with py7zr.SevenZipFile(
+        dst, "w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": 9}]
+    ) as zf:
         zf.write(src, arcname=src.name)
 
 
@@ -182,7 +202,9 @@ def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
         return result
 
 
-def decompress_stream_tar(src: Path, decompress_func: Callable, dst_dir: Path, extension: str) -> Path:
+def decompress_stream_tar(
+    src: Path, decompress_func: Callable, dst_dir: Path, extension: str
+) -> Path:
     extracted_path = dst_dir / src.name[: -len(extension)]
     with tempfile.NamedTemporaryFile(delete=False, suffix=".tar") as tf:
         tar_temp = Path(tf.name)
@@ -237,7 +259,9 @@ def decompress_one(path_str: str) -> Result:
             }
             for ext, (_len_offset, decompress_func) in ext_map.items():
                 if name.endswith(ext):
-                    extracted = decompress_stream_tar(src, decompress_func, dst_dir, ext)
+                    extracted = decompress_stream_tar(
+                        src, decompress_func, dst_dir, ext
+                    )
                     result.dst = str(extracted)
                     break
         elif name.endswith(".tar"):
@@ -263,7 +287,10 @@ def decompress_one(path_str: str) -> Result:
                     result.dst = str(dst_path)
                     break
         elif name.endswith((".7z", ".zip")):
-            ext_map = {".7z": (py7zr.SevenZipFile(src, "r"), src.stem), ".zip": (zipfile.ZipFile(src, "r"), src.stem)}
+            ext_map = {
+                ".7z": (py7zr.SevenZipFile(src, "r"), src.stem),
+                ".zip": (zipfile.ZipFile(src, "r"), src.stem),
+            }
             for ext, (archive, extract_name) in ext_map.items():
                 if name.endswith(ext):
                     with archive as zf:
@@ -323,13 +350,21 @@ def main() -> None:
     global COMPRESS_MODE
     cwd = Path.cwd()
     before = gsz(cwd)
-    parser = argparse.ArgumentParser(description="Compress/decompress current directory recursively.")
+    parser = argparse.ArgumentParser(
+        description="Compress/decompress current directory recursively."
+    )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", help="Compress")
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress")
-    parser.add_argument("--threads", type=int, default=os.cpu_count(), help="Number of threads to use")
-    parser.add_argument("-7", "--7z", dest="use_7z", action="store_true", help="Use py7zr")
-    parser.add_argument("-z", "--zstd", action="store_true", help="Use zstandard (default)")
+    parser.add_argument(
+        "--threads", type=int, default=os.cpu_count(), help="Number of threads to use"
+    )
+    parser.add_argument(
+        "-7", "--7z", dest="use_7z", action="store_true", help="Use py7zr"
+    )
+    parser.add_argument(
+        "-z", "--zstd", action="store_true", help="Use zstandard (default)"
+    )
     parser.add_argument("-x", "--xz", action="store_true", help="Use xz")
     parser.add_argument("-g", "--gz", action="store_true", help="Use gzip")
     parser.add_argument("-b", "--brotli", action="store_true", help="Use brotlicffi")
@@ -340,7 +375,9 @@ def main() -> None:
         args.compress = True
         args.zstd = True
     if args.decompress:
-        targets = [p for p in Path().iterdir() if p.is_file() and has_compressed_suffix(p)]
+        targets = [
+            p for p in Path().iterdir() if p.is_file() and has_compressed_suffix(p)
+        ]
         if not targets:
             print("No compressed files found to decompress.")
             return
@@ -356,12 +393,16 @@ def main() -> None:
             "xz": "xz",
             "bz2": "bz2",
         }
-        mode = next((mode_map[flag] for flag in mode_map if getattr(args, flag)), "zstd")
+        mode = next(
+            (mode_map[flag] for flag in mode_map if getattr(args, flag)), "zstd"
+        )
         items_to_process = collect_top_level_items(cwd)
         if not items_to_process:
             print("No files or directories to compress.")
             return
-        print(f"Found {len(items_to_process)} items to compress using mode '{mode}'. Starting compression...")
+        print(
+            f"Found {len(items_to_process)} items to compress using mode '{mode}'. Starting compression..."
+        )
         COMPRESS_MODE = mode
         mpf3(worker_func, items_to_process, max_workers=args.threads)
     after = gsz(cwd)

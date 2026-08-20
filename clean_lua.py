@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Remove comments from Lua files using tree-sitter.
-Updates files in-place. Accepts multiple files and directories as input.
-If no input is provided, processes files in the current directory recursively.
-"""
 
 from __future__ import annotations
 
@@ -51,7 +47,10 @@ def remove_comments(source: bytes) -> tuple[bytes, int, int]:
     bytes_removed = 0
     for start, end in ranges:
         line_start = start
-        while line_start > 0 and result[line_start - 1 : line_start] not in (b"\n", b"\r"):
+        while line_start > 0 and result[line_start - 1 : line_start] not in (
+            b"\n",
+            b"\r",
+        ):
             line_start -= 1
         leading = result[line_start:start]
         only_ws_before = leading.strip() == b""
@@ -126,7 +125,10 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
             base = item
             files.extend((p, base) for p in sorted(base.rglob("*.lua")))
         else:
-            print(f"warning: {item} is neither a file nor directory, skipping", file=sys.stderr)
+            print(
+                f"warning: {item} is neither a file nor directory, skipping",
+                file=sys.stderr,
+            )
     return files
 
 
@@ -139,7 +141,9 @@ def format_size(n: int) -> str:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Remove comments from Lua files using tree-sitter.")
+    ap = argparse.ArgumentParser(
+        description="Remove comments from Lua files using tree-sitter."
+    )
     ap.add_argument(
         "paths",
         nargs="*",
@@ -182,7 +186,9 @@ def main() -> int:
                 total_removed += s["removed"]
                 saved = s["before"] - s["after"]
                 pct = (saved / s["before"] * 100) if s["before"] else 0.0
-                print(f"  ✓ {rel}  {s['comments']} comment(s) removed · {format_size(saved)} (-{pct:.1f}%)")
+                print(
+                    f"  ✓ {rel}  {s['comments']} comment(s) removed · {format_size(saved)} (-{pct:.1f}%)"
+                )
     elapsed = time.monotonic() - t0
     print("\n" + "─" * 42)
     print(f"  Files processed  : {total_files}")

@@ -17,7 +17,9 @@ def main() -> None:
         sys.exit(1)
     Path("output").mkdir(exist_ok=True, parents=True)
     files = {
-        letter: Path(os.path.join("output", f"{letter}.txt")).open("w", encoding="utf-8")
+        letter: Path(os.path.join("output", f"{letter}.txt")).open(
+            "w", encoding="utf-8"
+        )
         for letter in string.ascii_lowercase
     }
     try:

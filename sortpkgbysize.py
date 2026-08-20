@@ -23,7 +23,9 @@ def sort_packages_by_size(filename: str) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Sort Debian packages CSV by Installed-Size")
+    parser = argparse.ArgumentParser(
+        description="Sort Debian packages CSV by Installed-Size"
+    )
     parser.add_argument("fname", help="CSV file to sort")
     args = parser.parse_args()
     sort_packages_by_size(args.fname)

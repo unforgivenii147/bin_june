@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""List pure Python packages with specific naming and structure constraints."""
 
 from __future__ import annotations
 
@@ -25,7 +24,11 @@ def has_valid_name(name: str) -> bool:
 def get_top_level_modules(dist) -> set[str]:
     try:
         if dist.read_text("top_level.txt"):
-            return {line.strip() for line in dist.read_text("top_level.txt").splitlines() if line.strip()}
+            return {
+                line.strip()
+                for line in dist.read_text("top_level.txt").splitlines()
+                if line.strip()
+            }
     except (FileNotFoundError, TypeError):
         pass
     if dist.files:

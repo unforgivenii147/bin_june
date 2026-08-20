@@ -45,7 +45,11 @@ def get_files_to_process(root_dir: Path, compress: bool) -> list[Path]:
                     files.append(file)
     else:
         for file in root_dir.rglob("*"):
-            if file.is_file() and not should_exclude(file) and file.suffix.lower() == ".xz":
+            if (
+                file.is_file()
+                and not should_exclude(file)
+                and file.suffix.lower() == ".xz"
+            ):
                 files.append(file)
     return sorted(files)
 
@@ -105,9 +109,15 @@ def process_files(
     total_failed = 0
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         if compress:
-            futures = {executor.submit(compress_file, file, preset, threads, remove_orig): file for file in files}
+            futures = {
+                executor.submit(compress_file, file, preset, threads, remove_orig): file
+                for file in files
+            }
         else:
-            futures = {executor.submit(decompress_file, file, remove_orig): file for file in files}
+            futures = {
+                executor.submit(decompress_file, file, remove_orig): file
+                for file in files
+            }
         completed = 0
         for future in as_completed(futures):
             completed += 1
@@ -139,8 +149,15 @@ def main():
               python compress_files.py -c /path/to/files --num-workers 8
         """),
     )
-    parser.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no -d specified)")
-    parser.add_argument("-d", "--decompress", action="store_true", help="Decompress .xz files")
+    parser.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files (default if no -d specified)",
+    )
+    parser.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress .xz files"
+    )
     parser.add_argument(
         "--preset",
         type=int,
@@ -148,7 +165,12 @@ def main():
         choices=range(10),
         help="Compression preset 0-9 (default: 9)",
     )
-    parser.add_argument("--threads", type=int, default=4, help="Threads per compression job (default: 4)")
+    parser.add_argument(
+        "--threads",
+        type=int,
+        default=4,
+        help="Threads per compression job (default: 4)",
+    )
     parser.add_argument(
         "--num-workers",
         type=int,

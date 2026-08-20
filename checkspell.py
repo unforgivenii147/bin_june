@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Spell checker script that reports and optionally fixes spelling errors in files.
-Supports multiple files, directories, multiprocessing, and personal dictionaries.
-"""
 
 from __future__ import annotations
 
@@ -35,7 +31,9 @@ class Personaldictionary:
                     data = json.load(f)
                     self.words = {word.lower() for word in data.get("words", [])}
             except (OSError, json.JSONDecodeError) as e:
-                print(f"Warning: Could not load personal dictionary: {e}", file=sys.stderr)
+                print(
+                    f"Warning: Could not load personal dictionary: {e}", file=sys.stderr
+                )
                 self.words = set()
         else:
             self.words = set()
@@ -43,7 +41,9 @@ class Personaldictionary:
     def save(self) -> None:
         try:
             with open(self.dict_path, "w", encoding="utf-8") as f:
-                json.dump({"words": sorted(self.words)}, f, indent=2, ensure_ascii=False)
+                json.dump(
+                    {"words": sorted(self.words)}, f, indent=2, ensure_ascii=False
+                )
             print(f"✓ dictionary saved to {self.dict_path}")
         except OSError as e:
             print(f"Error: Could not save dictionary: {e}", file=sys.stderr)
@@ -83,7 +83,12 @@ class SpellCheckProcessor:
         self.personal_dict = personal_dict or Personaldictionary()
 
     def check_file(self, file_path: Path) -> dict:
-        result = {"file": str(file_path), "errors": [], "total_errors": 0, "fixed": False}
+        result = {
+            "file": str(file_path),
+            "errors": [],
+            "total_errors": 0,
+            "fixed": False,
+        }
         try:
             with open(file_path, encoding="utf-8") as f:
                 content = f.read()
@@ -95,7 +100,9 @@ class SpellCheckProcessor:
         for line_num, line in enumerate(lines, 1):
             words = re.findall(r"\b[a-zA-Z]+\b", line)
             misspelled = self.spell_checker.unknown(words)
-            misspelled = [word for word in misspelled if not self.personal_dict.contains(word)]
+            misspelled = [
+                word for word in misspelled if not self.personal_dict.contains(word)
+            ]
             for word in misspelled:
                 if word not in error_map:
                     error_map[word] = []
@@ -106,7 +113,9 @@ class SpellCheckProcessor:
                 suggestions = [suggestions]
             else:
                 suggestions = list(suggestions)[:5]
-            result["errors"].append({"word": word, "lines": line_numbers, "suggestions": suggestions})
+            result["errors"].append(
+                {"word": word, "lines": line_numbers, "suggestions": suggestions}
+            )
             result["total_errors"] += len(line_numbers)
         if self.autofix and result["errors"]:
             result["fixed"] = self._fix_file(file_path, content)
@@ -119,7 +128,12 @@ class SpellCheckProcessor:
             word = error["word"]
             suggestion = self.spell_checker.correction(word)
             if isinstance(suggestion, str):
-                fixed_content = re.sub(r"\b" + re.escape(word) + r"\b", suggestion, fixed_content, flags=re.IGNORECASE)
+                fixed_content = re.sub(
+                    r"\b" + re.escape(word) + r"\b",
+                    suggestion,
+                    fixed_content,
+                    flags=re.IGNORECASE,
+                )
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(fixed_content)
@@ -133,7 +147,9 @@ class SpellCheckProcessor:
         for line in lines:
             words = re.findall(r"\b[a-zA-Z]+\b", line)
             misspelled = self.spell_checker.unknown(words)
-            misspelled = [word for word in misspelled if not self.personal_dict.contains(word)]
+            misspelled = [
+                word for word in misspelled if not self.personal_dict.contains(word)
+            ]
             for word in misspelled:
                 if word not in errors:
                     errors[word] = {"word": word}
@@ -205,7 +221,9 @@ def handle_dictionary_operations(args) -> None:
             print(f"✓ Added {count} word(s) from {args.add_from_file}")
             personal_dict.save()
         except OSError as e:
-            print(f"Error: Could not read file {args.add_from_file}: {e}", file=sys.stderr)
+            print(
+                f"Error: Could not read file {args.add_from_file}: {e}", file=sys.stderr
+            )
             sys.exit(1)
     if args.remove_words:
         count = sum(1 for word in args.remove_words if personal_dict.remove_word(word))
@@ -222,13 +240,24 @@ def handle_dictionary_operations(args) -> None:
         else:
             print("Personal dictionary is empty.")
     if args.clear_dict:
-        if input("Are you sure you want to clear the dictionary? (yes/no): ").lower() == "yes":
+        if (
+            input("Are you sure you want to clear the dictionary? (yes/no): ").lower()
+            == "yes"
+        ):
             personal_dict.words.clear()
             personal_dict.save()
             print("✓ dictionary cleared")
         else:
             print("Cancelled.")
-    if any([args.add_words, args.add_from_file, args.remove_words, args.list_dict, args.clear_dict]):
+    if any(
+        [
+            args.add_words,
+            args.add_from_file,
+            args.remove_words,
+            args.list_dict,
+            args.clear_dict,
+        ]
+    ):
         sys.exit(0)
 
 
@@ -251,8 +280,17 @@ Personal dictionary Management:
   python spell_checker.py -d /path/to/dict.json -a document.txt
         """,
     )
-    parser.add_argument("inputs", nargs="*", help="File(s) or folder(s) to check (default: current directory)")
-    parser.add_argument("-a", "--autofix", action="store_true", help="Automatically fix misspelled words")
+    parser.add_argument(
+        "inputs",
+        nargs="*",
+        help="File(s) or folder(s) to check (default: current directory)",
+    )
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Automatically fix misspelled words",
+    )
     parser.add_argument(
         "-j",
         "--jobs",
@@ -284,7 +322,9 @@ Personal dictionary Management:
         metavar="WORD",
         help="Remove one or more words from personal dictionary",
     )
-    parser.add_argument("--list-dict", action="store_true", help="list all words in personal dictionary")
+    parser.add_argument(
+        "--list-dict", action="store_true", help="list all words in personal dictionary"
+    )
     parser.add_argument(
         "--clear-dict",
         action="store_true",
@@ -298,7 +338,9 @@ Personal dictionary Management:
         print("No files found to check.", file=sys.stderr)
         sys.exit(1)
     print(f"Processing {len(files)} file(s) with {args.jobs} worker(s)...")
-    print(f"Using personal dictionary: {personal_dict.dict_path} ({len(personal_dict)} word(s))\n")
+    print(
+        f"Using personal dictionary: {personal_dict.dict_path} ({len(personal_dict)} word(s))\n"
+    )
     with Pool(args.jobs) as pool:
         file_args = [(f, args.autofix, personal_dict) for f in files]
         results = pool.map(process_file_wrapper, file_args)

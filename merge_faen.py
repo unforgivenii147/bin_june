@@ -5,45 +5,57 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
-def load_existing_translations(json_path: str) -> Dict[str, str]:
+def load_existing_translations(json_path: str) -> dict[str, str]:
     if os.path.exists(json_path):
         try:
             with open(json_path, "r", encoding="utf-8") as f:
                 existing_data = json.load(f)
                 if isinstance(existing_data, dict):
-                    logger.info(f"Loaded {len(existing_data)} existing translations from {json_path}")
+                    logger.info(
+                        f"Loaded {len(existing_data)} existing translations from {json_path}"
+                    )
                     return existing_data
                 else:
-                    logger.warning(f"Existing {json_path} is not a valid dictionary format")
-        except (json.JSONDecodeError, IOError) as e:
+                    logger.warning(
+                        f"Existing {json_path} is not a valid dictionary format"
+                    )
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Could not load existing JSON file: {e}")
     return {}
 
 
-def load_failed_words(failed_path: str) -> Set[str]:
+def load_failed_words(failed_path: str) -> set[str]:
     if os.path.exists(failed_path):
         try:
             with open(failed_path, "r", encoding="utf-8") as f:
                 failed_words = {line.strip() for line in f if line.strip()}
                 logger.info(f"Loaded {len(failed_words)} existing failed words")
                 return failed_words
-        except IOError as e:
+        except OSError as e:
             logger.warning(f"Could not load failed words file: {e}")
     return set()
 
 
-def process_file_pair(fa_path: Path, en_path: Path) -> Tuple[Dict[str, str], Set[str], List[str]]:
+def process_file_pair(
+    fa_path: Path, en_path: Path
+) -> tuple[dict[str, str], set[str], list[str]]:
     translations = {}
     failed = set()
     warnings = []
     try:
-        with open(fa_path, "r", encoding="utf-8") as f_fa, open(en_path, "r", encoding="utf-8") as f_en:
+        with (
+            open(fa_path, "r", encoding="utf-8") as f_fa,
+            open(en_path, "r", encoding="utf-8") as f_en,
+        ):
             fa_lines = [line.strip() for line in f_fa if line.strip()]
             en_lines = [line.strip() for line in f_en if line.strip()]
         if len(fa_lines) != len(en_lines):
@@ -62,7 +74,7 @@ def process_file_pair(fa_path: Path, en_path: Path) -> Tuple[Dict[str, str], Set
             else:
                 translations[fa_word] = en_word
         return translations, failed, warnings
-    except (IOError, OSError) as e:
+    except OSError as e:
         logger.error(f"Error reading files {fa_path.name} or {en_path.name}: {e}")
         return {}, set(), [f"Error: {e}"]
     except Exception as e:
@@ -122,17 +134,17 @@ def merge_translations(src_dir: str = "."):
         with open(output_json, "w", encoding="utf-8") as f:
             json.dump(sorted_translations, f, ensure_ascii=False, indent=2)
         logger.info(f"Saved {len(translations)} translations to {output_json}")
-    except IOError as e:
+    except OSError as e:
         logger.error(f"Error saving translations to {output_json}: {e}")
     try:
         sorted_failed = sorted(failed_words)
         with open(output_failed, "w", encoding="utf-8") as f:
             f.write("\n".join(sorted_failed))
         logger.info(f"Saved {len(failed_words)} failed words to {output_failed}")
-    except IOError as e:
+    except OSError as e:
         logger.error(f"Error saving failed words to {output_failed}: {e}")
     logger.info("=" * 42)
-    logger.info(f"SUMMARY:")
+    logger.info("SUMMARY:")
     logger.info(f"Files processed: {len(processed_files) // 2} pairs")
     logger.info(f"New translations added: {total_new_translations}")
     logger.info(f"Total translations in dictionary: {len(translations)}")

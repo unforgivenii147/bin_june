@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of trans_file_linebyline.py for Python 3.12.
-Translates non-English lines in a file line by line in-place.
-"""
 
 from __future__ import annotations
 
@@ -47,7 +43,9 @@ def process_file(filepath: Path, replace_original: bool = False) -> None:
     shutil.copyfile(filepath, backup_path)
     try:
         lines = filepath.read_text(encoding="utf-8").splitlines(keepends=True)
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, dir=filepath.parent
+        ) as tmp_file:
             for i, line in enumerate(lines, 1):
                 stripped = line.rstrip("\n")
                 if stripped.strip() and (not is_english(stripped)):

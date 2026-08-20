@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove a specific function implementation from Python files using parallel processing.
-Matches the exact function structure using AST comparison.
-Excludes the script itself and fileutils.py files.
-"""
 
 from __future__ import annotations
 
@@ -45,14 +40,26 @@ def get_target_function_ast() -> ast.FunctionDef:
     raise ValueError("Could not parse target function")
 
 
-def functions_match(target_ast: ast.FunctionDef, candidate_ast: ast.FunctionDef) -> bool:
+def functions_match(
+    target_ast: ast.FunctionDef, candidate_ast: ast.FunctionDef
+) -> bool:
+
     def clean_node(node: ast.AST) -> ast.AST:
         if isinstance(node, ast.FunctionDef):
             body = node.body
-            if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, (ast.Str, ast.Constant)):
+            if (
+                body
+                and isinstance(body[0], ast.Expr)
+                and isinstance(body[0].value, (ast.Str, ast.Constant))
+            ):
                 body = body[1:]
             cleaned = ast.FunctionDef(
-                name=node.name, args=node.args, body=body, decorator_list=[], returns=node.returns, type_comment=None
+                name=node.name,
+                args=node.args,
+                body=body,
+                decorator_list=[],
+                returns=node.returns,
+                type_comment=None,
             )
             return cleaned
         return node
@@ -64,7 +71,9 @@ def functions_match(target_ast: ast.FunctionDef, candidate_ast: ast.FunctionDef)
     return target_str == candidate_str
 
 
-def find_python_files(path: Path, include_hidden: bool = False, script_path: Path | None = None) -> list[Path]:
+def find_python_files(
+    path: Path, include_hidden: bool = False, script_path: Path | None = None
+) -> list[Path]:
     if not path.exists():
         raise FileNotFoundError(f"Path does not exist: {path}")
     if not path.is_dir():
@@ -143,12 +152,29 @@ def fsz(size: int) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Remove specific get_files function implementation from Python files")
-    parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("--workers", type=int, default=None, help="Number of worker processes (default: CPU count)")
-    parser.add_argument("--include-hidden", action="store_true", help="Include hidden files and directories")
+    parser = argparse.ArgumentParser(
+        description="Remove specific get_files function implementation from Python files"
+    )
     parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be removed without actually modifying files"
+        "paths",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count)",
+    )
+    parser.add_argument(
+        "--include-hidden",
+        action="store_true",
+        help="Include hidden files and directories",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be removed without actually modifying files",
     )
     args = parser.parse_args()
     script_path = Path(__file__).resolve()
@@ -177,7 +203,9 @@ def main():
                 continue
             python_files.add(path)
         elif path.is_dir():
-            python_files.update(find_python_files(path, args.include_hidden, script_path))
+            python_files.update(
+                find_python_files(path, args.include_hidden, script_path)
+            )
     if not python_files:
         print("No Python files found to process.")
         return
@@ -190,7 +218,11 @@ def main():
             _, elapsed_time, sizes = process_file(file_path)
             if sizes:
                 original_size, new_size, ratio = sizes
-                display_path = file_path.relative_to(Path.cwd()) if file_path.is_relative_to(Path.cwd()) else file_path
+                display_path = (
+                    file_path.relative_to(Path.cwd())
+                    if file_path.is_relative_to(Path.cwd())
+                    else file_path
+                )
                 print(
                     f"{display_path} ({elapsed_time:.2f}ms) {fsz(original_size)} - {fsz(new_size)} (ratio: {ratio:.1f}%)"
                 )
@@ -199,7 +231,10 @@ def main():
         total_new_size = 0
         files_modified = 0
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
-            future_to_file = {executor.submit(process_file, file_path): file_path for file_path in python_files}
+            future_to_file = {
+                executor.submit(process_file, file_path): file_path
+                for file_path in python_files
+            }
             for future in as_completed(future_to_file):
                 file_path = future_to_file[future]
                 try:
@@ -231,8 +266,14 @@ def main():
         print(f"  Files processed: {len(python_files)}")
         print(f"  Files modified: {files_modified}")
         if files_modified > 0:
-            total_ratio = total_new_size / total_original_size * 100 if total_original_size > 0 else 100
-            print(f"  Total size change: {fsz(total_original_size)} -> {fsz(total_new_size)} ({total_ratio:.1f}%)")
+            total_ratio = (
+                total_new_size / total_original_size * 100
+                if total_original_size > 0
+                else 100
+            )
+            print(
+                f"  Total size change: {fsz(total_original_size)} -> {fsz(total_new_size)} ({total_ratio:.1f}%)"
+            )
 
 
 if __name__ == "__main__":

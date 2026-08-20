@@ -27,7 +27,9 @@ def is_python_file(path: Path) -> bool:
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
     try:
-        result = subprocess.run(cmd, check=False, capture_output=True, text=True, encoding="utf-8")
+        result = subprocess.run(
+            cmd, check=False, capture_output=True, text=True, encoding="utf-8"
+        )
         return result.returncode, result.stdout, result.stderr
     except Exception as e:
         return -1, "", str(e)

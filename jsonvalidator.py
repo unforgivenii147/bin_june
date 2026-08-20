@@ -12,7 +12,9 @@ root: dict
 
 
 def assert_has_typed_keys(path: str, data: dict, keys: dict[str, T.Any]) -> dict:
-    assert set(data.keys()).issuperset(keys.keys()), f"{path}: DIFF: {set(data.keys()).difference(keys.keys())}"
+    assert set(data.keys()).issuperset(keys.keys()), (
+        f"{path}: DIFF: {set(data.keys()).difference(keys.keys())}"
+    )
     res = {}
     for key, val in keys.items():
         cur = data.pop(key)
@@ -121,10 +123,16 @@ def validate_object(path: str, name: str, obj: dict) -> None:
     if cur["defined_by_module"] is not None:
         assert cur["defined_by_module"] in root["objects"], f"{path}.{name}"
         assert cur["object_type"] == "RETURNED", f"{path}.{name}"
-        assert root["objects"][cur["defined_by_module"]]["object_type"] == "MODULE", f"{path}.{name}"
-        assert name in root["objects_by_type"]["modules"][cur["defined_by_module"]], f"{path}.{name}"
+        assert root["objects"][cur["defined_by_module"]]["object_type"] == "MODULE", (
+            f"{path}.{name}"
+        )
+        assert name in root["objects_by_type"]["modules"][cur["defined_by_module"]], (
+            f"{path}.{name}"
+        )
         return
-    assert cur["object_type"] in {"ELEMENTARY", "BUILTIN", "MODULE", "RETURNED"}, f"{path}.{name}"
+    assert cur["object_type"] in {"ELEMENTARY", "BUILTIN", "MODULE", "RETURNED"}, (
+        f"{path}.{name}"
+    )
     if cur["object_type"] == "ELEMENTARY":
         assert name in root["objects_by_type"]["elementary"], f"{path}.{name}"
     if cur["object_type"] == "BUILTIN":
@@ -165,12 +173,30 @@ def main() -> int:
     assert all(x in root["objects"] for x in root["objects_by_type"]["builtins"])
     assert all(x in root["objects"] for x in root["objects_by_type"]["returned"])
     assert all(x in root["objects"] for x in root["objects_by_type"]["modules"])
-    assert all(root["objects"][x]["object_type"] == "ELEMENTARY" for x in root["objects_by_type"]["elementary"])
-    assert all(root["objects"][x]["object_type"] == "BUILTIN" for x in root["objects_by_type"]["builtins"])
-    assert all(root["objects"][x]["object_type"] == "RETURNED" for x in root["objects_by_type"]["returned"])
-    assert all(root["objects"][x]["object_type"] == "MODULE" for x in root["objects_by_type"]["modules"])
-    assert all(all(isinstance(x, str) for x in v) for k, v in root["objects_by_type"]["modules"].items())
-    assert all(all(x in root["objects"] for x in v) for k, v in root["objects_by_type"]["modules"].items())
+    assert all(
+        root["objects"][x]["object_type"] == "ELEMENTARY"
+        for x in root["objects_by_type"]["elementary"]
+    )
+    assert all(
+        root["objects"][x]["object_type"] == "BUILTIN"
+        for x in root["objects_by_type"]["builtins"]
+    )
+    assert all(
+        root["objects"][x]["object_type"] == "RETURNED"
+        for x in root["objects_by_type"]["returned"]
+    )
+    assert all(
+        root["objects"][x]["object_type"] == "MODULE"
+        for x in root["objects_by_type"]["modules"]
+    )
+    assert all(
+        all(isinstance(x, str) for x in v)
+        for k, v in root["objects_by_type"]["modules"].items()
+    )
+    assert all(
+        all(x in root["objects"] for x in v)
+        for k, v in root["objects_by_type"]["modules"].items()
+    )
     assert all(
         all(root["objects"][x]["defined_by_module"] == k for x in v)
         for k, v in root["objects_by_type"]["modules"].items()

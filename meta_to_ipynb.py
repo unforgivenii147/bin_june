@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert Python package METADATA file to Jupyter notebook.
-Strips metadata headers and converts code/markdown sections to notebook cells.
-Output filename is based on the package name found in the header.
-"""
 
 from __future__ import annotations
 
@@ -104,7 +99,11 @@ def convert_metadata_to_notebook(metadata_file_path):
     notebook = {
         "cells": [],
         "metadata": {
-            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3",
+            },
             "language_info": {
                 "codemirror_mode": {"name": "ipython", "version": 3},
                 "file_extension": ".py",
@@ -125,7 +124,13 @@ def convert_metadata_to_notebook(metadata_file_path):
         if cell_type == "markdown":
             cell = {"cell_type": "markdown", "metadata": {}, "source": [content]}
         else:
-            cell = {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": [content]}
+            cell = {
+                "cell_type": "code",
+                "execution_count": None,
+                "metadata": {},
+                "outputs": [],
+                "source": [content],
+            }
         notebook["cells"].append(cell)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(notebook, f, indent=1, ensure_ascii=False)

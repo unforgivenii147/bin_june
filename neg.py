@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert all images in a directory (and subdirectories) to negative/inverted colors.
-Processes images in parallel using multiprocessing.
-"""
 
 from __future__ import annotations
 
@@ -15,9 +11,20 @@ from pathlib import Path
 
 from PIL import Image
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
-SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp", ".gif"}
+SUPPORTED_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".bmp",
+    ".tiff",
+    ".tif",
+    ".webp",
+    ".gif",
+}
 
 
 def is_image_file(file_path: Path) -> bool:
@@ -43,9 +50,13 @@ def invert_image(image_path: Path, dry_run: bool = False) -> tuple[Path, bool]:
 
 def find_images(root_dir: Path, recursive: bool = True) -> list[Path]:
     if recursive:
-        image_files = [f for f in root_dir.rglob("*") if f.is_file() and is_image_file(f)]
+        image_files = [
+            f for f in root_dir.rglob("*") if f.is_file() and is_image_file(f)
+        ]
     else:
-        image_files = [f for f in root_dir.iterdir() if f.is_file() and is_image_file(f)]
+        image_files = [
+            f for f in root_dir.iterdir() if f.is_file() and is_image_file(f)
+        ]
     return sorted(image_files)
 
 
@@ -55,18 +66,35 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="\nExamples:\n  %(prog)s ./photos                 # Invert all images recursively in ./photos\n  %(prog)s ./images -n 4            # Use 4 parallel processes\n  %(prog)s ./images --dry-run       # Preview what would be processed\n  %(prog)s ./images --no-recursive  # Only process current directory\n        ",
     )
-    parser.add_argument("directory", type=str, help="Directory containing images to invert")
     parser.add_argument(
-        "-n", "--processes", type=int, default=None, help="Number of parallel processes (default: CPU count)"
-    )
-    parser.add_argument("--no-recursive", action="store_true", help="Do not process subdirectories recursively")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be processed without actually modifying files"
+        "directory", type=str, help="Directory containing images to invert"
     )
     parser.add_argument(
-        "--extensions", type=str, nargs="+", help="Additional file extensions to process (e.g., .jpg .png)"
+        "-n",
+        "--processes",
+        type=int,
+        default=None,
+        help="Number of parallel processes (default: CPU count)",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument(
+        "--no-recursive",
+        action="store_true",
+        help="Do not process subdirectories recursively",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be processed without actually modifying files",
+    )
+    parser.add_argument(
+        "--extensions",
+        type=str,
+        nargs="+",
+        help="Additional file extensions to process (e.g., .jpg .png)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose logging"
+    )
     args = parser.parse_args()
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
@@ -83,7 +111,9 @@ def main():
                 ext = "." + ext
             SUPPORTED_EXTENSIONS.add(ext.lower())
     recursive = not args.no_recursive
-    logger.info(f"Scanning {('recursively' if recursive else 'non-recursively')} in: {root_dir}")
+    logger.info(
+        f"Scanning {('recursively' if recursive else 'non-recursively')} in: {root_dir}"
+    )
     image_files = find_images(root_dir, recursive)
     if not image_files:
         logger.warning("No image files found to process")

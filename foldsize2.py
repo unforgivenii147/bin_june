@@ -6,7 +6,11 @@ from pathlib import Path
 
 
 def get_all_files(root: Path) -> list[Path]:
-    return [p for p in root.glob("*") if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"]
+    return [
+        p
+        for p in root.glob("*")
+        if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"
+    ]
 
 
 def safe_rename(src: Path, dest_dir: Path) -> Path:

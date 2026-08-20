@@ -1,16 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove Python comments and docstrings in-place without reformatting code.
-Preserved:
-- shebang lines
-- comments containing "# fmt" or "# type"
-- module docstrings by default
-Examples:
-    python rmc.py myfile.py
-    python rmc.py ~/myprojects
-    python rmc.py
-    python rmc.py -r .
-"""
 
 from __future__ import annotations
 
@@ -18,10 +6,10 @@ import argparse
 import ast
 import os
 import sys
+from collections.abc import Generator, Iterable
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable
 
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser
@@ -77,7 +65,9 @@ def iter_python_files(paths: Iterable[Path]) -> Generator[Path, None, None]:
             ):
                 root = Path(root_str)
                 dirnames[:] = [
-                    dirname for dirname in dirnames if dirname not in SKIP_DIRS and not (root / dirname).is_symlink()
+                    dirname
+                    for dirname in dirnames
+                    if dirname not in SKIP_DIRS and not (root / dirname).is_symlink()
                 ]
                 for filename in filenames:
                     file_path = root / filename
@@ -98,10 +88,16 @@ def iter_python_files(paths: Iterable[Path]) -> Generator[Path, None, None]:
 
 
 def is_docstring_expr(node: ast.stmt) -> bool:
-    return isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str)
+    return (
+        isinstance(node, ast.Expr)
+        and isinstance(node.value, ast.Constant)
+        and isinstance(node.value.value, str)
+    )
 
 
-def collect_docstring_nodes(tree: ast.AST, remove_module_docstring: bool) -> list[ast.Expr]:
+def collect_docstring_nodes(
+    tree: ast.AST, remove_module_docstring: bool
+) -> list[ast.Expr]:
     result: list[ast.Expr] = []
 
     def visit_body_owner(node: ast.AST, is_module: bool = False) -> None:

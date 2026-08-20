@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to remove author/email/time info block from Python files recursively.
-Handles both .py files and Python files without extension (detected via shebang).
-"""
 
 from __future__ import annotations
 
@@ -11,7 +7,9 @@ import sys
 from pathlib import Path
 
 INFO_BLOCK_PATTERN = re.compile(
-    r"^# Author\s*:\s*isaac\s*\n" r"# Email\s*:\s*mkalafsaz@gmail\.com\s*\n" r"# Time\s*:\s*.*?\n",
+    r"^# Author\s*:\s*isaac\s*\n"
+    r"# Email\s*:\s*mkalafsaz@gmail\.com\s*\n"
+    r"# Time\s*:\s*.*?\n",
     re.MULTILINE,
 )
 PYTHON_SHEBANG_PATTERNS = [

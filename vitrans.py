@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of vitrans.py for Python 3.12.
-Translates Vietnamese text files to English using Google Translate via deep_translator.
-"""
 
 from __future__ import annotations
 
@@ -16,7 +12,13 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential_jitter,
+)
 
 MAX_CHUNK_CHARS: Final[int] = 4800
 DELAY_BETWEEN_CHUNKS: Final[float] = 1.2
@@ -122,7 +124,9 @@ def save_progress(src: Path, done: dict[int, str], total: int) -> None:
             "total_chunks": total,
             "chunks": {str(k): v for k, v in done.items()},
         }
-        _progress_path(src).write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+        _progress_path(src).write_text(
+            json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     except Exception as e:
         print(f"   ⚠️  Could not save progress: {e}")
 
@@ -191,7 +195,9 @@ def process_file(path: Path) -> bool:
         out.write_text(translated_text, encoding="utf-8")
         drop_progress(path)
         if failed_count:
-            print(f"   ⚠️  Done with {failed_count} chunk(s) untranslated — check {out.name}")
+            print(
+                f"   ⚠️  Done with {failed_count} chunk(s) untranslated — check {out.name}"
+            )
         else:
             print(f"   ✅ Saved → {out}")
         return True
@@ -201,7 +207,9 @@ def process_file(path: Path) -> bool:
 
 
 def main() -> None:
-    paths = [p for p in Path.cwd().glob("*.txt") if p.is_file() and p.name not in SKIP_DIRS]
+    paths = [
+        p for p in Path.cwd().glob("*.txt") if p.is_file() and p.name not in SKIP_DIRS
+    ]
     if not paths:
         print("No .txt files found to translate.")
         return

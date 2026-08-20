@@ -20,7 +20,7 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
@@ -40,7 +40,9 @@ def remove_conditional_exit_blocks(file_path: Path) -> None:
             match = IF_BLOCK_REGEX.search(modified_content)
             if not match:
                 break
-            modified_content = modified_content[: match.start()] + modified_content[match.end() :]
+            modified_content = (
+                modified_content[: match.start()] + modified_content[match.end() :]
+            )
         if original_content != modified_content:
             file_path.write_text(modified_content, encoding="utf-8")
             print(f"Cleaned: {file_path}")
@@ -56,9 +58,20 @@ def main() -> None:
             try:
                 content = item_path.read_text(encoding="utf-8", errors="ignore")
                 is_likely_bash = False
-                if content.startswith(("#!/bin/bash", "#!/usr/bin/env bash")) or oct(item_path.stat().st_mode)[
-                    -3:
-                ] not in ("000", "001", "010", "011", "002", "012", "100", "110", "111", "101"):
+                if content.startswith(("#!/bin/bash", "#!/usr/bin/env bash")) or oct(
+                    item_path.stat().st_mode
+                )[-3:] not in (
+                    "000",
+                    "001",
+                    "010",
+                    "011",
+                    "002",
+                    "012",
+                    "100",
+                    "110",
+                    "111",
+                    "101",
+                ):
                     is_likely_bash = True
                 if is_likely_bash:
                     remove_conditional_exit_blocks(item_path)

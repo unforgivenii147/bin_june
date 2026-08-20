@@ -57,13 +57,18 @@ def check_and_move_files(system_hashes):
                         counter = 1
                         original_dest = dest_path
                         while dest_path.exists():
-                            dest_path = original_dest.parent / f"{original_dest.stem}_{counter}{original_dest.suffix}"
+                            dest_path = (
+                                original_dest.parent
+                                / f"{original_dest.stem}_{counter}{original_dest.suffix}"
+                            )
                             counter += 1
                         shutil.move(filepath, dest_path)
                         moved.append((filepath.name, dest_path.name))
                         print(f"  📦 Moved: {filepath.name} -> {dest_path.name}")
                     else:
-                        print(f"  ⚠️  Hash matches but filename differs: {filepath.name} (system: {system_filename})")
+                        print(
+                            f"  ⚠️  Hash matches but filename differs: {filepath.name} (system: {system_filename})"
+                        )
         except (PermissionError, OSError) as e:
             print(f"  ⚠️  Error with {filepath.name}: {e}")
             continue
@@ -88,7 +93,9 @@ def main():
             status = "✅ MOVED" if local_file == system_file else "❌ Name mismatch"
             print(f"  • {local_file} matches /system/bin/{system_file} - {status}")
         if moved:
-            print(f"\n📦 Moved {len(moved)} files to './matched_system_files/' directory:")
+            print(
+                f"\n📦 Moved {len(moved)} files to './matched_system_files/' directory:"
+            )
             for original, new_name in moved:
                 print(f"  • {original} -> {new_name}")
     else:

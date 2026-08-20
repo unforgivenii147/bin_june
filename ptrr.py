@@ -107,7 +107,10 @@ def create_archive_streaming_fixed():
             sys.exit(0)
     try:
         compressor = zstd.ZstdCompressor(level=3, threads=mp.cpu_count())
-        with open(archive_path, "wb") as f_out, compressor.stream_writer(f_out) as zstd_writer:
+        with (
+            open(archive_path, "wb") as f_out,
+            compressor.stream_writer(f_out) as zstd_writer,
+        ):
             with tarfile.open(fileobj=zstd_writer, mode="w:") as tar:
                 files = get_file_list(current_dir)
                 if not files:

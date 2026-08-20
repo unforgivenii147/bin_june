@@ -67,6 +67,8 @@ if __name__ == "__main__":
     files = (
         [Path(p) for p in args]
         if args
-        else getfiles(cwd, ext=[".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hh", ".hxx"])
+        else getfiles(
+            cwd, ext=[".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hh", ".hxx"]
+        )
     )
     mpf3(process_file, files)

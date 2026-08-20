@@ -8,7 +8,9 @@ from pathlib import Path
 from dh import mpf3, unique_path
 
 
-def rename_item_to_lowercase(path: Path, dry_run: bool = False, verbose: bool = False) -> tuple[Path, Path] | None:
+def rename_item_to_lowercase(
+    path: Path, dry_run: bool = False, verbose: bool = False
+) -> tuple[Path, Path] | None:
     if not path.exists():
         if verbose:
             print(f"Warning: {path} does not exist. Skipping.", file=sys.stderr)
@@ -22,7 +24,9 @@ def rename_item_to_lowercase(path: Path, dry_run: bool = False, verbose: bool = 
     if new_path_candidate.exists() and new_path_candidate != path:
         new_path = unique_path(new_path_candidate)
         if verbose:
-            print(f"Note: Target {new_path_candidate.name} already exists. Using unique path: {new_path.name}")
+            print(
+                f"Note: Target {new_path_candidate.name} already exists. Using unique path: {new_path.name}"
+            )
     else:
         new_path = new_path_candidate
     if dry_run:
@@ -34,7 +38,9 @@ def rename_item_to_lowercase(path: Path, dry_run: bool = False, verbose: bool = 
             print(f"Renamed '{path.name}' to '{new_path.name}'")
         return (path, new_path)
     except OSError as e:
-        print(f"Error renaming '{path.name}' to '{new_path.name}': {e}", file=sys.stderr)
+        print(
+            f"Error renaming '{path.name}' to '{new_path.name}': {e}", file=sys.stderr
+        )
         return None
     except Exception as e:
         print(f"An unexpected error occurred for '{path.name}': {e}", file=sys.stderr)
@@ -60,12 +66,14 @@ def main() -> None:
         print("No files or directories found to process.")
         return
     print(f"Found {len(paths_to_process)} items to potentially rename.")
-    process_func_with_flags = partial(rename_item_to_lowercase, dry_run=dry_run, verbose=verbose)
+    process_func_with_flags = partial(
+        rename_item_to_lowercase, dry_run=dry_run, verbose=verbose
+    )
     results = mpf3(process_func_with_flags, paths_to_process)
     if dry_run:
         print("--- DRY RUN COMPLETE ---")
     else:
-        renamed_count = sum((1 for r in results if r is not None))
+        renamed_count = sum(1 for r in results if r is not None)
         print(f"\nSummary: Renamed {renamed_count} items.")
 
 

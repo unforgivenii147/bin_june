@@ -32,8 +32,12 @@ def modify_classes(html_content: str) -> str:
 
 
 def convert_latex_format(text: str) -> str:
-    text = re.sub(r"\\\[(.*?)\\\]", '<div class="latex-displayr">\1</div>', text, flags=re.DOTALL)
-    return re.sub(r"\\\((.*?)\\\)", '<span class="latex-inliner">\1</span>', text, flags=re.DOTALL)
+    text = re.sub(
+        r"\\\[(.*?)\\\]", '<div class="latex-displayr">\1</div>', text, flags=re.DOTALL
+    )
+    return re.sub(
+        r"\\\((.*?)\\\)", '<span class="latex-inliner">\1</span>', text, flags=re.DOTALL
+    )
 
 
 def read_markdown_file(file_path: str) -> str:
@@ -50,7 +54,8 @@ def convert_markdown(md_path: str) -> str:
     temp_html_path = os.path.join("/sdcard/tmp", f"{base_name}.html")
     final_output_path = md_path.replace(".md", ".html")
     html_content = markdown.markdown(
-        markdown_text, ext=["md_in_html", "fenced_code", "codehilite", "toc", "attr_list", "tables"]
+        markdown_text,
+        ext=["md_in_html", "fenced_code", "codehilite", "toc", "attr_list", "tables"],
     )
     html_content = modify_classes(html_content)
     html_template = f"""

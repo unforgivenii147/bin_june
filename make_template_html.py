@@ -8,7 +8,11 @@ from bs4 import BeautifulSoup
 
 def find_html_files(cwd: str = ".") -> list[Path]:
     root_path = Path(cwd).resolve()
-    html_files = [file_path for file_path in root_path.rglob("*.html") if file_path.name != "template.html"]
+    html_files = [
+        file_path
+        for file_path in root_path.rglob("*.html")
+        if file_path.name != "template.html"
+    ]
     for file_path in root_path.rglob("*.htm"):
         html_files.append(file_path)
     return sorted(html_files)
@@ -26,7 +30,11 @@ def extract_common_structure(html_files: list[Path]) -> dict:
                 if soup.head:
                     meta_tags.extend(str(meta) for meta in soup.head.find_all("meta"))
                     link_tags.extend(str(link) for link in soup.head.find_all("link"))
-                    script_tags.extend(str(script) for script in soup.head.find_all("script") if script.get("src"))
+                    script_tags.extend(
+                        str(script)
+                        for script in soup.head.find_all("script")
+                        if script.get("src")
+                    )
                 if soup.body and soup.body.get("class"):
                     body_classes.extend(soup.body.get("class"))
         except Exception as e:
@@ -63,7 +71,9 @@ def merge_html_content(html_files: list[Path]) -> str:
 
 
 def create_template_html(
-    html_files: list[Path], output_file: str = "template.html", title: str = "Merged HTML Template"
+    html_files: list[Path],
+    output_file: str = "template.html",
+    title: str = "Merged HTML Template",
 ) -> bool:
     if not html_files:
         print("No HTML files found")
@@ -180,7 +190,9 @@ def create_template_html(
 
 def main() -> None:
     html_files = find_html_files()
-    success = create_template_html(html_files, output_file="template.html", title="Merged HTML Template")
+    success = create_template_html(
+        html_files, output_file="template.html", title="Merged HTML Template"
+    )
     if success:
         print("Output file: template.html")
 

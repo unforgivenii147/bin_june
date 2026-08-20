@@ -61,7 +61,7 @@ def get_font_name_and_style(font_path):
 def sanitize_filename(name) -> str:
     if not name:
         return "Unknown"
-    sanitized = "".join((c if c.isalnum() or c in ("-", "_", " ") else "_" for c in name))
+    sanitized = "".join(c if c.isalnum() or c in ("-", "_", " ") else "_" for c in name)
     sanitized = sanitized.replace(" ", "_").strip("_")
     while "__" in sanitized:
         sanitized = sanitized.replace("__", "_")

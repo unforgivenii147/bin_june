@@ -40,7 +40,9 @@ def get_folder_id(service: Resource, folder_name: str):
 
 def download_folder(service: Resource, folder_id, current_path: str) -> None:
     query = f"'{folder_id}' in parents and trashed=false"
-    results = service.files().list(q=query, fields="files(id, name, mimeType)").execute()
+    results = (
+        service.files().list(q=query, fields="files(id, name, mimeType)").execute()
+    )
     items = results.get("files", [])
     for item in items:
         item_path = os.path.join(current_path, item["name"])

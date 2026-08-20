@@ -11,7 +11,9 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-RST2HTML_OPTIONS = " ".join(["--no-toc-backlinks", "--strip-comments", "--language en", "--date"])
+RST2HTML_OPTIONS = " ".join(
+    ["--no-toc-backlinks", "--strip-comments", "--language en", "--date"]
+)
 VALID_EXTENSIONS = {".rst", ".txt", ".md"}
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 MD_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
@@ -31,6 +33,7 @@ def find_rst2html_script():
 
 
 def convert_md_to_rst(content: str) -> str:
+
     def replace_heading(match):
         level = len(match.group(1))
         text = match.group(2).strip()
@@ -97,7 +100,9 @@ def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> 
                 if stylesheet_url:
                     cmd.extend(["--stylesheet", stylesheet_url, "--link-stylesheet"])
                 cmd.extend([str(file_path), str(html_path)])
-                subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=30)
+                subprocess.run(
+                    cmd, check=True, capture_output=True, text=True, timeout=30
+                )
             else:
                 raise RuntimeError("No RST to HTML converter found")
         if cleanup_temp and file_path.exists():
@@ -153,7 +158,8 @@ def publish_parallel(root_dir: Path | None = None, max_workers: int | None = Non
     errors = 0
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_file = {
-            executor.submit(process_file, file_path, stylesheet_url): file_path for file_path in source_files
+            executor.submit(process_file, file_path, stylesheet_url): file_path
+            for file_path in source_files
         }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
@@ -161,24 +167,39 @@ def publish_parallel(root_dir: Path | None = None, max_workers: int | None = Non
                 original, html_path = future.result()
                 if html_path:
                     converted += 1
-                    print(f"Converted: {original.relative_to(root_dir)} -> {html_path.relative_to(root_dir)}")
+                    print(
+                        f"Converted: {original.relative_to(root_dir)} -> {html_path.relative_to(root_dir)}"
+                    )
                 else:
                     errors += 1
             except Exception as e:
                 errors += 1
-                print(f"Error processing {file_path.relative_to(root_dir)}: {e}", file=sys.stderr)
+                print(
+                    f"Error processing {file_path.relative_to(root_dir)}: {e}",
+                    file=sys.stderr,
+                )
     print(f"\nConversion complete: {converted} converted, {errors} errors")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Convert all .rst, .txt, and .md files to HTML recursively")
-    parser.add_argument(
-        "directory", nargs="?", default=".", help="Root directory to process (default: current directory)"
+    parser = argparse.ArgumentParser(
+        description="Convert all .rst, .txt, and .md files to HTML recursively"
     )
     parser.add_argument(
-        "--workers", type=int, default=os.cpu_count(), help="Number of parallel workers (default: CPU count)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory to process (default: current directory)",
     )
-    parser.add_argument("--force", action="store_true", help="Force re-conversion even if HTML is newer")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=os.cpu_count(),
+        help="Number of parallel workers (default: CPU count)",
+    )
+    parser.add_argument(
+        "--force", action="store_true", help="Force re-conversion even if HTML is newer"
+    )
     args = parser.parse_args()
     root_dir = Path(args.directory).resolve()
     if not root_dir.exists():

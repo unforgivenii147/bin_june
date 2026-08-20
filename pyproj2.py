@@ -24,7 +24,9 @@ def write_file_if_missing(path: Path, content: str = "") -> None:
         path.write_text(content)
 
 
-def create_project_structure(pkg: str, author: str, email: str, url: str, simple_cli: bool = False) -> None:
+def create_project_structure(
+    pkg: str, author: str, email: str, url: str, simple_cli: bool = False
+) -> None:
     cwd = Path.cwd()
     version = "1.4.7"
     readme_path = cwd / "README.md"
@@ -47,15 +49,17 @@ def create_project_structure(pkg: str, author: str, email: str, url: str, simple
             "python_requires = >=3.11",
             "[options.entry_points]",
             "console_scripts =",
-            "{pkg} = {pkg}:main",
+            f"{pkg} = {pkg}:main",
             "",
         ]
     )
     setup_cfg.write_text("\n".join(cfg_content))
     pyproject_path = cwd / "pyproject.toml"
-    pyproject_path.write_text("""[build-system]
-requires = ["setuptools>=69.0", "wheel"]
-build-backend = "setuptools.build_meta\"
+    pyproject_path.write_text(f"""
+[build-system]
+requires = ["setuptools>=69.0", "wheel-"]
+build-backend = "setuptools.build_meta"
+
 [project.scripts]
 {pkg} = "{pkg}:main"
 """)
@@ -64,10 +68,19 @@ build-backend = "setuptools.build_meta\"
 
 def main() -> None:
     user_info = load_user_info()
-    parser = argparse.ArgumentParser(description="Initialize a Python project structure")
+    parser = argparse.ArgumentParser(
+        description="Initialize a Python project structure"
+    )
     parser.add_argument("name", help="Package name")
-    parser.add_argument("--version", default="1.4.7", help="Initial version (default: 1.4.7)")
-    parser.add_argument("-s", "--simple-cli", action="store_true", help="Create with simple CLI entry point")
+    parser.add_argument(
+        "--version", default="1.4.7", help="Initial version (default: 1.4.7)"
+    )
+    parser.add_argument(
+        "-s",
+        "--simple-cli",
+        action="store_true",
+        help="Create with simple CLI entry point",
+    )
     args = parser.parse_args()
     author = user_info.get("name", "")
     email = user_info.get("email", "")

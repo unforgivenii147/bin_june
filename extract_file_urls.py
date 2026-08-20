@@ -10,19 +10,15 @@ from urllib.parse import unquote, urlparse
 
 import requests
 
-# Extensions to extract. Matching is done against the URL path, so query
-# strings such as "?v=3.4.0" do not prevent a match.
 ALLOWED_EXTENSIONS = {".css", ".ttf", ".woff", ".woff2", ".pdf"}
 
 
 def clean_url(url: str) -> str:
-    """Remove surrounding whitespace and common HTML punctuation."""
     url = url.strip().strip("\"'<>(),;")
     return url
 
 
 def is_target_url(url: str) -> bool:
-    """Return True if the URL path ends with a supported file extension."""
     try:
         parsed = urlparse(url)
         path = unquote(parsed.path).lower()
@@ -33,12 +29,6 @@ def is_target_url(url: str) -> bool:
 
 
 def extract_urls(input_file: str, output_file: str) -> list[str]:
-    """
-    Extract URLs from urls.txt and save matching URLs to file_urls.txt.
-    Supports URLs such as:
-        https://example.com/style.css?v=3.4.0
-        https://example.com/font.woff2#section
-    """
     url_pattern = re.compile(r"https?://[^\s\"'<>]+", re.IGNORECASE)
 
     found_urls = set()
@@ -61,14 +51,12 @@ def extract_urls(input_file: str, output_file: str) -> list[str]:
 
 
 def filename_from_url(url: str) -> str:
-    """Generate a safe local filename for a downloaded URL."""
     parsed = urlparse(url)
     name = os.path.basename(unquote(parsed.path))
 
     if not name or "." not in name:
         name = "downloaded_file"
 
-    # Avoid overwriting files when different URLs have the same basename.
     url_hash = hashlib.sha256(url.encode("utf-8")).hexdigest()[:10]
 
     stem, suffix = os.path.splitext(name)
@@ -78,7 +66,6 @@ def filename_from_url(url: str) -> str:
 
 
 def download_one(task: tuple[str, str]) -> tuple[str, bool, str]:
-    """Download one URL."""
     url, output_dir = task
     filename = filename_from_url(url)
     destination = Path(output_dir) / filename
@@ -105,7 +92,6 @@ def download_one(task: tuple[str, str]) -> tuple[str, bool, str]:
 
 
 def download_files(urls: list[str], output_dir: str, workers: int) -> None:
-    """Download URLs concurrently using multiprocessing."""
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     tasks = [(url, output_dir) for url in urls]
@@ -119,7 +105,9 @@ def download_files(urls: list[str], output_dir: str, workers: int) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract CSS, font, and PDF URLs from a text file.")
+    parser = argparse.ArgumentParser(
+        description="Extract CSS, font, and PDF URLs from a text file."
+    )
 
     parser.add_argument(
         "-i",

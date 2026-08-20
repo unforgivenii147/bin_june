@@ -46,7 +46,7 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
@@ -76,9 +76,12 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                             stack.append(entry)
                     elif entry.is_file(follow_symlinks=False):
                         p = Path(entry.path)
-                        if p.suffix == ".py":
-                            pyfiles.append(p)
-                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
+                        if (
+                            p.suffix == ".py"
+                            or not p.suffix
+                            and (not p.name.startswith("."))
+                            and is_python_file(p)
+                        ):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
@@ -123,7 +126,9 @@ def main():
                 try:
                     OPTIMIZE_LEVEL = int(args[i + 1])
                     if OPTIMIZE_LEVEL not in (0, 1, 2):
-                        print(f"Error: Optimize level must be 0, 1, or 2 (got {OPTIMIZE_LEVEL})")
+                        print(
+                            f"Error: Optimize level must be 0, 1, or 2 (got {OPTIMIZE_LEVEL})"
+                        )
                         return 1
                     i += 2
                     continue
@@ -139,10 +144,14 @@ def main():
         elif arg in ("-h", "--help"):
             print("Usage: python script.py [options] [files/directories]")
             print("Options:")
-            print("  -o, --optimize LEVEL  Set optimization level (0, 1, or 2, default: 0)")
+            print(
+                "  -o, --optimize LEVEL  Set optimization level (0, 1, or 2, default: 0)"
+            )
             print("  -l, --legacy        Create legacy .pyc file beside original file")
             print("  -h, --help          Show this help message")
-            print("  files/directories   Files or directories to process (default: current directory)")
+            print(
+                "  files/directories   Files or directories to process (default: current directory)"
+            )
             return 0
         else:
             break

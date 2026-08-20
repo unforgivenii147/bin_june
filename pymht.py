@@ -36,7 +36,9 @@ def split_data_url(src: str):
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python mhtml_to_html.py input.mhtml [output.html] [output_files_dir]")
+        print(
+            "Usage: python mhtml_to_html.py input.mhtml [output.html] [output_files_dir]"
+        )
         sys.exit(1)
     in_path = Path(sys.argv[1])
     out_html = sys.argv[2] if len(sys.argv) >= 3 else Path(in_path).with_suffix(".html")
@@ -84,11 +86,17 @@ def main() -> None:
     cid_to_file = {}
 
     def get_name_from_headers(part) -> str:
-        filename = part.get_param("name", header="Content-Type") if part.get("Content-Type") else None
+        filename = (
+            part.get_param("name", header="Content-Type")
+            if part.get("Content-Type")
+            else None
+        )
         if filename:
             return sanitize_filename(filename)
         cd = part.get("Content-Disposition") or ""
-        m = re.search("filename-\\*?=(?:UTF-8'')?[\\\"']?([^\\\"';]+)", cd, flags=re.IGNORECASE)
+        m = re.search(
+            "filename-\\*?=(?:UTF-8'')?[\\\"']?([^\\\"';]+)", cd, flags=re.IGNORECASE
+        )
         if m:
             return sanitize_filename(m.group(1))
         return None
@@ -167,7 +175,12 @@ def main() -> None:
 
     if out_html.exists():
         out_html = unique_path(out_html)
-    html_text = re.sub("(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
+    html_text = re.sub(
+        "(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']",
+        data_uri_replacer,
+        html_text,
+        flags=re.IGNORECASE,
+    )
     with open(out_html, "w", encoding="utf-8") as f:
         f.write(html_text)
     print("Done.")

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Recursive file compressor using zstandard streaming compression.
-Compresses files in place with .zst extension and removes originals.
-"""
 
 from __future__ import annotations
 
@@ -53,7 +49,9 @@ def compress_file(
                 print(f"✓ Compressed & removed: {input_path} -> {output_path}")
             else:
                 print(f"✓ Compressed: {input_path} -> {output_path}")
-            print(f"  Size: {original_size:,} -> {compressed_size:,} bytes ({ratio:.1f}%)")
+            print(
+                f"  Size: {original_size:,} -> {compressed_size:,} bytes ({ratio:.1f}%)"
+            )
             return True
         else:
             raise RuntimeError("Compression produced empty or invalid file")
@@ -101,7 +99,9 @@ def decompress_file(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Recursively compress/decompress files using zstandard")
+    parser = argparse.ArgumentParser(
+        description="Recursively compress/decompress files using zstandard"
+    )
     parser.add_argument("directory", type=str, help="Root directory to process")
     parser.add_argument(
         "--decompress",
@@ -109,9 +109,23 @@ def main():
         action="store_true",
         help="Decompress .zst files instead of compressing",
     )
-    parser.add_argument("--level", "-l", type=int, default=3, help="Compression level (1-22, default: 3)")
-    parser.add_argument("--threads", "-t", type=int, default=4, help="Number of threads (default: 4)")
-    parser.add_argument("--pattern", "-p", type=str, default="*", help="File pattern to match (default: *)")
+    parser.add_argument(
+        "--level",
+        "-l",
+        type=int,
+        default=3,
+        help="Compression level (1-22, default: 3)",
+    )
+    parser.add_argument(
+        "--threads", "-t", type=int, default=4, help="Number of threads (default: 4)"
+    )
+    parser.add_argument(
+        "--pattern",
+        "-p",
+        type=str,
+        default="*",
+        help="File pattern to match (default: *)",
+    )
     parser.add_argument(
         "--chunk-size",
         "-c",
@@ -125,7 +139,12 @@ def main():
         action="store_true",
         help="Show what would be done without actually doing it",
     )
-    parser.add_argument("--keep-original", "-k", action="store_true", help="Keep original files (don't remove them)")
+    parser.add_argument(
+        "--keep-original",
+        "-k",
+        action="store_true",
+        help="Keep original files (don't remove them)",
+    )
     args = parser.parse_args()
     root_dir = Path(args.directory)
     if not root_dir.exists():
@@ -135,7 +154,9 @@ def main():
         print(f"Error: '{root_dir}' is not a directory", file=sys.stderr)
         sys.exit(1)
     remove_original = not args.keep_original
-    print(f"{'Decompressing' if args.decompress else 'Compressing'} files in: {root_dir}")
+    print(
+        f"{'Decompressing' if args.decompress else 'Compressing'} files in: {root_dir}"
+    )
     print(f"Pattern: {args.pattern}")
     print(f"Remove original: {'Yes' if remove_original else 'No'}")
     if not args.decompress:
@@ -145,8 +166,12 @@ def main():
     if args.decompress:
         for file_path, _ in walk_files(root_dir, f"*{args.pattern}*.zst"):
             if args.dry_run:
-                print(f"[DRY RUN] Would decompress & {'remove' if remove_original else 'keep'}: {file_path}")
-            elif decompress_file(file_path, chunk_size=args.chunk_size, remove_original=remove_original):
+                print(
+                    f"[DRY RUN] Would decompress & {'remove' if remove_original else 'keep'}: {file_path}"
+                )
+            elif decompress_file(
+                file_path, chunk_size=args.chunk_size, remove_original=remove_original
+            ):
                 processed += 1
             else:
                 failed += 1
@@ -168,7 +193,9 @@ def main():
             else:
                 failed += 1
     print(f"\n{'=' * 42}")
-    print(f"Completed: {processed} files {'decompressed' if args.decompress else 'compressed'}")
+    print(
+        f"Completed: {processed} files {'decompressed' if args.decompress else 'compressed'}"
+    )
     if failed > 0:
         print(f"Failed: {failed} files")
     return 0 if failed == 0 else 1

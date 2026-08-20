@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract text from PDF files using PyMuPDF (fastest option)
-"""
 
 import sys
 from pathlib import Path
 
-import fitz  # PyMuPDF
+import fitz
 from joblib import Parallel, delayed
 
 
@@ -21,12 +18,13 @@ def collect_pdf_files(inputs):
         elif path.is_dir():
             pdf_files.extend(path.rglob("*.pdf"))
         else:
-            print(f"Warning: {path} is not a valid PDF file or directory", file=sys.stderr)
+            print(
+                f"Warning: {path} is not a valid PDF file or directory", file=sys.stderr
+            )
     return pdf_files
 
 
 def extract_single_page(page_data):
-    """Extract text from a single page"""
     page_num, page, output_dir = page_data
     try:
         text = page.get_text()
@@ -39,7 +37,6 @@ def extract_single_page(page_data):
 
 
 def extract_pages_from_pdf(pdf_path, n_jobs=4):
-    """Extract all pages from a single PDF file"""
     pdf_path = Path(pdf_path)
     output_dir = pdf_path.parent / pdf_path.stem
     output_dir.mkdir(exist_ok=True)
@@ -48,10 +45,11 @@ def extract_pages_from_pdf(pdf_path, n_jobs=4):
     try:
         doc = fitz.open(pdf_path)
 
-        # Prepare page data for parallel processing
-        pages_data = [(page_num, doc[page_num - 1], output_dir) for page_num in range(1, len(doc) + 1)]
+        pages_data = [
+            (page_num, doc[page_num - 1], output_dir)
+            for page_num in range(1, len(doc) + 1)
+        ]
 
-        # Process pages in parallel
         page_results = Parallel(n_jobs=n_jobs, backend="threading")(
             delayed(extract_single_page)(page_data) for page_data in pages_data
         )

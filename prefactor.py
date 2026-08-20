@@ -1,17 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-merge_to_single.py
-Merge a small Python library (<= 10 files by default) into a single-file package.
-Features:
-- Uses pathlib for file operations
-- Resolves local imports between modules using AST
-- Uses multiprocessing to speed up file parsing/IO
-- Produces a single .py file that reconstructs the original module tree at runtime
-- Embeds original sources in the merged file in a safe way and exposes get_original_source()
-- Defaults: no CLI args => input = cwd, output_dir = ./out
-Limitations:
-- Best for small pure-Python libraries (<= ~10 files). Complex dynamic import or extension modules may not work.
-"""
 
 from __future__ import annotations
 
@@ -50,7 +37,9 @@ def find_py_files(root: Path, exclude: Path | None = None) -> list[Path]:
     return files
 
 
-def module_fullname_for_path(root: Path, file_path: Path, package_mode: bool, package_name: str | None) -> str:
+def module_fullname_for_path(
+    root: Path, file_path: Path, package_mode: bool, package_name: str | None
+) -> str:
     rel = file_path.relative_to(root)
     parts = list(rel.with_suffix("").parts)
     if parts and parts[-1] == "__init__":
@@ -66,7 +55,9 @@ def module_fullname_for_path(root: Path, file_path: Path, package_mode: bool, pa
         return ".".join(parts)
 
 
-def resolve_relative_import(curr_fullname: str, module: str | None, level: int) -> str | None:
+def resolve_relative_import(
+    curr_fullname: str, module: str | None, level: int
+) -> str | None:
     if level == 0:
         return module
     cur_parts = curr_fullname.split(".")
@@ -118,12 +109,18 @@ def analyze_file(args) -> ModuleInfo:
             normalized.add(d)
         else:
             for candidate in full_map:
-                if candidate == d or candidate.startswith(d + ".") or d.startswith(candidate + "."):
+                if (
+                    candidate == d
+                    or candidate.startswith(d + ".")
+                    or d.startswith(candidate + ".")
+                ):
                     normalized.add(candidate)
     return ModuleInfo(path=file_path, fullname=fullname, source=src, deps=normalized)
 
 
-def topological_sort(modules: dict[str, ModuleInfo]) -> tuple[list[str], list[set[str]]]:
+def topological_sort(
+    modules: dict[str, ModuleInfo],
+) -> tuple[list[str], list[set[str]]]:
     edges = {name: set(info.deps) for name, info in modules.items()}
     for name in edges:
         edges[name] = {d for d in edges[name] if d in modules}
@@ -147,7 +144,9 @@ def topological_sort(modules: dict[str, ModuleInfo]) -> tuple[list[str], list[se
     return ordered, cycles
 
 
-def build_merged_source(modules: dict[str, ModuleInfo], ordered: list[str], out_module_name: str) -> str:
+def build_merged_source(
+    modules: dict[str, ModuleInfo], ordered: list[str], out_module_name: str
+) -> str:
     lines: list[str] = []
     lines.append("# Auto-generated single-file package by merge_to_single.py")
     lines.append(f"# Reconstructed modules: {', '.join(ordered)}")
@@ -160,7 +159,9 @@ def build_merged_source(modules: dict[str, ModuleInfo], ordered: list[str], out_
     lines.append("}")
     lines.append("")
     lines.append("def get_original_source(module_name):")
-    lines.append('    """Return the original source (as a string) for a merged module, or None."""')
+    lines.append(
+        '    """Return the original source (as a string) for a merged module, or None."""'
+    )
     lines.append("    return _orig_sources.get(module_name)")
     lines.append("")
     lines.append("# Pre-create module objects and insert into sys.modules")
@@ -178,13 +179,17 @@ def build_merged_source(modules: dict[str, ModuleInfo], ordered: list[str], out_
     lines.append("for _name in _order:")
     lines.append("    src = _orig_sources[_name]")
     lines.append("    mod = sys.modules[_name]")
-    lines.append("    # compile with a synthetic filename so tracebacks mention the original module name")
+    lines.append(
+        "    # compile with a synthetic filename so tracebacks mention the original module name"
+    )
     lines.append("    exec(compile(src, f\"<merged:{_name}>\", 'exec'), mod.__dict__)")
     lines.append("")
     if out_module_name in modules:
         lines.append("try:")
         lines.append(f"    import {out_module_name} as _top")
-        lines.append("    # re-export public names (non-underscore) into the merged-file global namespace")
+        lines.append(
+            "    # re-export public names (non-underscore) into the merged-file global namespace"
+        )
         lines.append("    for _k, _v in vars(_top).items():")
         lines.append("        if not _k.startswith('_'):")
         lines.append("            globals()[_k] = _v")
@@ -197,7 +202,9 @@ def build_merged_source(modules: dict[str, ModuleInfo], ordered: list[str], out_
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Merge a small Python library into a single-file package.")
+    parser = argparse.ArgumentParser(
+        description="Merge a small Python library into a single-file package."
+    )
     parser.add_argument(
         "input",
         nargs="?",
@@ -212,7 +219,12 @@ def main():
         default=Path.cwd() / "out",
         help="Directory to write merged file to. Defaults to ./out.",
     )
-    parser.add_argument("--out-name", type=str, default=None, help="Output filename (defaults to <pkg>_single.py).")
+    parser.add_argument(
+        "--out-name",
+        type=str,
+        default=None,
+        help="Output filename (defaults to <pkg>_single.py).",
+    )
     parser.add_argument(
         "--max-files",
         type=int,
@@ -225,7 +237,11 @@ def main():
         default=None,
         help="Force package name (defaults to input folder name if package).",
     )
-    parser.add_argument("--force", action="store_true", help="Force merge even if file count > max-files.")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force merge even if file count > max-files.",
+    )
     parser.add_argument(
         "-j",
         "--jobs",
@@ -245,7 +261,9 @@ def main():
         print("No Python files found under input directory.", file=sys.stderr)
         sys.exit(2)
     package_mode = (root / "__init__.py").exists()
-    package_name = args.package_name if args.package_name else root.name if package_mode else None
+    package_name = (
+        args.package_name if args.package_name else root.name if package_mode else None
+    )
     if len(files) > args.max_files and not args.force:
         print(
             f"Found {len(files)} files which is > {args.max_files}. Use --force to override.",
@@ -256,7 +274,9 @@ def main():
     for p in files:
         name = module_fullname_for_path(root, p, package_mode, package_name)
         full_map_candidates[name] = p
-    pool_args = [(p, root, package_mode, package_name, full_map_candidates) for p in files]
+    pool_args = [
+        (p, root, package_mode, package_name, full_map_candidates) for p in files
+    ]
     if args.jobs and args.jobs > 0:
         workers = min(args.jobs, max(1, len(files)))
     else:
@@ -269,11 +289,16 @@ def main():
     modules: dict[str, ModuleInfo] = {}
     for mi in results:
         if not mi.fullname:
-            mi.fullname = module_fullname_for_path(root, mi.path, package_mode, package_name)
+            mi.fullname = module_fullname_for_path(
+                root, mi.path, package_mode, package_name
+            )
         modules[mi.fullname] = mi
     ordered, cycles = topological_sort(modules)
     if cycles:
-        print("Warning: cycles detected among modules; attempting best-effort merge.", file=sys.stderr)
+        print(
+            "Warning: cycles detected among modules; attempting best-effort merge.",
+            file=sys.stderr,
+        )
     out_name = args.out_name or f"{package_name or root.name}_single.py"
     out_path = out_dir / out_name
     merged = build_merged_source(modules, ordered, package_name or root.name)

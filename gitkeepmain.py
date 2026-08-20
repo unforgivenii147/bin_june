@@ -7,9 +7,13 @@ import sys
 from subprocess import CompletedProcess
 
 
-def run_git_command(cmd: str, check=True, capture_output=True) -> CompletedProcess[str] | None:
+def run_git_command(
+    cmd: str, check=True, capture_output=True
+) -> CompletedProcess[str] | None:
     try:
-        return subprocess.run(cmd, shell=True, check=check, capture_output=capture_output, text=True)
+        return subprocess.run(
+            cmd, shell=True, check=check, capture_output=capture_output, text=True
+        )
     except subprocess.CalledProcessError as e:
         print(f"Error running command: {cmd}")
         print(f"Error: {e}")
@@ -37,7 +41,9 @@ def get_main_branch_name() -> str:
                 return line.split(":")[1].strip()
     result = run_git_command("git branch -l")
     if result:
-        branches = [b.strip().replace("* ", "") for b in result.stdout.split("\n") if b.strip()]
+        branches = [
+            b.strip().replace("* ", "") for b in result.stdout.split("\n") if b.strip()
+        ]
         for branch in branches:
             if branch in {"main", "master"}:
                 return branch

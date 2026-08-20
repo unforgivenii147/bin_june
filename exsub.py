@@ -105,7 +105,10 @@ def parse_srt(filepath_path: Path) -> list[dict]:
             i += 1
         if i < len(lines) and not lines[i].strip():
             i += 1
-        match = re.match(r"(\d{2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[.,]\d{3})", ts_line)
+        match = re.match(
+            r"(\d{2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[.,]\d{3})",
+            ts_line,
+        )
         if match:
             start = _ts_to_seconds(match.group(1))
             end = _ts_to_seconds(match.group(2))
@@ -165,14 +168,20 @@ def extract_burned_subs_ocr(
     elif end_time is not None:
         time_range_msg = f" from start to {format_time(end_time)}"
     print(f"[1/3] Extracting frames ({sample_fps} fps sample{time_range_msg})…")
-    frames = extract_frames(video_path, sample_fps=sample_fps, start_time=start_time, end_time=end_time)
+    frames = extract_frames(
+        video_path, sample_fps=sample_fps, start_time=start_time, end_time=end_time
+    )
     print(f"      {len(frames)} unique frames queued for OCR")
     ocr_config = f"--oem 3 --psm 6 -l {lang}"
     worker_fn = partial(_ocr_worker, ocr_config=ocr_config)
     print(f"[2/3] Running OCR with {workers} worker(s)…")
     with multiprocessing.Pool(processes=workers) as pool:
         results: list[tuple[float, str]] = pool.map(worker_fn, frames)
-    new_subs = [{"start": t, "end": t + 1.0 / sample_fps, "text": txt} for t, txt in results if txt]
+    new_subs = [
+        {"start": t, "end": t + 1.0 / sample_fps, "text": txt}
+        for t, txt in results
+        if txt
+    ]
     if resume and output_srt_file.is_file():
         existing_subs = parse_srt(output_srt_file)
         if existing_subs:
@@ -197,7 +206,9 @@ def extract_burned_subs_ocr(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Extract burned-in subtitles from video using OCR")
+    parser = argparse.ArgumentParser(
+        description="Extract burned-in subtitles from video using OCR"
+    )
     parser.add_argument("video", help="Path to the video file")
     parser.add_argument(
         "output",
@@ -211,17 +222,37 @@ if __name__ == "__main__":
         dest="start_time",
         help="Start time for extraction (HH:MM:SS), e.g. 00:05:00",
     )
-    parser.add_argument("-e", "--end", dest="end_time", help="End time for extraction (HH:MM:SS), e.g. 00:10:00")
+    parser.add_argument(
+        "-e",
+        "--end",
+        dest="end_time",
+        help="End time for extraction (HH:MM:SS), e.g. 00:10:00",
+    )
     parser.add_argument(
         "-r",
         "--resume",
         action="store_true",
         help="Resume from a previous run (appends to existing SRT if present)",
     )
-    parser.add_argument("--sample_fps", type=float, default=2.0, help="Frames per second to sample (default: 2.0)")
-    parser.add_argument("--workers", type=int, default=4, help="Number of OCR worker processes (default: 4)")
+    parser.add_argument(
+        "--sample_fps",
+        type=float,
+        default=2.0,
+        help="Frames per second to sample (default: 2.0)",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of OCR worker processes (default: 4)",
+    )
     args = parser.parse_args()
-    if args.output and re.match(r"\d{1,2}:\d{2}:\d{2}", args.output) and not args.start_time and not args.end_time:
+    if (
+        args.output
+        and re.match(r"\d{1,2}:\d{2}:\d{2}", args.output)
+        and not args.start_time
+        and not args.end_time
+    ):
         args.end_time = args.output
         args.output = "extracted_subs.srt"
     start_time = parse_time(args.start_time) if args.start_time else None

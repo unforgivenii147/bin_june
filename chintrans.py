@@ -14,7 +14,11 @@ MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 3
 RETRY_DELAY: Final[float] = 0.5
 MAX_CHUNK_SIZE: Final[int] = 5000
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -56,7 +60,11 @@ def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
                 return (chunk, result)
         except Exception as e:
             logger.warning(
-                "Failed chunk starting with '%s' (attempt %d/%d): %s", chunk[0][:50], attempt + 1, RETRY_ATTEMPTS, e
+                "Failed chunk starting with '%s' (attempt %d/%d): %s",
+                chunk[0][:50],
+                attempt + 1,
+                RETRY_ATTEMPTS,
+                e,
             )
             if attempt < RETRY_ATTEMPTS - 1:
                 time.sleep(RETRY_DELAY)
@@ -99,7 +107,9 @@ def main() -> None:
     )
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_chunk = {executor.submit(translate_chunk, chunk): chunk for chunk in chunks}
+        future_to_chunk = {
+            executor.submit(translate_chunk, chunk): chunk for chunk in chunks
+        }
         for future in as_completed(future_to_chunk):
             chunk = future_to_chunk[future]
             try:
@@ -111,11 +121,20 @@ def main() -> None:
                             results[original_line] = translated_lines[i]
                             print(f"{original_line} → {translated_lines[i]}")
                         else:
-                            logger.error("Line count mismatch in chunk, missing translation for: %s", original_line)
+                            logger.error(
+                                "Line count mismatch in chunk, missing translation for: %s",
+                                original_line,
+                            )
                 else:
-                    logger.error("Failed to translate chunk starting with: %s", chunk[0][:50])
+                    logger.error(
+                        "Failed to translate chunk starting with: %s", chunk[0][:50]
+                    )
             except Exception as e:
-                logger.error("Unexpected error for chunk starting with '%s': %s", chunk[0][:50], e)
+                logger.error(
+                    "Unexpected error for chunk starting with '%s': %s",
+                    chunk[0][:50],
+                    e,
+                )
     try:
         with input_path.open("w", encoding="utf-8") as f:
             for line in all_lines:

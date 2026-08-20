@@ -1,12 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Split a tar.zst file into N valid tar.zst parts.
-Usage:
-    python split_tar_zst.py <input_file> <N>
-    input_file: Path to the tar.zst file to split
-    N: Number of parts to create
-Each created part will be a valid .tar.zst file that can be independently extracted.
-"""
 
 from __future__ import annotations
 
@@ -26,8 +18,7 @@ def split_tar_zst(input_file, num_parts):
         print("Error: N must be at least 1.", file=sys.stderr)
         sys.exit(1)
     base_name = Path(input_file).stem
-    if base_name.endswith(".tar"):
-        base_name = base_name[:-4]
+    base_name = base_name.removesuffix(".tar")
     output_dir = Path(input_file).parent
     print(f"Reading tar.zst file: {input_file}")
     dctx = zstd.ZstdDecompressor()
@@ -44,7 +35,9 @@ def split_tar_zst(input_file, num_parts):
     total_members = len(members)
     print(f"Total files/directories in archive: {total_members}")
     if num_parts > total_members:
-        print(f"Warning: N ({num_parts}) is greater than number of items ({total_members}).")
+        print(
+            f"Warning: N ({num_parts}) is greater than number of items ({total_members})."
+        )
         print("Some parts may be empty.")
         num_parts = total_members
     items_per_part = total_members // num_parts

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to generate a setup.py for a Python project.
-Automatically detects __main__.py or cli.py and adds console_scripts entry points.
-"""
 
 from __future__ import annotations
 
@@ -20,21 +16,33 @@ def detect_entry_point(project_dir, package_name):
     root_cli = project_path / "cli.py"
     entry_points = []
     if main_file.exists():
-        entry_points.append({"module": f"{package_name}.__main__", "function": "main", "script_name": package_name})
+        entry_points.append(
+            {
+                "module": f"{package_name}.__main__",
+                "function": "main",
+                "script_name": package_name,
+            }
+        )
     if cli_file.exists():
         function_name = detect_main_function(cli_file)
         entry_points.append(
             {
                 "module": f"{package_name}.cli",
                 "function": function_name,
-                "script_name": package_name if not main_file.exists() else f"{package_name}-cli",
+                "script_name": package_name
+                if not main_file.exists()
+                else f"{package_name}-cli",
             }
         )
     if root_main.exists() and not entry_points:
-        entry_points.append({"module": "__main__", "function": "main", "script_name": package_name})
+        entry_points.append(
+            {"module": "__main__", "function": "main", "script_name": package_name}
+        )
     if root_cli.exists() and not entry_points:
         function_name = detect_main_function(root_cli)
-        entry_points.append({"module": "cli", "function": function_name, "script_name": package_name})
+        entry_points.append(
+            {"module": "cli", "function": function_name, "script_name": package_name}
+        )
     return entry_points
 
 
@@ -42,9 +50,11 @@ def detect_main_function(file_path):
     try:
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
-        if re.search(r"def main\(", content):
-            return "main"
-        elif re.search(r"@click\.\w+", content) or re.search(r"import click", content):
+        if (
+            re.search(r"def main\(", content)
+            or re.search(r"@click\.\w+", content)
+            or re.search(r"import click", content)
+        ):
             return "main"
         elif re.search(r"def cli\(", content):
             return "cli"
@@ -66,7 +76,11 @@ def find_requirements(project_dir):
                 with open(req_path, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
-                        if line and not line.startswith("#") and not line.startswith("-"):
+                        if (
+                            line
+                            and not line.startswith("#")
+                            and not line.startswith("-")
+                        ):
                             if req_file == "Pipfile":
                                 if "=" in line and not line.startswith("["):
                                     pkg = line.split("=")[0].strip()
@@ -85,7 +99,9 @@ def generate_setup_py(project_dir, package_name, entry_points, requirements):
     if entry_points:
         console_scripts = []
         for ep in entry_points:
-            console_scripts.append(f"{ep['script_name']}={ep['module']}:{ep['function']}")
+            console_scripts.append(
+                f"{ep['script_name']}={ep['module']}:{ep['function']}"
+            )
         entry_points_str = "    entry_points={\n"
         entry_points_str += "        'console_scripts': [\n"
         for script in console_scripts:
@@ -153,7 +169,9 @@ def main():
     requirements = find_requirements(project_dir)
     if requirements:
         print(f"\nFound {len(requirements)} requirements in requirements files.")
-    setup_content = generate_setup_py(project_dir, package_name, entry_points, requirements)
+    setup_content = generate_setup_py(
+        project_dir, package_name, entry_points, requirements
+    )
     setup_path = os.path.join(project_dir, "setup.py")
     with open(setup_path, "w", encoding="utf-8") as f:
         f.write(setup_content)

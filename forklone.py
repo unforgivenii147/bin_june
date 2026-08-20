@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Automate forking and cloning a GitHub repository
-Usage: python script.py user/repo
-Example: python script.py octocat/Hello-World
-Install dependencies:
-pip install PyGithub GitPython python-dotenv
-"""
 
 from __future__ import annotations
 
@@ -89,7 +82,9 @@ def clone_and_setup(forked_repo, original_full_name):
     default_branch = forked_repo.default_branch
     print("Fetching from upstream...")
     upstream.fetch()
-    local_repo.git.branch(f"--set-upstream-to=upstream/{default_branch}", default_branch)
+    local_repo.git.branch(
+        f"--set-upstream-to=upstream/{default_branch}", default_branch
+    )
     return local_repo, default_branch
 
 

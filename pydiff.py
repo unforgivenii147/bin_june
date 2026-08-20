@@ -28,7 +28,9 @@ def read_file_task(path: Path, use_mmap: bool) -> tuple[Path, list[str]]:
     return path, lines
 
 
-def filter_diff_chunk(chunk: list[str], exclude_set: frozenset[str], mode: str) -> list[str]:
+def filter_diff_chunk(
+    chunk: list[str], exclude_set: frozenset[str], mode: str
+) -> list[str]:
     if mode == "only_in_first":
         return [p for p in chunk if p not in exclude_set]
     else:
@@ -51,7 +53,12 @@ def process_files_parallel(path1: Path, path2: Path, num_workers: int = 2) -> No
         chunk_size = max(1000, len(lines1) // num_workers)
         chunks = [lines1[i : i + chunk_size] for i in range(0, len(lines1), chunk_size)]
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
-            futures = [executor.submit(filter_diff_chunk, chunk, frozenset(set2), "only_in_first") for chunk in chunks]
+            futures = [
+                executor.submit(
+                    filter_diff_chunk, chunk, frozenset(set2), "only_in_first"
+                )
+                for chunk in chunks
+            ]
             only_in_first = []
             for future in as_completed(futures):
                 only_in_first.extend(future.result())

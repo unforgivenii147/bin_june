@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Scan ~/bin for Python scripts and count imports from:
-  - Standard library modules
-  - Third-party packages (installed via pip)
-  - Custom 'dh' package
-Save a comprehensive report to ~/dh_usage.txt and generate PNG charts.
-"""
 
 from __future__ import annotations
 
@@ -149,7 +142,9 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
             if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
                 if func.value.id in dh_names:
                     imports[PACKAGE].append(func.attr)
-            if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Attribute):
+            if isinstance(func, ast.Attribute) and isinstance(
+                func.value, ast.Attribute
+            ):
                 root = func.value
                 while isinstance(root, ast.Attribute):
                     root = root.value
@@ -158,7 +153,9 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
     return dict(imports)
 
 
-def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict[str, int]]:
+def count_calls(
+    filepath: Path, imports: dict[str, list[str]]
+) -> dict[str, dict[str, int]]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
     except (SyntaxError, UnicodeDecodeError):
@@ -255,7 +252,9 @@ def generate_report(
     lines.append(f"\n{'─' * 42}")
     lines.append("  SECTION 4: PER-FILE BREAKDOWN")
     lines.append(f"{'─' * 42}")
-    for fname, module_calls in sorted(per_file_data, key=lambda x: -sum(sum(c.values()) for c in x[1].values())):
+    for fname, module_calls in sorted(
+        per_file_data, key=lambda x: -sum(sum(c.values()) for c in x[1].values())
+    ):
         total_calls = sum(sum(c.values()) for c in module_calls.values())
         lines.append(f"\n  📄 {fname}  ({total_calls} total calls)")
         stdlib_in_file = {}
@@ -321,7 +320,9 @@ def save_charts(
     if top_stdlib:
         ax.barh(list(top_stdlib.keys()), list(top_stdlib.values()), color="#3498db")
         ax.set_xlabel("Total Calls")
-        ax.set_title("Top 10 Standard Library Modules by Usage", fontsize=14, fontweight="bold")
+        ax.set_title(
+            "Top 10 Standard Library Modules by Usage", fontsize=14, fontweight="bold"
+        )
         ax.invert_yaxis()
         plt.tight_layout()
         plt.savefig(output_dir / "01_stdlib_top10.png", dpi=100, bbox_inches="tight")
@@ -346,20 +347,30 @@ def save_charts(
         for autotext in autotexts:
             autotext.set_color("white")
             autotext.set_fontweight("bold")
-        ax.set_title("Import Usage Distribution by Category", fontsize=14, fontweight="bold")
+        ax.set_title(
+            "Import Usage Distribution by Category", fontsize=14, fontweight="bold"
+        )
         plt.tight_layout()
-        plt.savefig(output_dir / "02_category_distribution.png", dpi=100, bbox_inches="tight")
+        plt.savefig(
+            output_dir / "02_category_distribution.png", dpi=100, bbox_inches="tight"
+        )
         plt.close()
         print("   ✅ Saved: 02_category_distribution.png")
     fig, ax = plt.subplots(figsize=(12, 6))
     top_thirdparty = dict(sorted(thirdparty_counts.items(), key=lambda x: -x[1])[:10])
     if top_thirdparty:
-        ax.barh(list(top_thirdparty.keys()), list(top_thirdparty.values()), color="#e74c3c")
+        ax.barh(
+            list(top_thirdparty.keys()), list(top_thirdparty.values()), color="#e74c3c"
+        )
         ax.set_xlabel("Total Calls")
-        ax.set_title("Top 10 Third-Party Packages by Usage", fontsize=14, fontweight="bold")
+        ax.set_title(
+            "Top 10 Third-Party Packages by Usage", fontsize=14, fontweight="bold"
+        )
         ax.invert_yaxis()
         plt.tight_layout()
-        plt.savefig(output_dir / "03_thirdparty_top10.png", dpi=100, bbox_inches="tight")
+        plt.savefig(
+            output_dir / "03_thirdparty_top10.png", dpi=100, bbox_inches="tight"
+        )
         plt.close()
         print("   ✅ Saved: 03_thirdparty_top10.png")
     _fig, ax = plt.subplots(figsize=(12, 6))

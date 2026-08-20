@@ -1,14 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-AST-based duplicate definition extractor.
-Finds repeated functions, classes, and constant assignments across all
-Python files (including compressed archives) in the current directory tree.
-Optionally copies (-c) or moves (-m) the duplicate definitions to
-`utils/const.py`, `utils/class.py`, `utils/func.py`.
-Supported compression: gzip, bz2, lzma, zstandard (.zst), brotli (.br).
-Multiprocessing is used for fast AST analysis. Logging is handled by loguru.
-Requires Python 3.9+ (for ast.unparse).
-"""
 
 from __future__ import annotations
 
@@ -126,16 +116,28 @@ def _extract_definitions(path: str, source: str) -> list[_Def]:
         try:
             segment = ast.get_source_segment(source, node)
         except Exception as exc:
-            logger.error("Failed to get source segment in {} for {}: {}", path, name, exc)
+            logger.error(
+                "Failed to get source segment in {} for {}: {}", path, name, exc
+            )
             continue
         if segment is None:
             continue
         segment = segment.strip("\n")
-        defs.append(_Def(type=typ, name=name, source_code=segment, content_hash=_hash(segment), filepath=path))
+        defs.append(
+            _Def(
+                type=typ,
+                name=name,
+                source_code=segment,
+                content_hash=_hash(segment),
+                filepath=path,
+            )
+        )
     return defs
 
 
-def _new_utils_entries(groups: dict[str, list[_Def]], existing: dict[str, dict[str, _Def]]) -> dict[str, list[_Def]]:
+def _new_utils_entries(
+    groups: dict[str, list[_Def]], existing: dict[str, dict[str, _Def]]
+) -> dict[str, list[_Def]]:
     new: dict[str, list[_Def]] = {"func": [], "class": [], "const": []}
     for _hash_key, defs in groups.items():
         rep = defs[0]
@@ -146,7 +148,11 @@ def _new_utils_entries(groups: dict[str, list[_Def]], existing: dict[str, dict[s
             if existing[typ][name].content_hash == rep.content_hash:
                 logger.debug("Already in {}.py: {}", typ, name)
                 continue
-            logger.warning("Conflict in {}.py: '{}' exists with different content – skipping.", typ, name)
+            logger.warning(
+                "Conflict in {}.py: '{}' exists with different content – skipping.",
+                typ,
+                name,
+            )
             continue
         if any(d.name == name for d in new[typ]):
             continue
@@ -156,7 +162,11 @@ def _new_utils_entries(groups: dict[str, list[_Def]], existing: dict[str, dict[s
 
 def _read_existing_utils(utils_dir: Path) -> dict[str, dict[str, _Def]]:
     existing: dict[str, dict[str, _Def]] = {"func": {}, "class": {}, "const": {}}
-    for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
+    for typ, fname in [
+        ("func", "func.py"),
+        ("class", "class.py"),
+        ("const", "const.py"),
+    ]:
         path = utils_dir / fname
         if path.is_file():
             try:
@@ -170,7 +180,11 @@ def _read_existing_utils(utils_dir: Path) -> dict[str, dict[str, _Def]]:
 
 def _write_utils_files(utils_dir: Path, new: dict[str, list[_Def]]) -> None:
     utils_dir.mkdir(exist_ok=True)
-    for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
+    for typ, fname in [
+        ("func", "func.py"),
+        ("class", "class.py"),
+        ("const", "const.py"),
+    ]:
         if not new[typ]:
             continue
         path = utils_dir / fname
@@ -178,8 +192,7 @@ def _write_utils_files(utils_dir: Path, new: dict[str, list[_Def]]) -> None:
         with open(path, "a", encoding="utf-8") as fh:
             if write_header:
                 fh.write(f"# {typ.capitalize()} definitions\n\n")
-            for d in new[typ]:
-                fh.write(d.source_code + "\n\n")
+            fh.writelines(d.source_code + "\n\n" for d in new[typ])
         logger.info("Added {} definition(s) to {}", len(new[typ]), fname)
 
 
@@ -187,7 +200,9 @@ def _move_definitions(groups: dict[str, list[_Def]]) -> None:
     to_remove: dict[str, set[str]] = {}
     for hash_key, defs in groups.items():
         for d in defs:
-            if not d.filepath.endswith(".py") or any(d.filepath.endswith(ext) for ext in _COMPRESSED_EXT):
+            if not d.filepath.endswith(".py") or any(
+                d.filepath.endswith(ext) for ext in _COMPRESSED_EXT
+            ):
                 continue
             to_remove.setdefault(d.filepath, set()).add(hash_key)
     for path, hashes in to_remove.items():
@@ -215,7 +230,9 @@ def _move_definitions(groups: dict[str, list[_Def]]) -> None:
             try:
                 ast.parse(new_source)
             except SyntaxError as exc:
-                logger.error("Resulting code of {} has a syntax error – skipping: {}", path, exc)
+                logger.error(
+                    "Resulting code of {} has a syntax error – skipping: {}", path, exc
+                )
                 continue
             Path(path).write_text(new_source, encoding="utf-8")
             logger.info("Removed {} duplicate definition(s) from {}", len(hashes), path)
@@ -224,9 +241,13 @@ def _move_definitions(groups: dict[str, list[_Def]]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Copy/move repeated Python definitions to utils/")
+    parser = argparse.ArgumentParser(
+        description="Copy/move repeated Python definitions to utils/"
+    )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-c", "--copy", action="store_true", help="Copy duplicates to utils/")
+    group.add_argument(
+        "-c", "--copy", action="store_true", help="Copy duplicates to utils/"
+    )
     group.add_argument(
         "-m",
         "--move",
@@ -250,7 +271,9 @@ def main() -> None:
     logger.info("Found {} file(s) to process", len(file_jobs))
     all_defs: list[_Def] = []
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        futures = {executor.submit(_extract_definitions, p, src): p for p, src in file_jobs}
+        futures = {
+            executor.submit(_extract_definitions, p, src): p for p, src in file_jobs
+        }
         for future in concurrent.futures.as_completed(futures):
             try:
                 result = future.result()

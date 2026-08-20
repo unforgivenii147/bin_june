@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-In-place translation of Chinese characters in text files with progress persistence.
-"""
 
 from __future__ import annotations
 
@@ -17,14 +14,22 @@ from typing import Any, Final
 
 from deep_translator import GoogleTranslator
 from dh import get_nobinary
-from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential_jitter,
+)
 
 CHUNK_SIZE = 1024 * 1024
 CHUNK_SIZE: Final[int] = 32768
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
-CHINESE_PATTERN: Final[re.Pattern] = re.compile(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+")
+CHINESE_PATTERN: Final[re.Pattern] = re.compile(
+    r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+"
+)
 MAX_WORKERS: Final[int] = 10
 MAX_RETRIES: Final[int] = 1
 PROGRESS_SAVE_EVERY: Final[int] = 20
@@ -35,7 +40,9 @@ _interrupted = False
 
 def _sigint_handler(sig: Any, frame: Any) -> None:
     global _interrupted
-    print("\n⚠️  Ctrl+C caught — completing current active requests and saving progress...")
+    print(
+        "\n⚠️  Ctrl+C caught — completing current active requests and saving progress..."
+    )
     _interrupted = True
 
 
@@ -96,7 +103,9 @@ def _translate(text: str) -> str:
         raise TranslationError(str(e))
 
 
-def translate_worker(line_idx: int, start: int, end: int, text: str) -> tuple[int, int, int, str, bool]:
+def translate_worker(
+    line_idx: int, start: int, end: int, text: str
+) -> tuple[int, int, int, str, bool]:
     if _interrupted:
         return (line_idx, start, end, text, False)
     try:
@@ -109,16 +118,24 @@ def _progress_path(file_path: Path) -> Path:
     return file_path.with_suffix(file_path.suffix + ".xlprogress")
 
 
-def save_progress(file_path: Path, done: dict[int, dict[tuple[int, int], str]], total: int) -> None:
+def save_progress(
+    file_path: Path, done: dict[int, dict[tuple[int, int], str]], total: int
+) -> None:
     try:
-        serializable_done = {str(k): {f"{pos[0]},{pos[1]}": v for pos, v in v.items()} for k, v in done.items() if v}
+        serializable_done = {
+            str(k): {f"{pos[0]},{pos[1]}": v for pos, v in v.items()}
+            for k, v in done.items()
+            if v
+        }
         state = {
             "file": str(file_path),
             "saved_at": datetime.now().isoformat(),
             "total_lines": total,
             "translations": serializable_done,
         }
-        _progress_path(file_path).write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+        _progress_path(file_path).write_text(
+            json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     except Exception as e:
         log.error("Could not save progress for %s: %s", file_path, e)
 
@@ -132,7 +149,9 @@ def load_progress(file_path: Path) -> dict[int, dict[tuple[int, int], str]]:
         restored: dict[int, dict[tuple[int, int], str]] = {}
         for line_num_str, segments in state.get("translations", {}).items():
             line_idx = int(line_num_str)
-            restored[line_idx] = {tuple(map(int, k.split(","))): v for k, v in segments.items()}
+            restored[line_idx] = {
+                tuple(map(int, k.split(","))): v for k, v in segments.items()
+            }
         return restored
     except Exception:
         return {}
@@ -170,17 +189,23 @@ def process_file(path: Path) -> bool:
                 tasks.append((line_idx, start, end, chinese_text))
     completed_segments = total_segments - len(tasks)
     if completed_segments > 0:
-        print(f"   🔄 Resuming: {completed_segments}/{total_segments} segments already cached")
+        print(
+            f"   🔄 Resuming: {completed_segments}/{total_segments} segments already cached"
+        )
     if tasks:
         print(f"   ⚡ Launching {MAX_WORKERS} threads for {len(tasks)} segments...")
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            future_to_seg = {executor.submit(translate_worker, *task): task for task in tasks}
+            future_to_seg = {
+                executor.submit(translate_worker, *task): task for task in tasks
+            }
             for future in as_completed(future_to_seg):
                 l_idx, s, e, result_text, success = future.result()
                 done[l_idx][s, e] = result_text
                 completed_segments += 1
                 status = "✓" if success else "❌ Failed"
-                print(f"   [{completed_segments:>4}/{total_segments}] {status} line {l_idx + 1}")
+                print(
+                    f"   [{completed_segments:>4}/{total_segments}] {status} line {l_idx + 1}"
+                )
                 if completed_segments % PROGRESS_SAVE_EVERY == 0 or _interrupted:
                     save_progress(path, done, len(lines))
                     if _interrupted:
@@ -208,7 +233,11 @@ def process_file(path: Path) -> bool:
 
 def main() -> None:
     args = sys.argv[1:]
-    files = [Path(p) for p in args if Path(p).is_file()] if args else get_nobinary(Path.cwd())
+    files = (
+        [Path(p) for p in args if Path(p).is_file()]
+        if args
+        else get_nobinary(Path.cwd())
+    )
     for f in files:
         if _interrupted:
             break

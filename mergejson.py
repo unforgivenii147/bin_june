@@ -52,15 +52,21 @@ def merge_json_files(input_files, output_file):
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(merged_data, f, indent=4, ensure_ascii=False)
         print(f"Successfully merged {len(input_files)} files into '{output_file}'.")
-    except IOError as e:
+    except OSError as e:
         print(f"Error writing to output file: {e}")
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Merge two or more JSON files into one.")
-    parser.add_argument("inputs", nargs="+", help="Paths to the input JSON files (minimum 2)")
-    parser.add_argument("-o", "--output", required=True, help="Path for the merged output JSON file")
+    parser = argparse.ArgumentParser(
+        description="Merge two or more JSON files into one."
+    )
+    parser.add_argument(
+        "inputs", nargs="+", help="Paths to the input JSON files (minimum 2)"
+    )
+    parser.add_argument(
+        "-o", "--output", required=True, help="Path for the merged output JSON file"
+    )
     args = parser.parse_args()
     if len(args.inputs) < 2:
         print("Error: Please provide at least two input files to merge.")

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Live WiFi/Cellular Signal Strength Monitor for Termux
-Displays real-time signal meters and connection info
-"""
 
 from __future__ import annotations
 
@@ -29,7 +25,9 @@ class SignalMonitor:
 
     def get_wifi_signal(self):
         try:
-            result = subprocess.run(["dumpsys", "wifi"], capture_output=True, text=True, timeout=2)
+            result = subprocess.run(
+                ["dumpsys", "wifi"], capture_output=True, text=True, timeout=2
+            )
             rssi_match = re.search(r"mRssi[=:]?\s*(-?\d+)", result.stdout)
             ssid_match = re.search(r"ssid[=:]?\s*([\"\']?)([^\"\']*?)\1", result.stdout)
             if rssi_match:
@@ -43,7 +41,12 @@ class SignalMonitor:
 
     def get_cellular_signal(self):
         try:
-            result = subprocess.run(["dumpsys", "telephony.registry"], capture_output=True, text=True, timeout=2)
+            result = subprocess.run(
+                ["dumpsys", "telephony.registry"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+            )
             signal_match = re.search(r"mSignalStrength[=:]?\s*(\d+)", result.stdout)
             state_match = re.search(r"mDataConnectionState[=:]?\s*(\d+)", result.stdout)
             if signal_match:
@@ -95,7 +98,10 @@ class SignalMonitor:
 
     def render(self) -> None:
         os.system("clear")
-        header = Panel(Align.center("[bold cyan]📡 SIGNAL STRENGTH MONITOR[/bold cyan]"), border_style="cyan")
+        header = Panel(
+            Align.center("[bold cyan]📡 SIGNAL STRENGTH MONITOR[/bold cyan]"),
+            border_style="cyan",
+        )
         console.print(header)
         if self.is_airplane_mode:
             console.print("[bold red]✈️  AIRPLANE MODE ENABLED[/bold red]\n")
@@ -109,7 +115,9 @@ class SignalMonitor:
             console.print("  [dim]No WiFi data available[/dim]\n")
         console.print("[bold green]📱 Cellular Signal[/bold green]")
         if self.cellular_strength is not None:
-            bars, percent = self.strength_to_bars(self.cellular_strength, max_db=-25, min_db=-120)
+            bars, percent = self.strength_to_bars(
+                self.cellular_strength, max_db=-25, min_db=-120
+            )
             console.print(f"  Status: {self.cellular_status}")
             console.print(f"  Signal: {bars} {percent}%")
             console.print(f"  Strength: {self.cellular_strength} dBm\n")

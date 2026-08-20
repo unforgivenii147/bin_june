@@ -35,11 +35,17 @@ def main():
         print("Error: minutes must be a non-negative number")
         sys.exit(1)
     cwd = Path.cwd()
-    all_files = [p for p in cwd.rglob("*") if p.is_file() and not p.is_symlink() and ".git" not in p.parts]
+    all_files = [
+        p
+        for p in cwd.rglob("*")
+        if p.is_file() and not p.is_symlink() and ".git" not in p.parts
+    ]
     if not all_files:
         print("No files found in current directory")
         return
-    print(f"Checking {len(all_files)} files for modifications in last {n_minutes} minute(s)...")
+    print(
+        f"Checking {len(all_files)} files for modifications in last {n_minutes} minute(s)..."
+    )
     print()
     pool = Pool(8)
     results = pool.map(check_file_age, all_files)
@@ -48,9 +54,13 @@ def main():
     recent_files = [r for r in results if r is not None]
     recent_files.sort(key=lambda x: x[1], reverse=True)
     if recent_files:
-        print(f"Found {len(recent_files)} file(s) modified in the last {n_minutes} minute(s):\n")
+        print(
+            f"Found {len(recent_files)} file(s) modified in the last {n_minutes} minute(s):\n"
+        )
         for file_path, mod_time in recent_files:
-            print(f"{mod_time.strftime('%Y-%m-%d %H:%M:%S')} - {Path(file_path).relative_to(cwd)}")
+            print(
+                f"{mod_time.strftime('%Y-%m-%d %H:%M:%S')} - {Path(file_path).relative_to(cwd)}"
+            )
     else:
         print(f"No files modified in the last {n_minutes} minute(s)")
 

@@ -25,10 +25,16 @@ def sort_python_script(file_path: Path) -> None:
     except SyntaxError as e:
         print(f"Error parsing Python code in {file_path}: {e}")
         return
-    if tree.body and isinstance(tree.body[0], ast.Expr) and isinstance(tree.body[0].value, ast.Constant):
+    if (
+        tree.body
+        and isinstance(tree.body[0], ast.Expr)
+        and isinstance(tree.body[0].value, ast.Constant)
+    ):
         if isinstance(tree.body[0].value.value, str):
             docstring_node = tree.body[0]
-            module_docstring = ast.get_source_segment(remaining_code, docstring_node) or ""
+            module_docstring = (
+                ast.get_source_segment(remaining_code, docstring_node) or ""
+            )
             tree.body.pop(0)
     main_block = None
     other_nodes = []
@@ -55,7 +61,10 @@ def sort_python_script(file_path: Path) -> None:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             imports.append(node)
         elif isinstance(node, ast.Assign):
-            is_constant = all(isinstance(target, ast.Name) and target.id.isupper() for target in node.targets)
+            is_constant = all(
+                isinstance(target, ast.Name) and target.id.isupper()
+                for target in node.targets
+            )
             if is_constant:
                 constants.append(node)
             else:

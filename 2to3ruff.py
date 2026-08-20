@@ -19,7 +19,11 @@ def fix_print_statements_manually(content):
             continue
         if re.search("\\bprint\\s+", line) and (not is_in_string(line, "print")):
             if ">>" in line:
-                line = re.sub("print\\s+>>\\s*(\\w+)\\s*,\\s*(.+?)(?:\\s*#.*)?$", "print(\\2, file=\\1)", line)
+                line = re.sub(
+                    "print\\s+>>\\s*(\\w+)\\s*,\\s*(.+?)(?:\\s*#.*)?$",
+                    "print(\\2, file=\\1)",
+                    line,
+                )
             else:
                 line = re.sub("print\\s+(.+?)(?:\\s*#.*)?$", "print(\\1)", line)
             new_lines.append(line)
@@ -55,7 +59,9 @@ def process_file(path):
                 f.write(fixed_content)
             print("  ✅ Manual conversion applied")
             result = subprocess.run(
-                ["ruff", "check", "--fix", "--select", "UP010", path], capture_output=True, text=True
+                ["ruff", "check", "--fix", "--select", "UP010", path],
+                capture_output=True,
+                text=True,
             )
             if not result.returncode:
                 print("  ✅ Ruff applied additional fixes")

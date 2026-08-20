@@ -107,7 +107,9 @@ def extract_archive(path: Path) -> str:
         if low.endswith(".zip"):
             with zipfile.ZipFile(path) as zf:
                 zf.extractall(tmpdir, filter="data")
-        elif low.endswith((".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")):
+        elif low.endswith(
+            (".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")
+        ):
             with tarfile.open(path) as tf:
                 tf.extractall(tmpdir, filter="data")
         elif low.endswith(".gz") and not low.endswith(".tar.gz"):
@@ -173,12 +175,18 @@ def get_module_docstring_line_span(tree: ast.Module) -> tuple[int, int | None] |
     if not tree.body:
         return None
     first = tree.body[0]
-    if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant) and isinstance(first.value.value, str):
+    if (
+        isinstance(first, ast.Expr)
+        and isinstance(first.value, ast.Constant)
+        and isinstance(first.value.value, str)
+    ):
         return first.lineno, first.end_lineno
     return None
 
 
-def source_segment(code: str, node: Assign | AsyncFunctionDef | ClassDef | FunctionDef) -> str | None:
+def source_segment(
+    code: str, node: Assign | AsyncFunctionDef | ClassDef | FunctionDef
+) -> str | None:
     seg = ast.get_source_segment(code, node)
     if seg is not None:
         return seg
@@ -440,8 +448,16 @@ def main() -> None:
         action="store_true",
         help="Copy duplicate objects to utils.py without modifying source files",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=max(1, mp.cpu_count() - 1), help="Worker process count")
-    parser.add_argument("--log-level", default="INFO", help="DEBUG, INFO, WARNING, ERROR")
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=max(1, mp.cpu_count() - 1),
+        help="Worker process count",
+    )
+    parser.add_argument(
+        "--log-level", default="INFO", help="DEBUG, INFO, WARNING, ERROR"
+    )
     args = parser.parse_args()
     if args.move and args.copy:
         logger.error("Choose only one of --move or --copy.")
@@ -471,7 +487,9 @@ def main() -> None:
         for h, group in duplicate_groups.items():
             logger.info(f"Duplicate {h[:12]}:")
             for g in group:
-                logger.info(f"  {g['file']} :: {g['name']} ({g['kind']}) lines {g['lineno']}-{g['end_lineno']}")
+                logger.info(
+                    f"  {g['file']} :: {g['name']} ({g['kind']}) lines {g['lineno']}-{g['end_lineno']}"
+                )
         return
     utils_path = get_utils_path(base)
     utils_module_name = utils_path.stem

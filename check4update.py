@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Check installed packages for available updates using parallel processing.
-Saves upgradable packages to upgradable.txt
-"""
 
 from __future__ import annotations
 
@@ -12,14 +8,21 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 
-def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:
+def get_installed_packages(site_dir: Path) -> list[dict[str, str]]:
     packages = []
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "list", "--format=json", "--path", str(site_dir)],
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "list",
+                "--format=json",
+                "--path",
+                str(site_dir),
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -32,18 +35,29 @@ def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:
     return packages
 
 
-def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, bool]:
+def check_package_update(package_info: dict[str, str]) -> tuple[str, str, str, bool]:
     package_name = package_info["name"]
     current_version = package_info["version"]
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "--dry-run", "--quiet", f"{package_name}==latest"],
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "--dry-run",
+                "--quiet",
+                f"{package_name}==latest",
+            ],
             capture_output=True,
             text=True,
             timeout=30,
         )
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "index", "versions", package_name], capture_output=True, text=True, timeout=30
+            [sys.executable, "-m", "pip", "index", "versions", package_name],
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
@@ -63,11 +77,17 @@ def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, b
     return (package_name, current_version, current_version, False)
 
 
-def check_updates_parallel(packages: List[Dict[str, str]], max_workers: int = 8) -> List[Tuple[str, str, str]]:
+def check_updates_parallel(
+    packages: list[dict[str, str]], max_workers: int = 8
+) -> list[tuple[str, str, str]]:
     upgradable = []
-    print(f"Checking {len(packages)} packages for updates using {max_workers} workers...")
+    print(
+        f"Checking {len(packages)} packages for updates using {max_workers} workers..."
+    )
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_package = {executor.submit(check_package_update, pkg): pkg["name"] for pkg in packages}
+        future_to_package = {
+            executor.submit(check_package_update, pkg): pkg["name"] for pkg in packages
+        }
         completed = 0
         for future in as_completed(future_to_package):
             package_name = future_to_package[future]
@@ -77,32 +97,44 @@ def check_updates_parallel(packages: List[Dict[str, str]], max_workers: int = 8)
                 name, current_ver, latest_ver, has_update = result
                 if has_update:
                     upgradable.append((name, current_ver, latest_ver))
-                    print(f"[{completed}/{len(packages)}] {name}: {current_ver} -> {latest_ver} (UPDATE AVAILABLE)")
+                    print(
+                        f"[{completed}/{len(packages)}] {name}: {current_ver} -> {latest_ver} (UPDATE AVAILABLE)"
+                    )
                 else:
-                    print(f"[{completed}/{len(packages)}] {name}: {current_ver} (up-to-date)")
+                    print(
+                        f"[{completed}/{len(packages)}] {name}: {current_ver} (up-to-date)"
+                    )
             except Exception as e:
-                print(f"[{completed}/{len(packages)}] Error processing {package_name}: {e}")
+                print(
+                    f"[{completed}/{len(packages)}] Error processing {package_name}: {e}"
+                )
     return upgradable
 
 
-def save_upgradable_packages(upgradable: List[Tuple[str, str, str]], output_file: Path):
+def save_upgradable_packages(upgradable: list[tuple[str, str, str]], output_file: Path):
     try:
         with open(output_file, "w") as f:
             f.write("# Packages with available updates\n")
             f.write(f"# Generated on {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write("# Format: package_name current_version -> latest_version\n\n")
-            for name, current_ver, latest_ver in upgradable:
-                f.write(f"{name}=={current_ver}  # -> {latest_ver}\n")
+            f.writelines(
+                f"{name}=={current_ver}  # -> {latest_ver}\n"
+                for name, current_ver, latest_ver in upgradable
+            )
         print(f"\nResults saved to {output_file}")
         print(f"Found {len(upgradable)} packages with available updates")
-    except IOError as e:
+    except OSError as e:
         print(f"Error saving results to {output_file}: {e}")
 
 
-def find_site_packages() -> List[Path]:
+def find_site_packages() -> list[Path]:
     site_dirs = []
     result = subprocess.run(
-        [sys.executable, "-c", 'import site; print("\\n".join(site.getsitepackages()))'],
+        [
+            sys.executable,
+            "-c",
+            'import site; print("\\n".join(site.getsitepackages()))',
+        ],
         capture_output=True,
         text=True,
         check=True,

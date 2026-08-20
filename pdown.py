@@ -56,7 +56,10 @@ def download_package(url, filename, output_dir="."):
                     downloaded += len(chunk)
                     if total_size > 0:
                         percent = downloaded / total_size * 100
-                        print(f"\rProgress: {percent:.1f}% ({downloaded}/{total_size} bytes)", end="")
+                        print(
+                            f"\rProgress: {percent:.1f}% ({downloaded}/{total_size} bytes)",
+                            end="",
+                        )
         print(f"\n✓ Downloaded to: {output_path}")
         return output_path
     except requests.exceptions.RequestException as e:
@@ -69,8 +72,15 @@ def main():
         description="Download a Python package from PyPI.org (skips Python version compatibility check)"
     )
     parser.add_argument("package", help="Package name to download")
-    parser.add_argument("-v", "--version", help="Specific version to download (default: latest)")
-    parser.add_argument("-o", "--output", default=".", help="Output directory (default: current directory)")
+    parser.add_argument(
+        "-v", "--version", help="Specific version to download (default: latest)"
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=".",
+        help="Output directory (default: current directory)",
+    )
     args = parser.parse_args()
     try:
         print(f"Fetching {args.package} (version: {args.version or 'latest'})...")

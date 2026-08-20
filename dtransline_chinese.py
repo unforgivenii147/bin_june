@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Translate Chinese lines in files to English in-place using parallel processing.
-Optimized for Python 3.12.
-"""
 
 from __future__ import annotations
 
@@ -34,7 +30,9 @@ def is_chinese_text(text: str, threshold: float = 0.3) -> bool:
     return chinese_chars / len(clean_text) >= threshold
 
 
-def translate_line(text: str, translator: GoogleTranslator, max_retries: int = 3) -> str:
+def translate_line(
+    text: str, translator: GoogleTranslator, max_retries: int = 3
+) -> str:
     if not text.strip():
         return text
     for attempt in range(max_retries):
@@ -46,15 +44,31 @@ def translate_line(text: str, translator: GoogleTranslator, max_retries: int = 3
         except Exception as e:
             if attempt < max_retries - 1:
                 wait_time = (attempt + 1) * 1.5
-                logger.warning("  Retry %d/%d after %.1fs: %s", attempt + 1, max_retries, wait_time, e)
+                logger.warning(
+                    "  Retry %d/%d after %.1fs: %s",
+                    attempt + 1,
+                    max_retries,
+                    wait_time,
+                    e,
+                )
                 time.sleep(wait_time)
             else:
-                logger.error("  Translation failed after %d attempts: %s", max_retries, e)
+                logger.error(
+                    "  Translation failed after %d attempts: %s", max_retries, e
+                )
     return text
 
 
-def process_file(file_path: Path, dry_run: bool = False, threshold: float = 0.3) -> dict:
-    stats = {"file": str(file_path), "total_lines": 0, "chinese_lines": 0, "translated_lines": 0, "errors": 0}
+def process_file(
+    file_path: Path, dry_run: bool = False, threshold: float = 0.3
+) -> dict:
+    stats = {
+        "file": str(file_path),
+        "total_lines": 0,
+        "chinese_lines": 0,
+        "translated_lines": 0,
+        "errors": 0,
+    }
     prefix = "[DRY RUN] " if dry_run else ""
     logger.info("%sProcessing: %s", prefix, file_path)
     try:
@@ -77,7 +91,10 @@ def process_file(file_path: Path, dry_run: bool = False, threshold: float = 0.3)
                     new_lines.append(f"{leading_ws}{translated}{trailing_ws}")
                     stats["translated_lines"] += 1
                     if stats["translated_lines"] % 10 == 0:
-                        logger.info("  Progress: %d Chinese lines translated", stats["translated_lines"])
+                        logger.info(
+                            "  Progress: %d Chinese lines translated",
+                            stats["translated_lines"],
+                        )
             else:
                 new_lines.append(line)
         if not dry_run and found_chinese:
@@ -108,11 +125,19 @@ def main() -> None:
         help="Extensions to process",
     )
     parser.add_argument(
-        "--workers", "-w", type=int, default=mp.cpu_count(), help=f"Number of workers (default: {mp.cpu_count()})"
+        "--workers",
+        "-w",
+        type=int,
+        default=mp.cpu_count(),
+        help=f"Number of workers (default: {mp.cpu_count()})",
     )
-    parser.add_argument("--exclude", "-x", nargs="+", default=[], help="Paths to exclude")
+    parser.add_argument(
+        "--exclude", "-x", nargs="+", default=[], help="Paths to exclude"
+    )
     parser.add_argument("--dry-run", "-d", action="store_true", help="Detection only")
-    parser.add_argument("--threshold", "-t", type=float, default=0.3, help="Chinese character threshold")
+    parser.add_argument(
+        "--threshold", "-t", type=float, default=0.3, help="Chinese character threshold"
+    )
     args = parser.parse_args()
     exclude_paths = {Path(p).resolve() for p in args.exclude}
     files_to_process: list[Path] = []

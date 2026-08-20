@@ -9,7 +9,13 @@ from pathlib import Path
 
 
 def process_file(file_path: Path, auto_fix: bool = False) -> dict:
-    result = {"path": file_path, "found_count": 0, "fixed": False, "lines": [], "error": None}
+    result = {
+        "path": file_path,
+        "found_count": 0,
+        "fixed": False,
+        "lines": [],
+        "error": None,
+    }
     try:
         with file_path.open("rb") as f:
             tokens = list(tokenize.tokenize(f.readline))
@@ -54,7 +60,10 @@ def main():
         description="Recursively find and optionally replace 'is not' with '!=' in Python files."
     )
     parser.add_argument(
-        "-a", "--auto-fix", action="store_true", help="Automatically replace 'is not' with '!=' across files."
+        "-a",
+        "--auto-fix",
+        action="store_true",
+        help="Automatically replace 'is not' with '!=' across files.",
     )
     args = parser.parse_args()
     current_dir = Path(".")
@@ -68,7 +77,9 @@ def main():
     print(f"🔍 Found {len(py_files)} Python files.")
     print(f"⚡ Processing concurrently across {cpu_cores} parallel workers...")
     if args.auto_fix:
-        print("🛠️  Auto-fix mode active (-a). 'is not' operators will be converted to '!='.")
+        print(
+            "🛠️  Auto-fix mode active (-a). 'is not' operators will be converted to '!='."
+        )
     print("-" * 42)
     total_files_with_issues = 0
     total_replacements = 0
@@ -84,9 +95,11 @@ def main():
                 total_replacements += res["found_count"]
                 status = "[🔧 FIXED]" if res["fixed"] else "[⚠️  FOUND]"
                 lines_str = ", ".join(map(str, res["lines"]))
-                print(f"{status} {res['path']} -> Found {res['found_count']} time(s) on line(s): {lines_str}")
+                print(
+                    f"{status} {res['path']} -> Found {res['found_count']} time(s) on line(s): {lines_str}"
+                )
     print("-" * 42)
-    print(f"📊 Summary:")
+    print("📊 Summary:")
     print(f"   Files containing 'is not': {total_files_with_issues}")
     print(f"   Total instances found:     {total_replacements}")
 

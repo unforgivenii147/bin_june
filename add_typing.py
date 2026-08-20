@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Apply type annotations from .pyi stub files to source .py files using libcst.
-Automatically finds .pyi file in same directory and updates .py in-place.
-"""
 
 from __future__ import annotations
 
 import difflib
 import sys
 from pathlib import Path
-from typing import Dict, Optional
 
 import libcst as cst
 from dh import get_files, mpf3
@@ -18,19 +13,19 @@ from dh import get_files, mpf3
 class TypingCollector(cst.CSTVisitor):
     def __init__(self):
         self.stack: list[tuple[str, ...]] = []
-        self.annotations: Dict[
+        self.annotations: dict[
             tuple[str, ...],
-            tuple[cst.Parameters, Optional[cst.Annotation]],
+            tuple[cst.Parameters, cst.Annotation | None],
         ] = {}
 
-    def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+    def visit_ClassDef(self, node: cst.ClassDef) -> bool | None:
         self.stack.append(node.name.value)
         return True
 
     def leave_ClassDef(self, node: cst.ClassDef) -> None:
         self.stack.pop()
 
-    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+    def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
         self.stack.append(node.name.value)
         self.annotations[tuple(self.stack)] = (node.params, node.returns)
         return False
@@ -42,16 +37,16 @@ class TypingCollector(cst.CSTVisitor):
 class TypingTransformer(cst.CSTTransformer):
     def __init__(
         self,
-        annotations: Dict[
+        annotations: dict[
             tuple[str, ...],
-            tuple[cst.Parameters, Optional[cst.Annotation]],
+            tuple[cst.Parameters, cst.Annotation | None],
         ],
     ):
         self.stack: list[tuple[str, ...]] = []
         self.annotations = annotations
         self.applied = 0
 
-    def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+    def visit_ClassDef(self, node: cst.ClassDef) -> bool | None:
         self.stack.append(node.name.value)
         return True
 
@@ -63,7 +58,7 @@ class TypingTransformer(cst.CSTTransformer):
         self.stack.pop()
         return updated_node
 
-    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+    def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
         self.stack.append(node.name.value)
         return False
 

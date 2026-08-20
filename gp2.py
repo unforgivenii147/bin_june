@@ -59,7 +59,9 @@ def main() -> None:
     try:
         branch = repo.active_branch.name
         if old_url.startswith("https://github.com/"):
-            new_url = old_url.replace("https://github.com/", f"https://{GITHUB_USERNAME}:{token}@github.com/")
+            new_url = old_url.replace(
+                "https://github.com/", f"https://{GITHUB_USERNAME}:{token}@github.com/"
+            )
             origin.set_url(new_url)
             modified_url = True
         print(f"Pushing to origin/{branch}...")

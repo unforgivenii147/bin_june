@@ -34,7 +34,12 @@ def convert_one(src: str) -> tuple[str, int, bool, str]:
         src_size_before = src_path.stat().st_size
         dst_size_after = dst_xz.stat().st_size
         src_path.unlink()
-        return (src, dst_size_after - src_size_before, True, f"converted -> {dst_xz.name}, removed original")
+        return (
+            src,
+            dst_size_after - src_size_before,
+            True,
+            f"converted -> {dst_xz.name}, removed original",
+        )
     except Exception as e:
         try:
             if dst_xz.exists():
@@ -61,7 +66,9 @@ def main() -> None:
     delta = after - before
     ok_count = sum((1 for _, _, ok, _ in results if ok))
     fail_count = len(results) - ok_count
-    print(f"Found: {len(tar_zst_files)}; Converted OK: {ok_count}; Failed/Skipped: {fail_count}")
+    print(
+        f"Found: {len(tar_zst_files)}; Converted OK: {ok_count}; Failed/Skipped: {fail_count}"
+    )
     for src, _, ok, msg in sorted(results, key=lambda x: x[0]):
         status = "OK" if ok else "FAIL"
         print(f"[{status}] {Path(src).name}: {msg}")

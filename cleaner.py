@@ -8,7 +8,9 @@ import sys
 def clean_terminal_transcript(filepath):
     with open(filepath, encoding="utf-8", errors="replace") as f:
         content = f.read()
-    ansi_escape = re.compile(r"\x1b(\[[0-9;]*[mABCDEFGHJKSTfhilmnprsu]|\][^\x07]*\x07|[()][AB012])")
+    ansi_escape = re.compile(
+        r"\x1b(\[[0-9;]*[mABCDEFGHJKSTfhilmnprsu]|\][^\x07]*\x07|[()][AB012])"
+    )
     content = ansi_escape.sub("", content)
     content = content.replace("\r\n", "\n")
     content = content.replace("\r", "\n")

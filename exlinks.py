@@ -11,10 +11,24 @@ import chardet
 from dh import is_binary
 from loguru import logger
 
-TARGET_EXTENSIONS = {".tar.gz", ".pdf", ".zip", ".css", ".js", ".tar.xz", ".7z", ".whl", ".html"}
+TARGET_EXTENSIONS = {
+    ".tar.gz",
+    ".pdf",
+    ".zip",
+    ".css",
+    ".js",
+    ".tar.xz",
+    ".7z",
+    ".whl",
+    ".html",
+}
 COMPRESSED_ARCHIVES = {".tar.xz", ".tar.gz", ".tar.zst", ".7z", ".br", ".zip", ".whl"}
-GITHUB_REPO_REGEX = re.compile(r"https?://(?:www\.)?github\.com/[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]+")
-URL_REGEX = re.compile(r"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?")
+GITHUB_REPO_REGEX = re.compile(
+    r"https?://(?:www\.)?github\.com/[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]+"
+)
+URL_REGEX = re.compile(
+    r"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
+)
 MAX_WORKERS = 4
 
 
@@ -45,10 +59,14 @@ def read_file_with_encodings(
         if detected_encoding:
             try:
                 content = raw_data.decode(detected_encoding)
-                logger.debug(f"Successfully read {file_path} with detected encoding {detected_encoding}")
+                logger.debug(
+                    f"Successfully read {file_path} with detected encoding {detected_encoding}"
+                )
                 return content, detected_encoding
             except Exception as e:
-                logger.warning(f"Error decoding {file_path} with detected encoding {detected_encoding}: {e}")
+                logger.warning(
+                    f"Error decoding {file_path} with detected encoding {detected_encoding}: {e}"
+                )
     except Exception as e:
         logger.error(f"Failed to read or detect encoding for {file_path}: {e}")
     return None, None
@@ -72,7 +90,14 @@ def process_file(file_path_str: str):
                     logger.debug(f"Extracted from PDF: {file_path}")
                 else:
                     logger.warning(f"Could not decode PDF content for {file_path}")
-            elif file_extension in {".tar.gz", ".tar.xz", ".tar.zst", ".zip", ".7z", ".whl"}:
+            elif file_extension in {
+                ".tar.gz",
+                ".tar.xz",
+                ".tar.zst",
+                ".zip",
+                ".7z",
+                ".whl",
+            }:
                 try:
                     if file_extension in {".tar.gz", ".tar.xz"}:
                         with tarfile.open(file_path, "r:*") as tar:
@@ -82,17 +107,26 @@ def process_file(file_path_str: str):
                                         f = tar.extractfile(member)
                                         if f:
                                             member_content_bytes = f.read()
-                                            result = chardet.detect(member_content_bytes)
+                                            result = chardet.detect(
+                                                member_content_bytes
+                                            )
                                             enc = result["encoding"] or "utf-8"
-                                            member_content_str = member_content_bytes.decode(enc, errors="ignore")
+                                            member_content_str = (
+                                                member_content_bytes.decode(
+                                                    enc, errors="ignore"
+                                                )
+                                            )
                                             if member_content_str:
                                                 urls, gh_urls = extract_links_from_text(
-                                                    member_content_str, f"{file_path}/{member.name}"
+                                                    member_content_str,
+                                                    f"{file_path}/{member.name}",
                                                 )
                                                 local_urls.extend(urls)
                                                 github_urls.extend(gh_urls)
                                     except Exception as e:
-                                        logger.warning(f"Error processing member {member.name} in {file_path}: {e}")
+                                        logger.warning(
+                                            f"Error processing member {member.name} in {file_path}: {e}"
+                                        )
                         logger.debug(f"Extracted from Tar archive: {file_path}")
                     elif file_extension in {".zip", ".whl"}:
                         with zipfile.ZipFile(file_path, "r") as zip_ref:
@@ -102,7 +136,11 @@ def process_file(file_path_str: str):
                                         member_content_bytes = f.read()
                                         result = chardet.detect(member_content_bytes)
                                         enc = result["encoding"] or "utf-8"
-                                        member_content_str = member_content_bytes.decode(enc, errors="ignore")
+                                        member_content_str = (
+                                            member_content_bytes.decode(
+                                                enc, errors="ignore"
+                                            )
+                                        )
                                         if member_content_str:
                                             urls, gh_urls = extract_links_from_text(
                                                 member_content_str,
@@ -118,13 +156,19 @@ def process_file(file_path_str: str):
                         if is_binary(file_path):
                             content, _ = read_file_with_encodings(file_path)
                             if content:
-                                urls, gh_urls = extract_links_from_text(content, file_path)
+                                urls, gh_urls = extract_links_from_text(
+                                    content, file_path
+                                )
                                 local_urls.extend(urls)
                                 github_urls.extend(gh_urls)
                         else:
-                            logger.warning(f"File {file_path} identified as text, but couldn't extract from 7z.")
+                            logger.warning(
+                                f"File {file_path} identified as text, but couldn't extract from 7z."
+                            )
                 except Exception as e:
-                    logger.error(f"Unexpected error processing archive {file_path}: {e}")
+                    logger.error(
+                        f"Unexpected error processing archive {file_path}: {e}"
+                    )
             elif file_extension in {".css", ".js", ".html"}:
                 content, _ = read_file_with_encodings(file_path)
                 if content:
@@ -133,7 +177,9 @@ def process_file(file_path_str: str):
                     github_urls.extend(gh_urls)
                     logger.debug(f"Extracted from text file: {file_path}")
                 else:
-                    logger.warning(f"Could not read text file {file_path} with any encoding.")
+                    logger.warning(
+                        f"Could not read text file {file_path} with any encoding."
+                    )
         elif file_extension not in COMPRESSED_ARCHIVES:
             content, _encoding = read_file_with_encodings(file_path)
             if content:
@@ -151,7 +197,9 @@ def process_file(file_path_str: str):
                 urls, gh_urls = extract_links_from_text(content, file_path)
                 local_urls.extend(urls)
                 github_urls.extend(gh_urls)
-                logger.debug(f"Extracted potential URLs from binary-like file: {file_path}")
+                logger.debug(
+                    f"Extracted potential URLs from binary-like file: {file_path}"
+                )
     except FileNotFoundError:
         logger.error(f"File not found: {file_path}")
     except Exception as e:
@@ -173,7 +221,10 @@ if __name__ == "__main__":
     files_to_process = list(find_files_recursively(base_dir))
     print(f"Found {len(files_to_process)} files to process.")
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(process_file, file_path): file_path for file_path in files_to_process}
+        futures = {
+            executor.submit(process_file, file_path): file_path
+            for file_path in files_to_process
+        }
         for future in futures:
             file_path = futures[future]
             try:

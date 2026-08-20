@@ -11,7 +11,6 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Union
 
 from colorama import Fore, Style, init
 
@@ -75,8 +74,12 @@ class HTMLMinifier:
     @staticmethod
     def _check_dependencies() -> None:
         if not shutil.which("html-minifier-terser"):
-            print(f"{Fore.RED}Error: html-minifier-terser is not installed.{Style.RESET_ALL}")
-            print(f"{Fore.YELLOW}Install it with: npm install -g html-minifier-terser{Style.RESET_ALL}")
+            print(
+                f"{Fore.RED}Error: html-minifier-terser is not installed.{Style.RESET_ALL}"
+            )
+            print(
+                f"{Fore.YELLOW}Install it with: npm install -g html-minifier-terser{Style.RESET_ALL}"
+            )
             sys.exit(1)
 
     @staticmethod
@@ -93,7 +96,8 @@ class HTMLMinifier:
         import re
 
         content = re.sub(
-            r"(</(?:span|a|strong|em|b|i|code|label)>)" r"(<(?:span|a|strong|em|b|i|code|label))",
+            r"(</(?:span|a|strong|em|b|i|code|label)>)"
+            r"(<(?:span|a|strong|em|b|i|code|label))",
             r"\1 \2",
             content,
         )
@@ -107,13 +111,17 @@ class HTMLMinifier:
         config_file = None
         try:
             original_size = file_path.stat().st_size
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".json", delete=False, encoding="utf-8"
+            ) as f:
                 json.dump(self.config, f)
                 config_file = Path(f.name)
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
             cmd = self._build_cli_args(config_file)
-            process = subprocess.run(cmd, input=content, capture_output=True, text=True, encoding="utf-8")
+            process = subprocess.run(
+                cmd, input=content, capture_output=True, text=True, encoding="utf-8"
+            )
             if process.returncode != 0:
                 return MinifyStats(
                     path=file_path,
@@ -126,43 +134,59 @@ class HTMLMinifier:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(minified_content)
             minified_size = file_path.stat().st_size
-            return MinifyStats(path=file_path, original_size=original_size, minified_size=minified_size, success=True)
+            return MinifyStats(
+                path=file_path,
+                original_size=original_size,
+                minified_size=minified_size,
+                success=True,
+            )
         except Exception as e:
-            return MinifyStats(path=file_path, original_size=0, minified_size=0, success=False, error=str(e))
+            return MinifyStats(
+                path=file_path,
+                original_size=0,
+                minified_size=0,
+                success=False,
+                error=str(e),
+            )
         finally:
             if config_file and config_file.exists():
                 with contextlib.suppress(Exception):
                     config_file.unlink()
 
     @staticmethod
-    def find_html_files(paths: List[Path]) -> List[Path]:
-        """Find HTML files from a list of paths (files or directories)."""
+    def find_html_files(paths: list[Path]) -> list[Path]:
         html_files = []
         for path in paths:
             if not path.exists():
-                print(f"{Fore.YELLOW}Warning: Path '{path}' does not exist. Skipping.{Style.RESET_ALL}")
+                print(
+                    f"{Fore.YELLOW}Warning: Path '{path}' does not exist. Skipping.{Style.RESET_ALL}"
+                )
                 continue
             if path.is_file():
-                # Check if it's an HTML file
                 if path.suffix.lower() in [".html", ".htm"]:
                     html_files.append(path)
                 else:
-                    print(f"{Fore.YELLOW}Warning: '{path}' is not an HTML file. Skipping.{Style.RESET_ALL}")
+                    print(
+                        f"{Fore.YELLOW}Warning: '{path}' is not an HTML file. Skipping.{Style.RESET_ALL}"
+                    )
             elif path.is_dir():
                 html_files.extend(path.rglob("*.html"))
                 html_files.extend(path.rglob("*.htm"))
             else:
-                print(f"{Fore.YELLOW}Warning: '{path}' is neither a file nor a directory. Skipping.{Style.RESET_ALL}")
+                print(
+                    f"{Fore.YELLOW}Warning: '{path}' is neither a file nor a directory. Skipping.{Style.RESET_ALL}"
+                )
         return sorted(set(html_files))
 
-    def minify_paths(self, paths: List[Path], max_workers: int = 4) -> None:
-        """Minify HTML files from a list of paths (files or directories)."""
+    def minify_paths(self, paths: list[Path], max_workers: int = 4) -> None:
         html_files = self.find_html_files(paths)
         if not html_files:
             print(f"{Fore.YELLOW}No HTML files found to minify.{Style.RESET_ALL}")
             return
         total_files = len(html_files)
-        print(f"\n{Fore.CYAN}Found {total_files} HTML file(s) to minify{Style.RESET_ALL}")
+        print(
+            f"\n{Fore.CYAN}Found {total_files} HTML file(s) to minify{Style.RESET_ALL}"
+        )
         print(f"{Fore.CYAN}{'=' * 42}{Style.RESET_ALL}\n")
         stats_list: list[MinifyStats] = []
         successful = 0
@@ -170,7 +194,10 @@ class HTMLMinifier:
         total_original = 0
         total_minified = 0
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_file = {executor.submit(self.minify_file, file_path): file_path for file_path in html_files}
+            future_to_file = {
+                executor.submit(self.minify_file, file_path): file_path
+                for file_path in html_files
+            }
             for future in as_completed(future_to_file):
                 stats = future.result()
                 stats_list.append(stats)
@@ -182,10 +209,11 @@ class HTMLMinifier:
                 else:
                     failed += 1
                     self._print_error(stats)
-        self._print_summary(total_files, successful, failed, total_original, total_minified)
+        self._print_summary(
+            total_files, successful, failed, total_original, total_minified
+        )
 
     def minify_directory(self, directories: list[Path], max_workers: int = 4) -> None:
-        """Backward compatibility method - delegates to minify_paths."""
         self.minify_paths(directories, max_workers)
 
     def _print_file_stats(self, stats: MinifyStats) -> None:
@@ -214,13 +242,22 @@ class HTMLMinifier:
             rel_path = stats.path.relative_to(Path.cwd())
         except ValueError:
             rel_path = stats.path
-        print(f"{Fore.RED}✗ {rel_path}{Style.RESET_ALL}\n  {Fore.RED}Error: {stats.error}{Style.RESET_ALL}")
+        print(
+            f"{Fore.RED}✗ {rel_path}{Style.RESET_ALL}\n  {Fore.RED}Error: {stats.error}{Style.RESET_ALL}"
+        )
 
     def _print_summary(
-        self, total: int, successful: int, failed: int, total_original: int, total_minified: int
+        self,
+        total: int,
+        successful: int,
+        failed: int,
+        total_original: int,
+        total_minified: int,
     ) -> None:
         total_saved = total_original - total_minified
-        overall_ratio = (total_saved / total_original * 100) if total_original > 0 else 0
+        overall_ratio = (
+            (total_saved / total_original * 100) if total_original > 0 else 0
+        )
         original_mb = total_original / (1024 * 1024)
         minified_mb = total_minified / (1024 * 1024)
         saved_mb = total_saved / (1024 * 1024)
@@ -233,7 +270,9 @@ class HTMLMinifier:
             print(f"{Fore.RED}✗ Failed:         {failed}{Style.RESET_ALL}")
         print(f"{Fore.WHITE}Original size:    {original_mb:.2f} MB{Style.RESET_ALL}")
         print(f"{Fore.WHITE}Minified size:    {minified_mb:.2f} MB{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}Total saved:      {saved_mb:.2f} MB ({overall_ratio:.1f}%){Style.RESET_ALL}")
+        print(
+            f"{Fore.GREEN}Total saved:      {saved_mb:.2f} MB ({overall_ratio:.1f}%){Style.RESET_ALL}"
+        )
         print(f"{Fore.CYAN}{'=' * 42}{Style.RESET_ALL}\n")
 
 
@@ -251,16 +290,26 @@ Examples:
         """,
     )
     parser.add_argument(
-        "paths", nargs="*", default=["."], help="Files or directories to process (default: current directory)"
+        "paths",
+        nargs="*",
+        default=["."],
+        help="Files or directories to process (default: current directory)",
     )
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
-    parser.add_argument("--no-color", action="store_true", help="Disable colored output")
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4)",
+    )
+    parser.add_argument(
+        "--no-color", action="store_true", help="Disable colored output"
+    )
     args = parser.parse_args()
 
     if args.no_color:
         init(strip=True, autostop=False)
 
-    # Convert all paths to Path objects
     paths = [Path(p).resolve() for p in args.paths]
 
     minifier = HTMLMinifier()

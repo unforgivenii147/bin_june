@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Convert regex strings to raw strings safely."""
 
 import argparse
 import ast
@@ -18,17 +17,28 @@ class RegexRawConverter(ast.NodeTransformer):
     def visit_Call(self, node):
         if (
             isinstance(node.func, ast.Attribute)
-            and node.func.attr in ("compile", "match", "search", "sub", "findall", "split", "fullmatch")
+            and node.func.attr
+            in ("compile", "match", "search", "sub", "findall", "split", "fullmatch")
             and node.args
             and isinstance(node.args[0], ast.Constant)
         ):
             const = node.args[0]
-            if isinstance(const.value, str) and "\\" in const.value and not const.value.startswith("\\x"):
+            if (
+                isinstance(const.value, str)
+                and "\\" in const.value
+                and not const.value.startswith("\\x")
+            ):
                 if const.lineno <= len(self.source_lines):
                     line = self.source_lines[const.lineno - 1]
                     if "'" in line or '"' in line:
                         self.modified = True
-                        self.changes.append({"line": const.lineno, "col": const.col_offset, "value": const.value})
+                        self.changes.append(
+                            {
+                                "line": const.lineno,
+                                "col": const.col_offset,
+                                "value": const.value,
+                            }
+                        )
         return self.generic_visit(node)
 
 
@@ -71,7 +81,14 @@ def process_file(file_path: Path, autofix: bool = False) -> dict:
             else:
                 orig_lines = original.splitlines(keepends=True)
                 conv_lines = converted.splitlines(keepends=True)
-                diff = list(unified_diff(orig_lines, conv_lines, fromfile=str(file_path), tofile=str(file_path)))
+                diff = list(
+                    unified_diff(
+                        orig_lines,
+                        conv_lines,
+                        fromfile=str(file_path),
+                        tofile=str(file_path),
+                    )
+                )
                 return {"status": "diff", "path": file_path, "diff": diff}
         return {"status": "unchanged", "path": file_path}
     except (SyntaxError, UnicodeDecodeError) as e:
@@ -82,7 +99,11 @@ def main():
     parser = argparse.ArgumentParser(description="Convert regex strings to raw strings")
     parser.add_argument("-a", "--autofix", action="store_true", help="Apply changes")
     args = parser.parse_args()
-    py_files = [f for f in Path(".").rglob("*.py") if f.is_file() and f.name != Path(__file__).name]
+    py_files = [
+        f
+        for f in Path(".").rglob("*.py")
+        if f.is_file() and f.name != Path(__file__).name
+    ]
     results = {"fixed": 0, "diff": 0, "unchanged": 0, "error": 0}
     with ThreadPoolExecutor(max_workers=4) as executor:
         tasks = [executor.submit(process_file, f, args.autofix) for f in py_files]

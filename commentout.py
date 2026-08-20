@@ -57,7 +57,9 @@ def main():
         print("Error: Line numbers must be integers.")
         sys.exit(1)
     with open(file_path, "r", encoding="utf-8", errors="ignore") as infile:
-        with NamedTemporaryFile("w", delete=False, dir=file_path.parent, encoding="utf-8") as temp_file:
+        with NamedTemporaryFile(
+            "w", delete=False, dir=file_path.parent, encoding="utf-8"
+        ) as temp_file:
             temp_path = Path(temp_file.name)
             current_line_idx = 1
             chunk_size = 10000
@@ -72,11 +74,17 @@ def main():
                     target_end = end_line if end_line else float("inf")
                     if chunk_start <= target_end and chunk_end >= start_line:
                         prefix_count = max(0, start_line - chunk_start)
-                        suffix_start = max(0, target_end - chunk_start + 1) if end_line else len(lines)
+                        suffix_start = (
+                            max(0, target_end - chunk_start + 1)
+                            if end_line
+                            else len(lines)
+                        )
                         prefix = lines[:prefix_count]
                         target_block = lines[prefix_count:suffix_start]
                         suffix = lines[suffix_start:]
-                        future = executor.submit(process_chunk, target_block, comment_char)
+                        future = executor.submit(
+                            process_chunk, target_block, comment_char
+                        )
                         temp_file.writelines(prefix)
                         temp_file.writelines(future.result())
                         temp_file.writelines(suffix)

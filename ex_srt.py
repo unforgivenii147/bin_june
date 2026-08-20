@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Extract subtitles using ffmpy."""
 
 from __future__ import annotations
 
@@ -38,7 +37,9 @@ def get_subtitle_streams(input_file):
 
 def extract_subtitle(input_file, stream_index, output_file):
     ff = ffmpy.FFmpeg(
-        inputs={input_file: None}, outputs={output_file: f"-map 0:s:{stream_index}"}, global_options=["-y"]
+        inputs={input_file: None},
+        outputs={output_file: f"-map 0:s:{stream_index}"},
+        global_options=["-y"],
     )
     try:
         ff.run(stdout=False, stderr=False)

@@ -38,6 +38,8 @@ def get_repo_size(input_str: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python get-repo-size <user/repo> or <https://github.com/user/repo>")
+        print(
+            "Usage: python get-repo-size <user/repo> or <https://github.com/user/repo>"
+        )
         sys.exit(1)
     get_repo_size(sys.argv[1])

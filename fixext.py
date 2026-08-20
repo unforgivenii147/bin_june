@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-File extension mismatch detector with auto-fix capability.
-"""
 
 import argparse
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional, Tuple
 
 from dh import MIME2EXT, SHEBANG_MAP
 from loguru import logger
@@ -18,10 +14,20 @@ logger.add(
     sys.stderr,
     format="<level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>",
 )
-PROTECTED_EXTENSIONS = {".css", ".js", ".min.js", ".min.css", ".md", ".json", ".yaml", ".yml", ".xml"}
+PROTECTED_EXTENSIONS = {
+    ".css",
+    ".js",
+    ".min.js",
+    ".min.css",
+    ".md",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".xml",
+}
 
 
-def detect_with_pure_magic(file_path: Path) -> Optional[str]:
+def detect_with_pure_magic(file_path: Path) -> str | None:
     try:
         import magic
 
@@ -33,7 +39,7 @@ def detect_with_pure_magic(file_path: Path) -> Optional[str]:
         return None
 
 
-def detect_with_python_magic(file_path: Path) -> Optional[str]:
+def detect_with_python_magic(file_path: Path) -> str | None:
     try:
         import magic
 
@@ -44,7 +50,7 @@ def detect_with_python_magic(file_path: Path) -> Optional[str]:
         return None
 
 
-def detect_with_filetype(file_path: Path) -> Optional[str]:
+def detect_with_filetype(file_path: Path) -> str | None:
     try:
         import filetype
 
@@ -57,7 +63,7 @@ def detect_with_filetype(file_path: Path) -> Optional[str]:
         return None
 
 
-def detect_with_file_command(file_path: Path) -> Optional[str]:
+def detect_with_file_command(file_path: Path) -> str | None:
     try:
         result = subprocess.run(
             ["file", "--brief", "--mime-type", str(file_path)],
@@ -74,14 +80,14 @@ def detect_with_file_command(file_path: Path) -> Optional[str]:
         return None
 
 
-def _mime_to_ext(mime_type: str) -> Optional[str]:
+def _mime_to_ext(mime_type: str) -> str | None:
     if mime_type in MIME2EXT:
         exts = MIME2EXT[mime_type]
         return exts[0] if isinstance(exts, list) else exts
     return None
 
 
-def detect_shebang_ext(file_path: Path) -> Optional[str]:
+def detect_shebang_ext(file_path: Path) -> str | None:
     try:
         with open(file_path, "rb") as f:
             first_line = f.readline()
@@ -96,7 +102,7 @@ def detect_shebang_ext(file_path: Path) -> Optional[str]:
         return None
 
 
-def detect_extension(file_path: Path) -> Optional[str]:
+def detect_extension(file_path: Path) -> str | None:
     detectors = [
         detect_with_pure_magic,
         detect_with_python_magic,
@@ -110,7 +116,9 @@ def detect_extension(file_path: Path) -> Optional[str]:
     return None
 
 
-def check_file(file_path: Path, auto_fix: bool = False) -> Tuple[Path, bool, Optional[str], Optional[str]]:
+def check_file(
+    file_path: Path, auto_fix: bool = False
+) -> tuple[Path, bool, str | None, str | None]:
     if not file_path.is_file():
         return file_path, False, None, None
     current_ext = file_path.suffix.lower()
@@ -121,13 +129,17 @@ def check_file(file_path: Path, auto_fix: bool = False) -> Tuple[Path, bool, Opt
                 new_name = file_path.with_suffix(detected_ext)
                 try:
                     file_path.rename(new_name)
-                    logger.info(f"Renamed: {file_path.name} → {new_name.name} (shebang-based)")
+                    logger.info(
+                        f"Renamed: {file_path.name} → {new_name.name} (shebang-based)"
+                    )
                     return new_name, True, None, detected_ext
                 except Exception as e:
                     logger.error(f"Failed to rename {file_path.name}: {e}")
                     return file_path, False, None, detected_ext
             else:
-                logger.warning(f"No extension found; shebang suggests {detected_ext}: {file_path.name}")
+                logger.warning(
+                    f"No extension found; shebang suggests {detected_ext}: {file_path.name}"
+                )
                 return file_path, True, None, detected_ext
         return file_path, False, None, None
     detected_ext = detect_extension(file_path)
@@ -142,7 +154,9 @@ def check_file(file_path: Path, auto_fix: bool = False) -> Tuple[Path, bool, Opt
         new_name = file_path.with_suffix(detected_ext)
         try:
             file_path.rename(new_name)
-            logger.info(f"Renamed: {file_path.name} → {new_name.name} ({current_ext} → {detected_ext})")
+            logger.info(
+                f"Renamed: {file_path.name} → {new_name.name} ({current_ext} → {detected_ext})"
+            )
             return new_name, True, current_ext, detected_ext
         except Exception as e:
             logger.error(f"Failed to rename {file_path.name}: {e}")
@@ -153,12 +167,29 @@ def check_file(file_path: Path, auto_fix: bool = False) -> Tuple[Path, bool, Opt
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Detect and fix file extension mismatches")
-    parser.add_argument("-a", "--auto-fix", action="store_true", help="Automatically fix extension mismatches")
-    parser.add_argument(
-        "-d", "--directory", type=Path, default=Path.cwd(), help="Directory to scan (default: current directory)"
+    parser = argparse.ArgumentParser(
+        description="Detect and fix file extension mismatches"
     )
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
+    parser.add_argument(
+        "-a",
+        "--auto-fix",
+        action="store_true",
+        help="Automatically fix extension mismatches",
+    )
+    parser.add_argument(
+        "-d",
+        "--directory",
+        type=Path,
+        default=Path.cwd(),
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4)",
+    )
     args = parser.parse_args()
     logger.info(f"Scanning: {args.directory}")
     if args.auto_fix:
@@ -168,7 +199,10 @@ def main():
     mismatches = 0
     fixed = 0
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        futures = {executor.submit(check_file, file_path, args.auto_fix): file_path for file_path in files}
+        futures = {
+            executor.submit(check_file, file_path, args.auto_fix): file_path
+            for file_path in files
+        }
         for future in as_completed(futures):
             try:
                 file_path, is_mismatch, old_ext, new_ext = future.result()

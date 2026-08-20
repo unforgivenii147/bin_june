@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Universal compression utility with automatic best-compressor selection.
-Compresses files/directories using multiple algorithms and retains
-only the best result based on compression ratio.
-"""
 
 from __future__ import annotations
 
@@ -35,18 +30,25 @@ REPORT_WIDTH: Final[int] = 70
 COMPRESSORS: Final[dict[str, tuple[CompressorFunc, str]]] = {
     "brotli": (lambda d: brotli.compress(d, quality=BROTLI_QUALITY_MAX), ".br"),
     "zstd": (lambda d: zstd.ZstdCompressor(level=ZSTD_LEVEL_MAX).compress(d), ".zst"),
-    "xz": (lambda d: lzma.compress(d, preset=COMPRESSION_LEVEL_MAX, format=lzma.FORMAT_XZ), ".xz"),
+    "xz": (
+        lambda d: lzma.compress(d, preset=COMPRESSION_LEVEL_MAX, format=lzma.FORMAT_XZ),
+        ".xz",
+    ),
     "bz2": (lambda d: bz2.compress(d, compresslevel=COMPRESSION_LEVEL_MAX), ".bz2"),
     "gzip": (lambda d: gzip.compress(d, compresslevel=COMPRESSION_LEVEL_MAX), ".gz"),
     "lz4": (
         lambda d: lz4.frame.compress(
             d,
-            compression_context=lz4.frame.create_compression_context(lz4.frame.COMPRESSIONLEVEL_MAX),
+            compression_context=lz4.frame.create_compression_context(
+                lz4.frame.COMPRESSIONLEVEL_MAX
+            ),
         ),
         ".lz4",
     ),
     "blosc2": (
-        lambda d: blosc2.compress(d, codec=blosc2.Codec.zstd, clevel=COMPRESSION_LEVEL_MAX),
+        lambda d: blosc2.compress(
+            d, codec=blosc2.Codec.zstd, clevel=COMPRESSION_LEVEL_MAX
+        ),
         ".blosc2",
     ),
 }
@@ -73,7 +75,9 @@ class CompressionResult:
 class CompressionManager:
     __slots__ = "output_dir", "temp_dir"
 
-    def __init__(self, output_dir: str | Path = ".", *, keep_temp: bool = False) -> None:
+    def __init__(
+        self, output_dir: str | Path = ".", *, keep_temp: bool = False
+    ) -> None:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.temp_dir = tempfile.mkdtemp(prefix="compress_")
@@ -104,7 +108,12 @@ class CompressionManager:
         raise ValueError(f"Target is neither file nor directory: {target_path}")
 
     def compress_single(
-        self, name: str, compress_func: CompressorFunc, extension: str, data: bytes, base_name: str
+        self,
+        name: str,
+        compress_func: CompressorFunc,
+        extension: str,
+        data: bytes,
+        base_name: str,
     ) -> CompressionResult | None:
         output_path = self.output_dir / f"{base_name}{extension}"
         try:
@@ -163,7 +172,9 @@ class CompressionManager:
         print("COMPRESSION PROGRESS:")
         print("-" * REPORT_WIDTH)
         for name, (compress_func, extension) in COMPRESSORS.items():
-            result = self.compress_single(name, compress_func, extension, data, base_name)
+            result = self.compress_single(
+                name, compress_func, extension, data, base_name
+            )
             if result:
                 results.append(result)
                 print(
@@ -178,7 +189,9 @@ class CompressionManager:
         return sorted(results, key=lambda x: x.ratio)
 
     @staticmethod
-    def cleanup_results(results: list[CompressionResult], keep_best: bool = True) -> CompressionResult | None:
+    def cleanup_results(
+        results: list[CompressionResult], keep_best: bool = True
+    ) -> CompressionResult | None:
         if not results:
             return None
         best = results[0]
@@ -219,7 +232,9 @@ def print_report(results: list[CompressionResult], original_size: int) -> None:
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python script.py <file_or_directory> [output_directory]")
-        print("\nCompresses the target using multiple algorithms and keeps the best result.")
+        print(
+            "\nCompresses the target using multiple algorithms and keeps the best result."
+        )
         sys.exit(1)
     target = sys.argv[1]
     output_dir = sys.argv[2] if len(sys.argv) > 2 else "."

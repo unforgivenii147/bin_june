@@ -26,7 +26,14 @@ def process_file(path) -> bool:
     if len(path.read_text().splitlines()) == 1:
         return False
     print(f"{path.name}", end=" ")
-    cmd = ["cleancss", "-O2", "all:off;removeDuplicateRules:on", str(path), "-o", str(path)]
+    cmd = [
+        "cleancss",
+        "-O2",
+        "all:off;removeDuplicateRules:on",
+        str(path),
+        "-o",
+        str(path),
+    ]
     res, _, _err = runcmd(cmd, show_output=True)
     if not res:
         after = gsz(path)
@@ -45,7 +52,9 @@ def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
     before = gsz(cwd)
-    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".css", ".min.css"])
+    files = (
+        [Path(p) for p in args] if args else get_files(cwd, ext=[".css", ".min.css"])
+    )
     _ = mpf3(process_file, files)
     diff_size = before - gsz(cwd)
     cprint(f"space freed : {fsz(diff_size)}", "green")

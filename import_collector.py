@@ -99,12 +99,18 @@ def main() -> None:
     pip_script = cwd / "install_deps.sh"
     all_imports = set()
     local_names = {p.stem for p in cwd.glob("*.py")}
-    local_names.update({p.name for p in cwd.iterdir() if p.is_dir() and (p / "__init__.py").exists()})
+    local_names.update(
+        {p.name for p in cwd.iterdir() if p.is_dir() and (p / "__init__.py").exists()}
+    )
     std_libs = getattr(sys, "stdlib_module_names", set())
     for path in cwd.rglob("*"):
         if is_python_file(path) and path.name not in {"importz.txt", "install_deps.sh"}:
             all_imports.update(get_imports_from_file(path))
-    third_party = [imp for imp in all_imports if imp not in std_libs and imp not in local_names and imp != "__future__"]
+    third_party = [
+        imp
+        for imp in all_imports
+        if imp not in std_libs and imp not in local_names and imp != "__future__"
+    ]
     missing_for_pip = []
     already_installed = []
     for imp in sorted(third_party):

@@ -60,7 +60,11 @@ class EntityExtractor(ast.NodeVisitor):
         self.scope_stack.pop()
 
     def visit_Assign(self, node: ast.Assign) -> None:
-        if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        if (
+            not self.scope_stack
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+        ):
             target_name = node.targets[0].id
             if re.match(r"^[A-Z_][A-Z0-9_]*$", target_name):
                 self._extract_and_save(node, "constant", target_name)
@@ -105,14 +109,22 @@ class EntityExtractor(ast.NodeVisitor):
         )
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
+        entity_type = (
+            "method"
+            if self.scope_stack and self.scope_stack[-1].startswith("class_")
+            else "function"
+        )
         self._extract_and_save(node, entity_type, node.name)
         self.scope_stack.append(f"func_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
+        entity_type = (
+            "method"
+            if self.scope_stack and self.scope_stack[-1].startswith("class_")
+            else "function"
+        )
         self._extract_and_save(node, entity_type, node.name)
         self.scope_stack.append(f"async_func_{node.name}")
         self.generic_visit(node)
@@ -125,7 +137,11 @@ class EntityExtractor(ast.NodeVisitor):
         self.scope_stack.pop()
 
     def visit_Assign(self, node: ast.Assign) -> None:
-        if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        if (
+            not self.scope_stack
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+        ):
             target_name = node.targets[0].id
             if re.match(r"^[A-Z_][A-Z0-9_]*$", target_name):
                 self._extract_and_save(node, "constant", target_name)
@@ -198,7 +214,11 @@ def is_python_file_no_extension(path: Path) -> bool:
             first_lines = "".join(f.readlines(1024))
             return bool(
                 re.match(r"#!\s*/.*python", first_lines)
-                or ("def " in first_lines or "class " in first_lines or "import " in first_lines)
+                or (
+                    "def " in first_lines
+                    or "class " in first_lines
+                    or "import " in first_lines
+                )
             )
     except:
         return False
@@ -216,8 +236,15 @@ def process_single_file(path: Path) -> list[dict[str, Any]]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract Python entities and save to database.")
-    parser.add_argument("-db", "--database", action="store_true", help="Save extracted entities to the database")
+    parser = argparse.ArgumentParser(
+        description="Extract Python entities and save to database."
+    )
+    parser.add_argument(
+        "-db",
+        "--database",
+        action="store_true",
+        help="Save extracted entities to the database",
+    )
     args = parser.parse_args()
     print(f"Starting analysis in {Path.cwd()}...")
     create_database()
@@ -228,7 +255,9 @@ def main() -> None:
             path = Path(root) / name
             if path.is_relative_to(OUTPUT_DIR):
                 continue
-            if path.suffix in ALLOWED_PYTHON_EXTENSIONS or is_python_file_no_extension(path):
+            if path.suffix in ALLOWED_PYTHON_EXTENSIONS or is_python_file_no_extension(
+                path
+            ):
                 files_to_process.append(path)
     if not files_to_process:
         print("No Python files found to process.")

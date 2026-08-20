@@ -46,7 +46,15 @@ def extract_subtitles(video_path: Path, output_dir: Path) -> None:
         if title:
             out_ext = "srt" if codec in {"subrip", "srt"} else codec
         out_file = output_dir / f"{base}{suffix}.{out_ext}"
-        cmd = ["ffmpeg", "-y", "-i", str(video_path), "-map", f"0:s:{subs.index(s)}", str(out_file)]
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(video_path),
+            "-map",
+            f"0:s:{subs.index(s)}",
+            str(out_file),
+        ]
         try:
             run(cmd)
             print(f"Extracted: {out_file}")
@@ -55,7 +63,9 @@ def extract_subtitles(video_path: Path, output_dir: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract embedded subtitles from a movie file")
+    parser = argparse.ArgumentParser(
+        description="Extract embedded subtitles from a movie file"
+    )
     parser.add_argument("movie", help="Path to movie file")
     parser.add_argument("-o", "--output", default="subtitles", help="Output directory")
     args = parser.parse_args()

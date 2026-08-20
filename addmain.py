@@ -29,7 +29,9 @@ def has_main_guard(tree: ast.AST) -> bool:
 def is_docstring_expr(node: ast.AST) -> bool:
     if not isinstance(node, ast.Expr):
         return False
-    return bool(isinstance(node.value, ast.Constant) and isinstance(node.value.value, str))
+    return bool(
+        isinstance(node.value, ast.Constant) and isinstance(node.value.value, str)
+    )
 
 
 def should_wrap_node(node: ast.stmt) -> bool:
@@ -41,9 +43,17 @@ def should_wrap_node(node: ast.stmt) -> bool:
         return False
     if isinstance(node, ast.If):
         test = node.test
-        if isinstance(test, ast.Compare) and len(test.ops) == 1 and isinstance(test.ops[0], ast.Eq):
+        if (
+            isinstance(test, ast.Compare)
+            and len(test.ops) == 1
+            and isinstance(test.ops[0], ast.Eq)
+        ):
             left = test.left
-            if isinstance(left, ast.Name) and left.id == "__name__" and len(test.comparators) == 1:
+            if (
+                isinstance(left, ast.Name)
+                and left.id == "__name__"
+                and len(test.comparators) == 1
+            ):
                 comp = test.comparators[0]
                 if isinstance(comp, ast.Constant) and comp.value == "__main__":
                     return False
@@ -133,8 +143,17 @@ def iter_py_files(inputs: list[str]) -> list[Path]:
 
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("paths", nargs="*", help="Files or directories to scan (default: current dir recursively)")
-    p.add_argument("-a", "--autofix", action="store_true", help="Wrap top-level code in main() and add main guard")
+    p.add_argument(
+        "paths",
+        nargs="*",
+        help="Files or directories to scan (default: current dir recursively)",
+    )
+    p.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Wrap top-level code in main() and add main guard",
+    )
     args = p.parse_args(argv)
     files = iter_py_files(args.paths)
     any_changed = False

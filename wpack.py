@@ -15,7 +15,9 @@ WHEELS_OUTPUT_DIR = None
 
 
 def find_dist_info_dir(pkg_dir: Path) -> Path | None:
-    candidates = [p for p in pkg_dir.iterdir() if p.is_dir() and p.name.endswith(".dist-info")]
+    candidates = [
+        p for p in pkg_dir.iterdir() if p.is_dir() and p.name.endswith(".dist-info")
+    ]
     if not candidates:
         return None
     if len(candidates) > 1:
@@ -26,7 +28,9 @@ def find_dist_info_dir(pkg_dir: Path) -> Path | None:
     return candidates[0]
 
 
-def create_wheel_for_dir_sync(pkg_dir: Path, dest_dir: Path | None = None) -> tuple[str, bool]:
+def create_wheel_for_dir_sync(
+    pkg_dir: Path, dest_dir: Path | None = None
+) -> tuple[str, bool]:
     dist_info = find_dist_info_dir(pkg_dir)
     if dist_info is None:
         print(f"Skipping {pkg_dir}: no *.dist-info dir found.")
@@ -54,9 +58,13 @@ def create_wheel_for_dir_sync(pkg_dir: Path, dest_dir: Path | None = None) -> tu
         return wheel_filename, False
 
 
-async def process_package_async(pkg_dir: Path, dest_dir: Path | None, task_queue: asyncio.Queue):
+async def process_package_async(
+    pkg_dir: Path, dest_dir: Path | None, task_queue: asyncio.Queue
+):
     loop = asyncio.get_running_loop()
-    wheel_filename, success = await loop.run_in_executor(None, create_wheel_for_dir_sync, pkg_dir, dest_dir)
+    wheel_filename, success = await loop.run_in_executor(
+        None, create_wheel_for_dir_sync, pkg_dir, dest_dir
+    )
     await task_queue.put_nowait((wheel_filename, success))
 
 
@@ -77,7 +85,9 @@ async def main_async():
         return
     print(f"Found {len(dirs_to_process)} directories to process.")
     for pkg_dir in dirs_to_process:
-        task = asyncio.create_task(process_package_async(pkg_dir, WHEELS_OUTPUT_DIR, task_queue))
+        task = asyncio.create_task(
+            process_package_async(pkg_dir, WHEELS_OUTPUT_DIR, task_queue)
+        )
         tasks.append(task)
     await asyncio.gather(*tasks)
     successful_wheels = []

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Reinstall all packages with entry points using pip's internal API.
-Compatible with Python 3.12+ and pip 26.1.2+
-"""
 
 from __future__ import annotations
 
@@ -14,7 +10,6 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 from pip._internal.commands.install import InstallCommand
 from pip._internal.exceptions import InstallationError
@@ -23,14 +18,16 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler(f"reinstall_entrypoint_packages_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"),
+        logging.FileHandler(
+            f"reinstall_entrypoint_packages_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        ),
         logging.StreamHandler(),
     ],
 )
 logger = logging.getLogger(__name__)
 
 
-def get_site_packages_dirs() -> List[Path]:
+def get_site_packages_dirs() -> list[Path]:
     site_dirs = []
     user_site = site.getusersitepackages()
     if user_site:
@@ -47,7 +44,7 @@ def get_site_packages_dirs() -> List[Path]:
     return unique_dirs
 
 
-def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
+def get_packages_with_entry_points() -> dict[str, dict[str, any]]:
     packages_with_eps = {}
     try:
         for dist in importlib.metadata.distributions():
@@ -77,7 +74,11 @@ def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
                             groups.add(ep.group)
                 if groups:
                     metadata = dist.metadata
-                    summary = metadata.get("Summary", "No summary") if metadata else "No summary"
+                    summary = (
+                        metadata.get("Summary", "No summary")
+                        if metadata
+                        else "No summary"
+                    )
                     packages_with_eps[dist.name] = {
                         "groups": groups,
                         "info": {
@@ -117,7 +118,9 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
         return "Unknown"
 
 
-def get_user_confirmation(package_name: str, package_data: Dict, include_deps: bool = False) -> str:
+def get_user_confirmation(
+    package_name: str, package_data: dict, include_deps: bool = False
+) -> str:
     groups = package_data.get("groups", set())
     info = package_data.get("info", {})
     print("\n" + "=" * 42)
@@ -129,10 +132,12 @@ def get_user_confirmation(package_name: str, package_data: Dict, include_deps: b
     if info.get("size"):
         print(f"   Size: {info.get('size')}")
     if include_deps:
-        print(f"   ⚠️  Will reinstall dependencies (may cause conflicts)")
+        print("   ⚠️  Will reinstall dependencies (may cause conflicts)")
     print("-" * 42)
     while True:
-        response = input("Reinstall this package? (y/n/a/?) [y/n/a/?]: ").lower().strip()
+        response = (
+            input("Reinstall this package? (y/n/a/?) [y/n/a/?]: ").lower().strip()
+        )
         if response in ("y", "yes"):
             return "yes"
         elif response in ("n", "no"):
@@ -151,7 +156,9 @@ def get_user_confirmation(package_name: str, package_data: Dict, include_deps: b
             continue
 
 
-def reinstall_package_with_pip(package_name: str, include_deps: bool = False) -> Tuple[str, bool, str]:
+def reinstall_package_with_pip(
+    package_name: str, include_deps: bool = False
+) -> tuple[str, bool, str]:
     try:
         install_cmd = InstallCommand()
         args = [
@@ -182,8 +189,8 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
 
 def reinstall_entrypoint_packages(
     max_workers: int = 4,
-    exclude_packages: Set[str] | None = None,
-    only_packages: Set[str] | None = None,
+    exclude_packages: set[str] | None = None,
+    only_packages: set[str] | None = None,
     include_deps: bool = False,
     dry_run: bool = False,
     skip_confirmation: bool = False,
@@ -206,7 +213,9 @@ def reinstall_entrypoint_packages(
             data = entry_point_packages.get(pkg, {})
             groups = data.get("groups", set())
             version = data.get("info", {}).get("version", "Unknown")
-            logger.info(f"  {i:3d}. {pkg} (v{version}) - entry points: {', '.join(groups)}")
+            logger.info(
+                f"  {i:3d}. {pkg} (v{version}) - entry points: {', '.join(groups)}"
+            )
     if dry_run:
         logger.info("\nDRY RUN - No packages will be reinstalled")
         return
@@ -233,12 +242,15 @@ def reinstall_entrypoint_packages(
             return
     else:
         logger.info("Skipping confirmation - will reinstall all packages")
-    logger.info(f"\nStarting reinstallation of {len(packages_to_reinstall)} selected packages...")
+    logger.info(
+        f"\nStarting reinstallation of {len(packages_to_reinstall)} selected packages..."
+    )
     successful = []
     failed = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_package = {
-            executor.submit(reinstall_package_with_pip, pkg, include_deps): pkg for pkg in packages_to_reinstall
+            executor.submit(reinstall_package_with_pip, pkg, include_deps): pkg
+            for pkg in packages_to_reinstall
         }
         for future in as_completed(future_to_package):
             package_name = future_to_package[future]
@@ -271,7 +283,13 @@ def main():
         description="Reinstall all Python packages with entry points using pip API",
         epilog="Compatible with Python 3.12+ and pip 26.1.2+",
     )
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4)",
+    )
     parser.add_argument(
         "-e",
         "--exclude",
@@ -279,16 +297,27 @@ def main():
         default=["pip", "setuptools", "wheel"],
         help="Packages to exclude from reinstallation",
     )
-    parser.add_argument("-o", "--only", nargs="+", help="Only reinstall specified packages")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Only show what would be reinstalled without actually doing it"
+        "-o", "--only", nargs="+", help="Only reinstall specified packages"
     )
     parser.add_argument(
-        "--include-deps", action="store_true", help="Also reinstall dependencies (not recommended, may cause conflicts)"
+        "--dry-run",
+        action="store_true",
+        help="Only show what would be reinstalled without actually doing it",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
     parser.add_argument(
-        "-y", "--yes", action="store_true", help="Skip confirmation and reinstall all packages (use with caution)"
+        "--include-deps",
+        action="store_true",
+        help="Also reinstall dependencies (not recommended, may cause conflicts)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose logging"
+    )
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Skip confirmation and reinstall all packages (use with caution)",
     )
     args = parser.parse_args()
     if args.workers < 1:
@@ -297,11 +326,17 @@ def main():
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     if sys.version_info < (3, 12):
-        logger.warning(f"Running on Python {sys.version_info.major}.{sys.version_info.minor}. Recommended Python 3.12+")
+        logger.warning(
+            f"Running on Python {sys.version_info.major}.{sys.version_info.minor}. Recommended Python 3.12+"
+        )
     logger.info(f"Starting package reinstallation with {args.workers} workers")
-    logger.info("Reinstalling ONLY packages with entry points (console_scripts, gui_scripts, etc.)")
+    logger.info(
+        "Reinstalling ONLY packages with entry points (console_scripts, gui_scripts, etc.)"
+    )
     if args.yes:
-        logger.warning("⚠️  Auto-confirmation enabled. Will reinstall all packages without prompting!")
+        logger.warning(
+            "⚠️  Auto-confirmation enabled. Will reinstall all packages without prompting!"
+        )
     reinstall_entrypoint_packages(
         max_workers=args.workers,
         exclude_packages=set(args.exclude),

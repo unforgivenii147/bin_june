@@ -1,14 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Make an HTML file standalone by inlining all assets.
-Usage: python standalone.py <html_file>
-- Remote assets (http/https) are downloaded and inlined
-- Local assets are read from disk and inlined
-- CSS files are inlined as <style> tags (with recursive url()/@import inlining)
-- JS files are inlined as <script> tags
-- Images, fonts, and other binary assets are converted to data URIs
-- The file is updated in place
-"""
 
 import base64
 import mimetypes

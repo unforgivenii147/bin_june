@@ -80,7 +80,9 @@ def autofix_filename(file_path: Path, current_ext: str, true_ext: str) -> Path:
     counter = 1
     original_new_path = new_path
     while new_path.exists() and new_path != file_path:
-        new_path = original_new_path.with_name(f"{original_new_path.stem}_{counter}{true_ext}")
+        new_path = original_new_path.with_name(
+            f"{original_new_path.stem}_{counter}{true_ext}"
+        )
         counter += 1
     if new_path != file_path:
         file_path.rename(new_path)
@@ -92,11 +94,22 @@ def main():
     parser = argparse.ArgumentParser(
         description="Recursively detect and optionally fix file extension mismatches based on file headers (magic numbers)."
     )
-    parser.add_argument("directory", type=str, help="The directory to recursively scan.")
     parser.add_argument(
-        "-a", "--autofix", action="store_true", help="Automatically rename files to fix detected mismatches in place."
+        "directory", type=str, help="The directory to recursively scan."
     )
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel worker threads (default: 4).")
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Automatically rename files to fix detected mismatches in place.",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel worker threads (default: 4).",
+    )
     args = parser.parse_args()
     root_dir = Path(args.directory)
     if not root_dir.is_dir():
@@ -119,14 +132,16 @@ def main():
         return
     print(f"\nFound {len(mismatches)} mismatches:")
     for file_path, current_ext, true_ext in sorted(mismatches):
-        print(f"[MISMATCH] '{file_path}' | Current: '{current_ext}' | Detected: '{true_ext}'")
+        print(
+            f"[MISMATCH] '{file_path}' | Current: '{current_ext}' | Detected: '{true_ext}'"
+        )
         if args.autofix:
             try:
                 new_path = autofix_filename(file_path, current_ext, true_ext)
                 if new_path != file_path:
                     print(f"  -> Fixed: Renamed to '{new_path.name}'")
                 else:
-                    print(f"  -> Skipped fix: Filename collision or identical.")
+                    print("  -> Skipped fix: Filename collision or identical.")
             except Exception as e:
                 print(f"  -> Error fixing file: {e}")
 

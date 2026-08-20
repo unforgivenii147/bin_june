@@ -65,7 +65,9 @@ def install_or_download(package_name: str) -> None:
             print(f"Successfully installed {package_name} from wheel.")
         except subprocess.CalledProcessError as e:
             print(f"Error installing {package_name} from {wheel_url}: {e}")
-            print(f"Installation failed for {package_name}. Could not find a source archive fallback from mirror.")
+            print(
+                f"Installation failed for {package_name}. Could not find a source archive fallback from mirror."
+            )
     else:
         print(f"No wheel found for {package_name} on the mirror.")
         print("This script currently only handles wheel installations from the mirror.")
@@ -82,7 +84,9 @@ if __name__ == "__main__":
     try:
         from bs4 import BeautifulSoup
     except ImportError:
-        print("The 'beautifulsoup4' library is required. Please install it: pip install beautifulsoup4")
+        print(
+            "The 'beautifulsoup4' library is required. Please install it: pip install beautifulsoup4"
+        )
         sys.exit(1)
     for pkg in packages_to_process:
         install_or_download(pkg)

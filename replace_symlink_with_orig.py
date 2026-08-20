@@ -9,19 +9,32 @@ from pathlib import Path
 def process_symlink(symlink_path: Path):
     try:
         raw_target = symlink_path.readlink()
-        target_path = raw_target if raw_target.is_absolute() else (symlink_path.parent / raw_target).resolve()
-        if symlink_path.parent.name == "bin" and target_path.parent == symlink_path.parent:
+        target_path = (
+            raw_target
+            if raw_target.is_absolute()
+            else (symlink_path.parent / raw_target).resolve()
+        )
+        if (
+            symlink_path.parent.name == "bin"
+            and target_path.parent == symlink_path.parent
+        ):
             return None
         if target_path.suffix == ".so":
             return None
         if not target_path.exists():
-            return {"status": "error", "msg": f"Target does not exist: {symlink_path} -> {target_path}"}
+            return {
+                "status": "error",
+                "msg": f"Target does not exist: {symlink_path} -> {target_path}",
+            }
         symlink_path.unlink()
         if target_path.is_dir():
             shutil.copytree(target_path, symlink_path)
         else:
             shutil.copy2(target_path, symlink_path)
-        return {"status": "replaced", "msg": f"Replaced: {symlink_path} -> {target_path}"}
+        return {
+            "status": "replaced",
+            "msg": f"Replaced: {symlink_path} -> {target_path}",
+        }
     except Exception as e:
         return {"status": "error", "msg": f"Failed to process {symlink_path}: {e!s}"}
 
@@ -39,7 +52,9 @@ def main():
     replaced_list = []
     errors_list = []
     with ThreadPoolExecutor() as executor:
-        futures = {executor.submit(process_symlink, symlink): symlink for symlink in symlinks}
+        futures = {
+            executor.submit(process_symlink, symlink): symlink for symlink in symlinks
+        }
         for future in as_completed(futures):
             result = future.result()
             if result:
@@ -49,7 +64,9 @@ def main():
                     errors_list.append(result["msg"])
     if replaced_list:
         replaced_log.write_text("\n".join(replaced_list) + "\n", encoding="utf-8")
-        print(f"Successfully replaced {len(replaced_list)} symlinks. Logged to replaced.txt")
+        print(
+            f"Successfully replaced {len(replaced_list)} symlinks. Logged to replaced.txt"
+        )
     if errors_list:
         errors_log.write_text("\n".join(errors_list) + "\n", encoding="utf-8")
         print(f"Encountered {len(errors_list)} errors. Logged to errors.txt")

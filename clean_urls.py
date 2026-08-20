@@ -19,7 +19,6 @@ with open("urls.txt") as f:
         except:
             print(line)
 with open("cleaned_urls", "w") as fo:
-    for k in seen:
-        fo.write(f"{k}\n")
+    fo.writelines(f"{k}\n" for k in seen)
 with open("git_urls", "a") as fg:
     fg.write("".join(gl))

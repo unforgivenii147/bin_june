@@ -28,7 +28,10 @@ def should_skip(path: Path) -> bool:
     return bool(
         path.is_symlink()
         or not path.stat().st_size
-        or any((pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache")))
+        or any(
+            pat in path.parts
+            for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache")
+        )
     )
 
 
@@ -49,7 +52,9 @@ def find_duplicates() -> None:
     cwd = Path.cwd()
     files_by_hash = defaultdict(list)
     duplicate_count = 0
-    ptp = [path for path in cwd.rglob("*") if path.is_file() and (not should_skip(path))]
+    ptp = [
+        path for path in cwd.rglob("*") if path.is_file() and (not should_skip(path))
+    ]
     files_by_size = {}
     for p in ptp:
         try:
@@ -63,7 +68,9 @@ def find_duplicates() -> None:
         if len(paths) > 1:
             paths_to_hash.extend(paths)
     with ThreadPoolExecutor(max_workers=8) as executor:
-        future_to_path = {executor.submit(get_hash_file, path): path for path in paths_to_hash}
+        future_to_path = {
+            executor.submit(get_hash_file, path): path for path in paths_to_hash
+        }
         for future in as_completed(future_to_path):
             hash_result, path = future.result()
             if hash_result is not None:
@@ -80,7 +87,7 @@ def find_duplicates() -> None:
     if total:
         cprint(f"total : {fsz(total)}")
     else:
-        cprint(f"NO DUPS")
+        cprint("NO DUPS")
 
 
 if __name__ == "__main__":

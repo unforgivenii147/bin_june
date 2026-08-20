@@ -1,13 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Make HTML files standalone by inlining referenced CSS and JS files.
-- Processes one or more directories recursively (defaults to CWD if none given).
-- Downloads remote CSS/JS via HTTP(S) and reads local CSS/JS from disk.
-- Inlines them into <style> and <script> blocks, replacing the original tags.
-- Updates HTML files in place.
-- Silently ignores missing local or remote resources.
-- Uses pathlib and parallel (threaded) processing.
-"""
 
 from __future__ import annotations
 
@@ -132,7 +123,9 @@ def gather_html_files(dirs):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Make HTML files standalone by inlining CSS/JS resources.")
+    parser = argparse.ArgumentParser(
+        description="Make HTML files standalone by inlining CSS/JS resources."
+    )
     parser.add_argument(
         "dirs",
         nargs="*",
@@ -151,7 +144,9 @@ def main():
     if not html_files:
         print("No HTML files found.", file=sys.stderr)
         return
-    print(f"Found {len(html_files)} HTML file(s); processing with {args.workers} worker(s)...")
+    print(
+        f"Found {len(html_files)} HTML file(s); processing with {args.workers} worker(s)..."
+    )
     updated = 0
     skipped = 0
     errors = 0

@@ -1,26 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-embed_optimizer.py — Extract, optimize, and re-embed base64 resources.
-
-Recursively finds CSS / HTML / HTM / JS files, extracts base64-encoded
-resources (PNG, JPG, JPEG, WEBP, SVG, CSS, JS), optimizes them with
-external tools, and re-embeds the optimized versions in place.
-
-External tools (customize TOOL_COMMANDS below):
-    pngq        — optimize PNG          (in-place)
-    jpegoptim   — optimize JPEG         (in-place)
-    to_jpg      — convert WEBP → JPG     (input  output)
-    svgo        — optimize SVG          (in-place via -i/-o)
-    ter_ser     — optimize/minify JS     (in-place)
-    ccss        — optimize/minify CSS   (in-place)
-
-Usage:
-    python embed_optimizer.py                     # cwd, recursive
-    python embed_optimizer.py ./src/ ./assets/    # specific dirs
-    python embed_optimizer.py a.css b.html        # specific files
-    python embed_optimizer.py -j 8 ./assets/      # 8 workers
-    python embed_optimizer.py --dry-run           # list files only
-"""
 
 from __future__ import annotations
 
@@ -32,17 +10,14 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 from joblib import Parallel, delayed
 from loguru import logger
 
-# ─── Configuration ──────────────────────────────────────────────────────────
 DEFAULT_WORKERS = 4
 SOURCE_EXTENSIONS: set[str] = {".css", ".html", ".htm", ".js"}
-TOOL_TIMEOUT = 300  # seconds per subprocess
+TOOL_TIMEOUT = 300
 
-# External tool commands — adjust paths / flags as needed
 TOOL_COMMANDS: dict[str, object] = {
     "png": lambda p: ["pngq", str(p)],
     "jpg": lambda p: ["jpegoptim", str(p)],
@@ -52,7 +27,6 @@ TOOL_COMMANDS: dict[str, object] = {
     "css": lambda p: ["ccss", str(p)],
 }
 
-# MIME type → file extension
 MIME_TO_EXT: dict[str, str] = {
     "image/png": ".png",
     "image/jpeg": ".jpg",
@@ -64,7 +38,6 @@ MIME_TO_EXT: dict[str, str] = {
     "text/javascript": ".js",
 }
 
-# Extension → resource type category
 EXT_TO_TYPE: dict[str, str] = {
     ".png": "png",
     ".jpg": "jpg",
@@ -75,7 +48,6 @@ EXT_TO_TYPE: dict[str, str] = {
     ".js": "js",
 }
 
-# Resource type → MIME after optimization
 TYPE_TO_NEW_MIME: dict[str, str] = {
     "png": "image/png",
     "jpg": "image/jpeg",
@@ -84,7 +56,6 @@ TYPE_TO_NEW_MIME: dict[str, str] = {
     "js": "application/javascript",
 }
 
-# Regex: data:<mime>;base64,<base64data>
 DATA_URI_RE = re.compile(
     r"data:"
     r"(?P<mime>"
@@ -97,9 +68,7 @@ DATA_URI_RE = re.compile(
 )
 
 
-# ─── Helpers ────────────────────────────────────────────────────────────────
 def format_size(n: int) -> str:
-    """Human-readable byte size."""
     size = float(n)
     for unit in ("B", "KB", "MB", "GB", "TB"):
         if size < 1024:
@@ -109,7 +78,6 @@ def format_size(n: int) -> str:
 
 
 def run_tool(cmd: list[str], desc: str) -> bool:
-    """Run a subprocess tool. Returns True on success, False otherwise."""
     try:
         result = subprocess.run(
             cmd,
@@ -118,7 +86,9 @@ def run_tool(cmd: list[str], desc: str) -> bool:
             timeout=TOOL_TIMEOUT,
         )
         if result.returncode != 0:
-            logger.error(f"{desc} failed (rc={result.returncode}): {result.stderr.strip()[:300]}")
+            logger.error(
+                f"{desc} failed (rc={result.returncode}): {result.stderr.strip()[:300]}"
+            )
             return False
         return True
     except subprocess.TimeoutExpired:
@@ -132,14 +102,7 @@ def run_tool(cmd: list[str], desc: str) -> bool:
         return False
 
 
-# ─── Core: optimize one extracted resource ──────────────────────────────────
-def optimize_resource(mime: str, data: bytes) -> tuple[Optional[bytes], Optional[str]]:
-    """
-    Optimize a single base64-embedded resource.
-
-    Returns (optimized_bytes, new_mime) or (None, None) on failure.
-    Temp files are always cleaned up.
-    """
+def optimize_resource(mime: str, data: bytes) -> tuple[bytes | None, str | None]:
     ext = MIME_TO_EXT.get(mime)
     if ext is None:
         logger.warning(f"Unsupported MIME type: {mime}")
@@ -149,7 +112,6 @@ def optimize_resource(mime: str, data: bytes) -> tuple[Optional[bytes], Optional
     if rtype is None:
         return None, None
 
-    # Create a unique temp file for the extracted resource
     fd, tmp_path = tempfile.mkstemp(suffix=ext)
     os.close(fd)
     tmp_file = Path(tmp_path)
@@ -160,19 +122,15 @@ def optimize_resource(mime: str, data: bytes) -> tuple[Optional[bytes], Optional
     new_mime = TYPE_TO_NEW_MIME.get(rtype, mime)
 
     try:
-        # ── PNG ──────────────────────────────────────────────────────────
         if rtype == "png":
             if not run_tool(TOOL_COMMANDS["png"](tmp_file), "pngq"):
                 return None, None
 
-        # ── JPG / JPEG ──────────────────────────────────────────────────
         elif rtype == "jpg":
             if not run_tool(TOOL_COMMANDS["jpg"](tmp_file), "jpegoptim"):
                 return None, None
 
-        # ── WEBP → JPG → optimize ───────────────────────────────────────
         elif rtype == "webp":
-            # Step 1: convert WEBP to JPG
             jpg_file = tmp_file.with_suffix(".jpg")
             if not run_tool(TOOL_COMMANDS["webp_to_jpg"](tmp_file, jpg_file), "to_jpg"):
                 return None, None
@@ -181,28 +139,23 @@ def optimize_resource(mime: str, data: bytes) -> tuple[Optional[bytes], Optional
                 return None, None
             files_to_clean.append(jpg_file)
 
-            # Step 2: optimize the resulting JPG
             if not run_tool(TOOL_COMMANDS["jpg"](jpg_file), "jpegoptim"):
                 return None, None
             result_file = jpg_file
             new_mime = "image/jpeg"
 
-        # ── SVG ──────────────────────────────────────────────────────────
         elif rtype == "svg":
             if not run_tool(TOOL_COMMANDS["svg"](tmp_file), "svgo"):
                 return None, None
 
-        # ── CSS ──────────────────────────────────────────────────────────
         elif rtype == "css":
             if not run_tool(TOOL_COMMANDS["css"](tmp_file), "ccss"):
                 return None, None
 
-        # ── JS ───────────────────────────────────────────────────────────
         elif rtype == "js":
             if not run_tool(TOOL_COMMANDS["js"](tmp_file), "ter_ser"):
                 return None, None
 
-        # Read back the optimized result
         if not result_file.exists():
             logger.error(f"Result file missing after optimization: {result_file}")
             return None, None
@@ -218,12 +171,7 @@ def optimize_resource(mime: str, data: bytes) -> tuple[Optional[bytes], Optional
                 pass
 
 
-# ─── Core: process one source file ──────────────────────────────────────────
 def process_file(filepath: Path) -> dict:
-    """
-    Extract, optimize, and re-embed all base64 resources in a single file.
-    Returns a stats dict.
-    """
     stats: dict = {
         "file": str(filepath),
         "original_size": 0,
@@ -239,7 +187,6 @@ def process_file(filepath: Path) -> dict:
         original_size = len(original_bytes)
         stats["original_size"] = original_size
 
-        # Decode to text for regex matching
         text = original_bytes.decode("utf-8", errors="replace")
 
         matches = list(DATA_URI_RE.finditer(text))
@@ -248,19 +195,16 @@ def process_file(filepath: Path) -> dict:
         if not matches:
             return stats
 
-        # Rebuild the file with optimized resources
         parts: list[str] = []
         offset = 0
         optimized_count = 0
 
         for match in matches:
-            # Text before this data URI
             parts.append(text[offset : match.start()])
 
             mime = match.group("mime")
             b64_data = match.group("data")
 
-            # Decode base64 to raw bytes
             try:
                 raw = base64.b64decode(b64_data)
             except Exception as e:
@@ -269,29 +213,25 @@ def process_file(filepath: Path) -> dict:
                 offset = match.end()
                 continue
 
-            # WEBP is always replaced (user requested conversion to JPG)
             is_webp = MIME_TO_EXT.get(mime) == ".webp"
 
-            # Optimize the resource
             optimized, new_mime = optimize_resource(mime, raw)
 
             if optimized is not None and (is_webp or len(optimized) < len(raw)):
-                # Re-encode and replace
                 new_b64 = base64.b64encode(optimized).decode("ascii")
                 parts.append(f"data:{new_mime};base64,{new_b64}")
                 optimized_count += 1
             else:
-                # Keep original
                 parts.append(match.group(0))
                 if optimized is not None and not is_webp:
-                    logger.debug(f"No size improvement for {mime} in {filepath.name} ({len(optimized)} >= {len(raw)})")
+                    logger.debug(
+                        f"No size improvement for {mime} in {filepath.name} ({len(optimized)} >= {len(raw)})"
+                    )
 
             offset = match.end()
 
-        # Remaining text after last data URI
         parts.append(text[offset:])
 
-        # Write back only if something was optimized
         if optimized_count > 0:
             new_text = "".join(parts)
             new_bytes = new_text.encode("utf-8")
@@ -310,9 +250,7 @@ def process_file(filepath: Path) -> dict:
     return stats
 
 
-# ─── File discovery ─────────────────────────────────────────────────────────
 def find_source_files(paths: list[Path]) -> list[Path]:
-    """Walk files/directories and return a de-duplicated list of source files."""
     files: list[Path] = []
     for p in paths:
         if p.is_file() and p.suffix.lower() in SOURCE_EXTENSIONS:
@@ -324,7 +262,6 @@ def find_source_files(paths: list[Path]) -> list[Path]:
         else:
             logger.warning(f"Path not found: {p}")
 
-    # De-duplicate while preserving order
     seen: set[Path] = set()
     unique: list[Path] = []
     for f in files:
@@ -335,9 +272,7 @@ def find_source_files(paths: list[Path]) -> list[Path]:
     return unique
 
 
-# ─── Reporting ──────────────────────────────────────────────────────────────
 def print_file_stats(stats: dict) -> None:
-    """Print per-file result to stdout."""
     name = Path(stats["file"]).name
 
     if stats["error"]:
@@ -357,7 +292,6 @@ def print_file_stats(stats: dict) -> None:
 
 
 def print_summary(all_stats: list[dict]) -> None:
-    """Print aggregate summary."""
     total = len(all_stats)
     errors = sum(1 for s in all_stats if s["error"])
     total_found = sum(s["resources_found"] for s in all_stats)
@@ -375,10 +309,11 @@ def print_summary(all_stats: list[dict]) -> None:
     print("=" * 60)
 
 
-# ─── CLI ────────────────────────────────────────────────────────────────────
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description=("Extract, optimize, and re-embed base64 resources in CSS/HTML/JS files."),
+        description=(
+            "Extract, optimize, and re-embed base64 resources in CSS/HTML/JS files."
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 Examples:
@@ -419,7 +354,6 @@ Examples:
 def main() -> None:
     args = parse_args()
 
-    # Configure loguru — stderr so stdout stays clean for stats
     logger.remove()
     logger.add(
         sys.stderr,
@@ -427,7 +361,6 @@ def main() -> None:
         format="<level>{level:<7}</level> | {message}",
     )
 
-    # Discover source files
     input_paths = args.inputs if args.inputs else [Path.cwd()]
     source_files = find_source_files(input_paths)
 
@@ -442,12 +375,10 @@ def main() -> None:
             print(f"  {f}")
         return
 
-    # Process in parallel
-    # prefer="threads" is ideal here: the workload is subprocess-bound
-    # (I/O), so the GIL is not a bottleneck, and we avoid pickling overhead.
-    results = Parallel(n_jobs=args.workers, prefer="threads")(delayed(process_file)(f) for f in source_files)
+    results = Parallel(n_jobs=args.workers, prefer="threads")(
+        delayed(process_file)(f) for f in source_files
+    )
 
-    # Report results
     for s in results:
         print_file_stats(s)
 

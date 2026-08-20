@@ -33,7 +33,10 @@ def has_get_files(file_path: Path) -> bool:
     try:
         content = file_path.read_text(encoding="utf-8")
         tree = ast.parse(content)
-        return any(isinstance(node, ast.FunctionDef) and node.name == "get_files" for node in ast.walk(tree))
+        return any(
+            isinstance(node, ast.FunctionDef) and node.name == "get_files"
+            for node in ast.walk(tree)
+        )
     except Exception:
         return False
 

@@ -77,7 +77,9 @@ def clone_repo_shallow(user, repo) -> bool:
         print(f"   Cloned into: {clone_path}")
         return True
     except FileNotFoundError:
-        print("❌ Error: 'git' command not found. Please ensure Git is installed and in your PATH.")
+        print(
+            "❌ Error: 'git' command not found. Please ensure Git is installed and in your PATH."
+        )
         return False
     except Exception as e:
         print(f"❌ An unexpected error occurred during cloning: {e}")

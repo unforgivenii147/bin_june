@@ -98,16 +98,28 @@ def decompress_file(zst_path: Path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Compress/Decompress with Zstandard (zstd)")
-    parser.add_argument("-c", "--compress", action="store_true", help="Compress mode (default)")
-    parser.add_argument("-d", "--decompress", action="store_true", help="Decompress mode")
+    parser = argparse.ArgumentParser(
+        description="Compress/Decompress with Zstandard (zstd)"
+    )
+    parser.add_argument(
+        "-c", "--compress", action="store_true", help="Compress mode (default)"
+    )
+    parser.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress mode"
+    )
     args = parser.parse_args()
     mode = "decompress" if args.decompress else "compress"
     current_dir = Path(".")
     if mode == "compress":
-        subdirs = [d for d in current_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+        subdirs = [
+            d
+            for d in current_dir.iterdir()
+            if d.is_dir() and not d.name.startswith(".")
+        ]
         files = [
-            f for f in current_dir.iterdir() if f.is_file() and f.suffix != ".zst" and f.name != Path(__file__).name
+            f
+            for f in current_dir.iterdir()
+            if f.is_file() and f.suffix != ".zst" and f.name != Path(__file__).name
         ]
         if not subdirs and not files:
             print("No files or subdirectories found to compress.")
@@ -120,7 +132,9 @@ def main():
             for f in files:
                 executor.submit(process_file, f)
     else:
-        archives = [f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".zst"]
+        archives = [
+            f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".zst"
+        ]
         if not archives:
             print("No .zst or .tar.zst files found to decompress.")
             return

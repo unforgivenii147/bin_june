@@ -23,7 +23,9 @@ def ocr_worker(q_in: Queue, q_out: Queue) -> None:
         frame = cv2.resize(frame, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = 255 - gray
-        text = pytesseract.image_to_string(Image.fromarray(gray), lang="eng", config="--oem 3 --psm 6")
+        text = pytesseract.image_to_string(
+            Image.fromarray(gray), lang="eng", config="--oem 3 --psm 6"
+        )
         if text and len(text.strip()) > 5:
             cprint(f"frame {frame_id} --> {text}", "cyan")
             txtfile.open("a", encoding="utf-8").write(text + "\n")
@@ -36,7 +38,9 @@ def main() -> None:
     cap = cv2.VideoCapture(video)
     q_in = Queue(maxsize=cpu_count())
     q_out = Queue()
-    workers = [Process(target=ocr_worker, args=(q_in, q_out)) for _ in range(cpu_count())]
+    workers = [
+        Process(target=ocr_worker, args=(q_in, q_out)) for _ in range(cpu_count())
+    ]
     for w in workers:
         w.start()
     frame_id = 0

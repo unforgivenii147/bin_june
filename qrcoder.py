@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-QR Code Extractor using zbar (Lightweight)
-Install: pip install pyzbar pillow
-"""
 
 from __future__ import annotations
 
 import os
 import sys
 
-import pyzbar.pyzbar as pyzbar
 from PIL import Image
+from pyzbar import pyzbar
 
 
 def extract_qr_data_zbar(image_path):

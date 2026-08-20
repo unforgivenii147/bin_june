@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Fix unused code based on Vulture output.
-Reads Vulture findings from stdin or a file and fixes the issues in-place.
-"""
 
 from __future__ import annotations
 
@@ -78,12 +74,7 @@ def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
             if issue_type == "unused_variable":
                 lines[idx] = _comment_out_variable(line, name)
                 modified = True
-            elif issue_type == "unused_function":
-                func_lines = _get_function_lines(lines, idx)
-                for i in range(func_lines[0], func_lines[1] + 1):
-                    lines_to_remove.add(i)
-                modified = True
-            elif issue_type == "unused_method":
+            elif issue_type == "unused_function" or issue_type == "unused_method":
                 func_lines = _get_function_lines(lines, idx)
                 for i in range(func_lines[0], func_lines[1] + 1):
                     lines_to_remove.add(i)
@@ -93,10 +84,7 @@ def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
                 for i in range(class_lines[0], class_lines[1] + 1):
                     lines_to_remove.add(i)
                 modified = True
-            elif issue_type == "unused_attribute":
-                lines[idx] = _comment_out_line(line)
-                modified = True
-            elif issue_type == "unused_import":
+            elif issue_type == "unused_attribute" or issue_type == "unused_import":
                 lines[idx] = _comment_out_line(line)
                 modified = True
             elif issue_type in ("unreachable_after", "unreachable_else"):

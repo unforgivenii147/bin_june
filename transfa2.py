@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of transchin.py for Python 3.12.
-Translates Persian text in files in-place using parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -24,7 +20,9 @@ FILE_DELAY: Final[float] = 2.0
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
-PERSIAN_PATTERN: Final[re.Pattern] = re.compile("[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]")
+PERSIAN_PATTERN: Final[re.Pattern] = re.compile(
+    "[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]"
+)
 BOUNDARY_PATTERN: Final[re.Pattern] = re.compile(r"[\s\n\.\!\?\;]+")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)

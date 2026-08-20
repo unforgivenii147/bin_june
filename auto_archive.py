@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-auto_compress.py
-Benchmark multiple compression algorithms on a file or directory,
-keep only the smallest result. Uses multiprocessing in folder mode.
-"""
 
 from __future__ import annotations
 
@@ -51,8 +46,7 @@ def read_file(path: Path) -> bytes:
 def compress_zstd(data: bytes, level: int) -> bytes:
     if zstd is None:
         raise RuntimeError("zstandard not installed")
-        if level > 21:
-            level = 21
+        level = min(level, 21)
     cctx = zstd.ZstdCompressor(level=level)
     buf = BytesIO()
     with cctx.stream_writer(buf, closefd=False) as writer:
@@ -187,7 +181,13 @@ def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
     except Exception as exc:
         log.error("Cannot write %s: %s", dest, exc)
         return None
-    log.info("  Winner → %s (algo=%s level=%d size=%s)", dest.name, w_name, w_level, fsz(len(w_bytes)))
+    log.info(
+        "  Winner → %s (algo=%s level=%d size=%s)",
+        dest.name,
+        w_name,
+        w_level,
+        fsz(len(w_bytes)),
+    )
     return dest
 
 
@@ -216,7 +216,11 @@ SKIP_EXTENSIONS = {
 
 
 def collect_files(root: Path) -> list[Path]:
-    return [p for p in root.rglob("*") if p.is_file() and p.suffix.lower() not in SKIP_EXTENSIONS]
+    return [
+        p
+        for p in root.rglob("*")
+        if p.is_file() and p.suffix.lower() not in SKIP_EXTENSIONS
+    ]
 
 
 def main() -> None:

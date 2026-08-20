@@ -56,11 +56,19 @@ class HTMLStandaloneMaker:
             self.log(f"Error encoding file {file_path}: {e}", "ERROR")
             return None
 
-    def find_local_resource(self, resource_name: str | AttributeValueList, base_dir: Path) -> Path | None:
+    def find_local_resource(
+        self, resource_name: str | AttributeValueList, base_dir: Path
+    ) -> Path | None:
         resource_str = str(resource_name)
         parsed = urlparse(resource_str)
         path_part = parsed.path.lstrip("/")
-        search_locations = [base_dir, Path("/sdcard/_static"), Path.cwd(), base_dir.parent.parent, base_dir.parent]
+        search_locations = [
+            base_dir,
+            Path("/sdcard/_static"),
+            Path.cwd(),
+            base_dir.parent.parent,
+            base_dir.parent,
+        ]
         for location in search_locations:
             location = location.resolve()
             candidate = location / resource_str
@@ -70,11 +78,15 @@ class HTMLStandaloneMaker:
             if resource_str.startswith("/"):
                 candidate = location / path_part
                 if candidate.exists():
-                    self.log(f"Found resource '{resource_str}' (stripped) at: {candidate}")
+                    self.log(
+                        f"Found resource '{resource_str}' (stripped) at: {candidate}"
+                    )
                     return candidate
             candidate = location / Path(resource_str).name
             if candidate.exists():
-                self.log(f"Found resource '{resource_str}' (filename only) at: {candidate}")
+                self.log(
+                    f"Found resource '{resource_str}' (filename only) at: {candidate}"
+                )
                 return candidate
         self.log(f"Resource '{resource_str}' not found in search locations", "WARNING")
         self.warning_count += 1
@@ -94,14 +106,21 @@ class HTMLStandaloneMaker:
                 if encoded_font:
                     mime_type = self.get_mime_type(local_font_path)
                     escaped_url = re.escape(f"url({font_url})")
-                    escaped_url = escaped_url.replace("\\(", "\\(").replace("\\)", "\\)")
+                    escaped_url = escaped_url.replace("\\(", "\\(").replace(
+                        "\\)", "\\)"
+                    )
                     css_content = re.sub(
-                        escaped_url, f"url('data:{mime_type};base64,{encoded_font}')", css_content, flags=re.IGNORECASE
+                        escaped_url,
+                        f"url('data:{mime_type};base64,{encoded_font}')",
+                        css_content,
+                        flags=re.IGNORECASE,
                     )
                     self.embedded_count += 1
                     self.log(f"Embedded font: {local_font_path.name}")
             else:
-                self.log(f"Font file '{font_url}' not found, leaving reference", "WARNING")
+                self.log(
+                    f"Font file '{font_url}' not found, leaving reference", "WARNING"
+                )
         return css_content
 
     def process_image_tag(self, img_tag, base_dir: Path) -> None:
@@ -130,7 +149,9 @@ class HTMLStandaloneMaker:
         if local_css_path:
             try:
                 css_content = local_css_path.read_text(encoding="utf-8")
-                css_content = self.process_css_content(css_content, local_css_path.parent)
+                css_content = self.process_css_content(
+                    css_content, local_css_path.parent
+                )
                 style_tag = BeautifulSoup("", "html.parser").new_tag("style")
                 style_tag.string = css_content
                 link_tag.replace_with(style_tag)
@@ -197,7 +218,9 @@ class HTMLStandaloneMaker:
         if not standalone_html:
             return False
         if output_path is None:
-            output_path = html_path.parent / f"{html_path.stem}_standalone{html_path.suffix}"
+            output_path = (
+                html_path.parent / f"{html_path.stem}_standalone{html_path.suffix}"
+            )
         try:
             output_path.write_text(standalone_html, encoding="utf-8")
             self.log(f"Standalone HTML saved to: {output_path}")
@@ -216,11 +239,19 @@ def main() -> None:
         epilog="\nExamples:\n  python html_standalone.py index.html\n  python html_standalone.py index.html -o standalone.html\n  python html_standalone.py index.html -v\n  python html_standalone.py index.html --no-embed-scripts\n        ",
     )
     parser.add_argument("input", help="Input HTML file")
-    parser.add_argument("-o", "--output", help="Output file (default: input_standalone.html)")
+    parser.add_argument(
+        "-o", "--output", help="Output file (default: input_standalone.html)"
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    parser.add_argument("--no-embed-scripts", action="store_true", help="Don't embed scripts")
-    parser.add_argument("--no-embed-images", action="store_true", help="Don't embed images")
-    parser.add_argument("--no-embed-fonts", action="store_true", help="Don't embed fonts")
+    parser.add_argument(
+        "--no-embed-scripts", action="store_true", help="Don't embed scripts"
+    )
+    parser.add_argument(
+        "--no-embed-images", action="store_true", help="Don't embed images"
+    )
+    parser.add_argument(
+        "--no-embed-fonts", action="store_true", help="Don't embed fonts"
+    )
     args = parser.parse_args()
     try:
         input_path = Path(args.input)
@@ -231,7 +262,9 @@ def main() -> None:
         if args.output:
             output_path = Path(args.output)
         else:
-            output_path = input_path.parent / f"{input_path.stem}_standalone{input_path.suffix}"
+            output_path = (
+                input_path.parent / f"{input_path.stem}_standalone{input_path.suffix}"
+            )
         success = maker.save_standalone(input_path, output_path)
         sys.exit(0 if success else 1)
     except Exception as e:

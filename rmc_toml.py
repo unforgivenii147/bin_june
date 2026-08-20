@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-TOML Comment Remover - Removes comments from TOML files using parallel processing.
-Supports processing multiple files/directories recursively.
-"""
 
 from __future__ import annotations
 
@@ -124,26 +120,34 @@ def main():
         return
     print(f"Found {len(toml_files)} TOML file(s) to process...")
     print("-" * 42)
-    print(f"{'Filename':<50} {'Time (ms)':<10} {'Before':<12} {'After':<12} {'Ratio':<8}")
+    print(
+        f"{'Filename':<50} {'Time (ms)':<10} {'Before':<12} {'After':<12} {'Ratio':<8}"
+    )
     print("-" * 42)
     max_workers = min(len(toml_files), 8)
     results = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(process_file, file): file for file in toml_files}
+        future_to_file = {
+            executor.submit(process_file, file): file for file in toml_files
+        }
         for future in as_completed(future_to_file):
             result = future.result()
             results.append(result)
             filename, time_taken, before_size, after_size = result
             ratio = after_size / before_size * 100 if before_size > 0 else 0
             display_name = filename if len(filename) <= 48 else "..." + filename[-45:]
-            print(f"{display_name:<50} {time_taken:>8.2f}  {fsz(before_size):<12} {fsz(after_size):<12} {ratio:>6.1f}%")
+            print(
+                f"{display_name:<50} {time_taken:>8.2f}  {fsz(before_size):<12} {fsz(after_size):<12} {ratio:>6.1f}%"
+            )
     print("-" * 42)
     total_before = sum(r[2] for r in results)
     total_after = sum(r[3] for r in results)
     total_ratio = total_after / total_before * 100 if total_before > 0 else 0
     total_time = sum(r[1] for r in results)
     print(f"Total: {len(results)} file(s) processed in {total_time:.2f} ms")
-    print(f"Size reduction: {fsz(total_before)} -> {fsz(total_after)} ({total_ratio:.1f}% of original)")
+    print(
+        f"Size reduction: {fsz(total_before)} -> {fsz(total_after)} ({total_ratio:.1f}% of original)"
+    )
 
 
 if __name__ == "__main__":

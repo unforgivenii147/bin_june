@@ -117,8 +117,15 @@ def process_file(py_file: Path, dh_index: dict[str, str]):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Replace inlined dh functions with proper imports.")
-    parser.add_argument("-a", "--apply", action="store_true", help="write changes back to disk (default is dry-run)")
+    parser = argparse.ArgumentParser(
+        description="Replace inlined dh functions with proper imports."
+    )
+    parser.add_argument(
+        "-a",
+        "--apply",
+        action="store_true",
+        help="write changes back to disk (default is dry-run)",
+    )
     args = parser.parse_args()
     dh_index = build_dh_index(DH_SOURCE_DIR)
     cwd = Path.cwd()
@@ -143,13 +150,15 @@ def main():
         tag = "APPLY" if args.apply else "DRY RUN"
         print(f"[{tag}] {path.name}")
         print(f"  matched functions: {', '.join(names)}")
-        diff = difflib.unified_diff(old_lines, new_lines, fromfile=str(path), tofile=str(path) + " (modified)")
+        diff = difflib.unified_diff(
+            old_lines, new_lines, fromfile=str(path), tofile=str(path) + " (modified)"
+        )
         diff_text = "".join(diff)
         if diff_text:
             print(diff_text)
         if args.apply:
             path.write_text("".join(new_lines), encoding="utf-8")
-            print(f"  -> written.")
+            print("  -> written.")
 
 
 if __name__ == "__main__":

@@ -33,7 +33,9 @@ def get_image_features_cv2(image_path, size=(64, 64)):
             print(f"Histogram calculation error for {image_path}: {e}")
             return None
         img_flat = img_resized.flatten()
-        features = np.concatenate([hist_h.flatten(), hist_s.flatten(), hist_v.flatten(), img_flat])
+        features = np.concatenate(
+            [hist_h.flatten(), hist_s.flatten(), hist_v.flatten(), img_flat]
+        )
         norm = np.linalg.norm(features)
         if norm > 0:
             features /= norm
@@ -66,7 +68,9 @@ def compute_similarity(feat1, feat2):
     return np.dot(feat1, feat2) / (norm1 * norm2)
 
 
-def simple_clustering(features: ndarray, paths, n_clusters=10, threshold=0.7) -> ndarray[tuple[int]] | ndarray:
+def simple_clustering(
+    features: ndarray, paths, n_clusters=10, threshold=0.7
+) -> ndarray[tuple[int]] | ndarray:
     n_samples = len(features)
     if n_samples == 0:
         return np.array([])
@@ -102,7 +106,12 @@ def simple_clustering(features: ndarray, paths, n_clusters=10, threshold=0.7) ->
     return labels
 
 
-def organize_photos(source_dir: str = ".", n_clusters: int = 10, move: bool = False, threshold: float = 0.7) -> None:
+def organize_photos(
+    source_dir: str = ".",
+    n_clusters: int = 10,
+    move: bool = False,
+    threshold: float = 0.7,
+) -> None:
     print(f"Scanning directory: {source_dir}")
     image_paths = get_all_images(source_dir)
     print(f"Found {len(image_paths)} images")
@@ -157,9 +166,21 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Organize photos by similarity")
-    parser.add_argument("-d", "--directory", default=".", help="Source directory (default: current)")
-    parser.add_argument("-k", "--clusters", type=int, default=10, help="Number of groups (default: 10)")
-    parser.add_argument("-m", "--move", action="store_true", help="Move files instead of copy")
-    parser.add_argument("-t", "--threshold", type=float, default=0.7, help="Similarity threshold (default: 0.7)")
+    parser.add_argument(
+        "-d", "--directory", default=".", help="Source directory (default: current)"
+    )
+    parser.add_argument(
+        "-k", "--clusters", type=int, default=10, help="Number of groups (default: 10)"
+    )
+    parser.add_argument(
+        "-m", "--move", action="store_true", help="Move files instead of copy"
+    )
+    parser.add_argument(
+        "-t",
+        "--threshold",
+        type=float,
+        default=0.7,
+        help="Similarity threshold (default: 0.7)",
+    )
     args = parser.parse_args()
     organize_photos(args.directory, args.clusters, args.move, args.threshold)

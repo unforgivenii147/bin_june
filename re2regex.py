@@ -4,9 +4,7 @@ from __future__ import annotations
 import argparse
 import re
 from concurrent.futures import ProcessPoolExecutor
-from os import scandir as os_scandir
 from pathlib import Path
-
 
 NORMAL_IMPORT = "^import re\\b"
 REGEX_IMPORT = r"^import regex as re\b"
@@ -34,14 +32,23 @@ def update_file(file_path, reverse: bool = False) -> str | None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Recursively swap 'import re' with 'import regex as re'")
-    parser.add_argument("-r", "--reverse", action="store_true", help="Reverse the replacement (regex as re -> re)")
+    parser = argparse.ArgumentParser(
+        description="Recursively swap 'import re' with 'import regex as re'"
+    )
+    parser.add_argument(
+        "-r",
+        "--reverse",
+        action="store_true",
+        help="Reverse the replacement (regex as re -> re)",
+    )
     args = parser.parse_args()
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)
     print(f"Scanning {len(py_files)} files...")
     with ProcessPoolExecutor() as executor:
-        results = list(executor.map(update_file, py_files, [args.reverse] * len(py_files)))
+        results = list(
+            executor.map(update_file, py_files, [args.reverse] * len(py_files))
+        )
     updates = [r for r in results if r]
     for msg in updates:
         print(msg)

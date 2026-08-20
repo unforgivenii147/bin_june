@@ -86,7 +86,9 @@ def process_file(args):
         doc_count = cleaner.docstrings_removed
         if comment_count > 0 or doc_count > 0:
             path.write_text(cleaned_code)
-            logger.info(f"{rel_path}: removed {comment_count} comments, {doc_count} docstrings")
+            logger.info(
+                f"{rel_path}: removed {comment_count} comments, {doc_count} docstrings"
+            )
             return comment_count + doc_count
         return 0
     except Exception as e:
@@ -103,7 +105,9 @@ def main():
     files_to_process = []
     for target in targets:
         if target.is_file():
-            if not any(part in SKIP_DIRS for part in target.parts) and is_python_script(target):
+            if not any(part in SKIP_DIRS for part in target.parts) and is_python_script(
+                target
+            ):
                 files_to_process.append((target, root))
         elif target.is_dir():
             for path in target.rglob("*"):

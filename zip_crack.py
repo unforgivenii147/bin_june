@@ -44,7 +44,9 @@ def format_duration(seconds: float) -> str:
     return f"{secs}s"
 
 
-def check_password_batch(zip_path: Path, passwords: list[str]) -> tuple[str | None, int]:
+def check_password_batch(
+    zip_path: Path, passwords: list[str]
+) -> tuple[str | None, int]:
     tested = 0
     try:
         with zipfile.ZipFile(zip_path) as zf:
@@ -62,7 +64,9 @@ def check_password_batch(zip_path: Path, passwords: list[str]) -> tuple[str | No
     return (None, tested)
 
 
-def get_wordlist_batches(path: Path, batch_size: int) -> Generator[list[str], None, None]:
+def get_wordlist_batches(
+    path: Path, batch_size: int
+) -> Generator[list[str], None, None]:
     with path.open("r", encoding="utf-8", errors="ignore") as f:
         while True:
             batch = [line.strip() for line in islice(f, batch_size) if line.strip()]
@@ -111,7 +115,9 @@ def brute_force_zip(
         with multiprocessing.Pool(processes=num_processes) as pool:
             batches = get_wordlist_batches(wordlist_path, batch_size)
             worker_args = ((zip_path, batch) for batch in batches)
-            for found_pwd, tested_in_batch in pool.starmap(check_password_batch, worker_args):
+            for found_pwd, tested_in_batch in pool.starmap(
+                check_password_batch, worker_args
+            ):
                 result.tested_count += tested_in_batch
                 current_time = time.time()
                 if found_pwd:
@@ -121,7 +127,11 @@ def brute_force_zip(
                     pool.terminate()
                     break
                 if current_time - last_update >= update_interval:
-                    progress = result.tested_count / total_passwords * 100 if total_passwords > 0 else 0
+                    progress = (
+                        result.tested_count / total_passwords * 100
+                        if total_passwords > 0
+                        else 0
+                    )
                     elapsed = current_time - result.start_time
                     pps = result.tested_count / elapsed if elapsed > 0 else 0
                     print(
@@ -152,16 +162,36 @@ def brute_force_zip(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Optimized Zip Brute-Forcer for Python 3.12", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description="Optimized Zip Brute-Forcer for Python 3.12",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("zip_file", type=Path, help="Path to the protected zip file")
     parser.add_argument(
-        "-w", "--wordlist", type=Path, default=Path("wordlist.txt"), help="Path to the password wordlist"
+        "-w",
+        "--wordlist",
+        type=Path,
+        default=Path("wordlist.txt"),
+        help="Path to the password wordlist",
     )
-    parser.add_argument("-p", "--processes", type=int, help="Number of parallel processes (default: CPU count)")
-    parser.add_argument("-b", "--batch-size", type=int, default=DEFAULT_BATCH_SIZE, help="Passwords per worker batch")
     parser.add_argument(
-        "-i", "--interval", type=float, default=DEFAULT_UPDATE_INTERVAL, help="Status update interval in seconds"
+        "-p",
+        "--processes",
+        type=int,
+        help="Number of parallel processes (default: CPU count)",
+    )
+    parser.add_argument(
+        "-b",
+        "--batch-size",
+        type=int,
+        default=DEFAULT_BATCH_SIZE,
+        help="Passwords per worker batch",
+    )
+    parser.add_argument(
+        "-i",
+        "--interval",
+        type=float,
+        default=DEFAULT_UPDATE_INTERVAL,
+        help="Status update interval in seconds",
     )
     args = parser.parse_args()
     try:

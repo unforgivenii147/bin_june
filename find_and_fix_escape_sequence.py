@@ -11,7 +11,13 @@ from pathlib import Path
 
 
 def process_file(file_path: Path, auto_fix: bool = False) -> dict:
-    result = {"path": file_path, "has_issues": False, "fixed": False, "errors": [], "warnings": []}
+    result = {
+        "path": file_path,
+        "has_issues": False,
+        "fixed": False,
+        "errors": [],
+        "warnings": [],
+    }
     try:
         content_bytes = file_path.read_bytes()
     except Exception as e:
@@ -28,7 +34,9 @@ def process_file(file_path: Path, auto_fix: bool = False) -> dict:
             else:
                 return result
         for w in caught_warnings:
-            if issubclass(w.category, SyntaxWarning) and "invalid escape sequence" in str(w.message):
+            if issubclass(
+                w.category, SyntaxWarning
+            ) and "invalid escape sequence" in str(w.message):
                 result["has_issues"] = True
                 line_no = getattr(w, "lineno", "Unknown")
                 result["warnings"].append(f"Line {line_no}: SyntaxWarning: {w.message}")
@@ -53,8 +61,15 @@ def process_file(file_path: Path, auto_fix: bool = False) -> dict:
                             warnings.simplefilter("always", SyntaxWarning)
                             with contextlib.suppress(SyntaxError, SyntaxWarning):
                                 compile(f"_{prefix}{actual_str}", "<string>", "exec")
-                            if any("invalid escape sequence" in str(sw.message) for sw in str_warnings):
-                                new_prefix = "r" + prefix if "r" not in prefix.lower() else prefix
+                            if any(
+                                "invalid escape sequence" in str(sw.message)
+                                for sw in str_warnings
+                            ):
+                                new_prefix = (
+                                    "r" + prefix
+                                    if "r" not in prefix.lower()
+                                    else prefix
+                                )
                                 tok = tok._replace(string=f"{new_prefix}{actual_str}")
                                 is_modified = True
                 modified_tokens.append(tok)
@@ -72,7 +87,11 @@ def main():
         description="Find and optionally fix invalid escape sequences in Python files using parallel processing."
     )
     parser.add_argument(
-        "directory", type=str, nargs="?", default=".", help="The target directory to scan (default: current directory)."
+        "directory",
+        type=str,
+        nargs="?",
+        default=".",
+        help="The target directory to scan (default: current directory).",
     )
     parser.add_argument(
         "-a",
@@ -88,9 +107,13 @@ def main():
     py_files = list(target_dir.rglob("*.py"))
     script_path = Path(__file__).resolve()
     py_files = [f for f in py_files if f.resolve() != script_path]
-    print(f"🔍 Found {len(py_files)} Python files. Processing in parallel across {os.cpu_count() or 1} cores...")
+    print(
+        f"🔍 Found {len(py_files)} Python files. Processing in parallel across {os.cpu_count() or 1} cores..."
+    )
     if args.auto_fix:
-        print("🛠️  Auto-fix flag (-a) is active. Offending string literals will be converted to raw strings.")
+        print(
+            "🛠️  Auto-fix flag (-a) is active. Offending string literals will be converted to raw strings."
+        )
     print("-" * 42)
     total_issues = 0
     total_fixed = 0
@@ -111,7 +134,7 @@ def main():
                     total_fixed += 1
                 print()
     print("-" * 42)
-    print(f"📊 Scan Complete.")
+    print("📊 Scan Complete.")
     print(f"   Files with issues: {total_issues}")
     if args.auto_fix:
         print(f"   Files successfully fixed: {total_fixed}")

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Termux script creator - Creates executable scripts from clipboard content.
-Archives existing files to ~/isaac/may/scripts/ if -a flag provided.
-"""
 
 from __future__ import annotations
 
@@ -24,13 +20,19 @@ EXTENSION_MAP = {
     ".bash": "bash",
     ".rs": "rust",
 }
-SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin", Path.home() / ".cargo" / "bin"}
+SCRIPT_DIRS = {
+    Path.home() / "bin",
+    Path.home() / "bashbin",
+    Path.home() / ".cargo" / "bin",
+}
 ARCHIVE_DIR = Path.home() / "isaac" / "may" / "scripts"
 
 
 def get_clipboard_content() -> str:
     try:
-        result = subprocess.run(["termux-clipboard-get"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["termux-clipboard-get"], capture_output=True, text=True, check=True
+        )
         return result.stdout
     except subprocess.CalledProcessError as e:
         print(f"Failed to read clipboard: {e}", file=sys.stderr)
@@ -100,7 +102,11 @@ def main() -> None:
         archive_existing_file(output_path)
     content = get_clipboard_content()
     if not content.strip():
-        content = (TERMUX_SHEBANGS[get_language_from_extension(filename)] + "\n\n") if is_script_dir else "\n"
+        content = (
+            (TERMUX_SHEBANGS[get_language_from_extension(filename)] + "\n\n")
+            if is_script_dir
+            else "\n"
+        )
     elif is_script_dir:
         lang = get_language_from_extension(filename)
         content = replace_shebang(content, lang)

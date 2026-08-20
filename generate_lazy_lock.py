@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Generate lazy-lock.json for lazy.nvim plugin manager.
-Scans plugins in ~/.local/share/nvim/lazy and creates a lock file
-with current commit hashes.
-"""
 
 from __future__ import annotations
 
@@ -15,10 +10,16 @@ from pathlib import Path
 def get_git_commit(repo_path):
     try:
         commit = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=repo_path, stderr=subprocess.DEVNULL, text=True
+            ["git", "rev-parse", "HEAD"],
+            cwd=repo_path,
+            stderr=subprocess.DEVNULL,
+            text=True,
         ).strip()
         branch = subprocess.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=repo_path, stderr=subprocess.DEVNULL, text=True
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=repo_path,
+            stderr=subprocess.DEVNULL,
+            text=True,
         ).strip()
         return commit, branch
     except subprocess.CalledProcessError:
@@ -54,7 +55,7 @@ def generate_lazy_lock():
         print(f"\n✓ Successfully wrote lock file to {lock_file}")
         print(f"  Total plugins: {len(plugins_lock)}")
         return True
-    except IOError as e:
+    except OSError as e:
         print(f"Error writing lock file: {e}")
         return False
 

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Automatically scan directory and translate non-English text files.
-Optimized for Python 3.12.
-"""
 
 from __future__ import annotations
 
@@ -19,7 +15,11 @@ DIRECTORY: Final[str] = "."
 CHUNK_SIZE: Final[int] = 2000
 MAX_WORKERS_FILE: Final[int] = 6
 MAX_WORKERS_CHUNK: Final[int] = 8
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 try:
     from fastwalk import walk_files
@@ -98,7 +98,11 @@ def process_directory(directory: str) -> None:
                 files.append(p)
     else:
         for p in dir_path.rglob("*"):
-            if p.is_file() and (not any(part.startswith(".") for part in p.parts)) and (not is_binary(p)):
+            if (
+                p.is_file()
+                and (not any(part.startswith(".") for part in p.parts))
+                and (not is_binary(p))
+            ):
                 files.append(p)
     logger.info("Total text files found: %d", len(files))
     if not files:

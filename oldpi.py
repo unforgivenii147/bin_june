@@ -13,7 +13,14 @@ from dh import mpf3
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
-    skip_dirs = {".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", "lazy"}
+    skip_dirs = {
+        ".git",
+        "__pycache__",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".pytest_cache",
+        "lazy",
+    }
     queue = deque([path])
     files = []
     while queue:
@@ -126,7 +133,7 @@ def autofix_file(filepath: str) -> bool:
     try:
         with Path(filepath).open(encoding="utf-8") as f:
             lines = f.readlines()
-        if any((l.strip() == "from rich import print" for l in lines)):
+        if any(l.strip() == "from rich import print" for l in lines):
             return False
         changed = False
         for i, line in enumerate(lines):
@@ -169,9 +176,18 @@ def process_file(filepath: str, autofix: bool = False) -> str | None:
 def main() -> None:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Detect and fix Python 2 print statements")
-    parser.add_argument("path", nargs="?", default=".", help="Path to file or directory to scan")
-    parser.add_argument("-a", "--autofix", action="store_true", help="Automatically fix print statements")
+    parser = argparse.ArgumentParser(
+        description="Detect and fix Python 2 print statements"
+    )
+    parser.add_argument(
+        "path", nargs="?", default=".", help="Path to file or directory to scan"
+    )
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Automatically fix print statements",
+    )
     args = parser.parse_args()
     path = Path(args.path)
     if path.is_file() and path.suffix == ".py":

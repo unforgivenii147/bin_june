@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Copy installed packages that have entry points to ~/tmp/packages/<pkgname>
-Uses parallel processing for efficient file copying.
-"""
 
 from __future__ import annotations
 
@@ -16,13 +12,15 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional, Tuple
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(processName)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(processName)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 
-def get_python_paths() -> List[Path]:
+def get_python_paths() -> list[Path]:
     paths = []
     paths.extend(site.getsitepackages())
     user_site = site.getusersitepackages()
@@ -34,7 +32,7 @@ def get_python_paths() -> List[Path]:
     return [p for p in paths if p.exists()]
 
 
-def find_dist_info_dirs(search_paths: List[Path]) -> List[Path]:
+def find_dist_info_dirs(search_paths: list[Path]) -> list[Path]:
     dist_info_dirs = []
     for path in search_paths:
         if not path.exists():
@@ -58,10 +56,13 @@ def has_entry_points(dist_info_dir: Path) -> bool:
                     return True
         except Exception as e:
             logger.debug(f"Error reading {metadata_file}: {e}")
-    return bool((dist_info_dir / "top_level.txt").exists() and any(dist_info_dir.glob("scripts*")))
+    return bool(
+        (dist_info_dir / "top_level.txt").exists()
+        and any(dist_info_dir.glob("scripts*"))
+    )
 
 
-def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
+def parse_record_file(dist_info_dir: Path) -> list[tuple[Path, str]]:
     record_file = dist_info_dir / "RECORD"
     if not record_file.exists():
         logger.warning(f"No RECORD file found in {dist_info_dir}")
@@ -74,7 +75,10 @@ def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
                 if row and len(row) >= 1:
                     relative_path = row[0]
                     hash_digest = row[1] if len(row) > 1 else ""
-                    if not relative_path.endswith(".pyc") and "__pycache__" not in relative_path:
+                    if (
+                        not relative_path.endswith(".pyc")
+                        and "__pycache__" not in relative_path
+                    ):
                         files.append((Path(relative_path), hash_digest))
     except Exception as e:
         logger.error(f"Error parsing RECORD file {record_file}: {e}")
@@ -82,7 +86,9 @@ def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
 
 
 @lru_cache(maxsize=128)
-def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Optional[Path]:
+def find_file_in_paths(
+    relative_path: str, search_paths: tuple[Path, ...]
+) -> Path | None:
     if Path(relative_path).is_absolute():
         abs_path = Path(relative_path)
         return abs_path if abs_path.exists() else None
@@ -114,7 +120,9 @@ def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Op
     return None
 
 
-def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, bool, str]:
+def copy_package_files(
+    package_info: tuple[str, Path, list[str]],
+) -> tuple[str, bool, str]:
     package_name, dist_info_dir, search_paths = package_info
     try:
         dest_base = Path.home() / "tmp" / "packages" / package_name
@@ -186,12 +194,19 @@ def main():
         logger.warning("No packages with entry points found!")
         return
     search_paths_str = [str(p) for p in search_paths]
-    package_infos = [(name, d, search_paths_str) for name, d in packages_with_entry_points]
+    package_infos = [
+        (name, d, search_paths_str) for name, d in packages_with_entry_points
+    ]
     results = []
     max_workers = min(os.cpu_count() or 1, len(package_infos))
-    logger.info(f"Processing {len(package_infos)} packages using {max_workers} workers...")
+    logger.info(
+        f"Processing {len(package_infos)} packages using {max_workers} workers..."
+    )
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_package = {executor.submit(copy_package_files, pkg_info): pkg_info[0] for pkg_info in package_infos}
+        future_to_package = {
+            executor.submit(copy_package_files, pkg_info): pkg_info[0]
+            for pkg_info in package_infos
+        }
         for future in as_completed(future_to_package):
             package_name = future_to_package[future]
             try:

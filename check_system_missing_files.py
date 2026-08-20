@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""System package file integrity checker for Termux/Linux."""
 
 from __future__ import annotations
 
@@ -21,7 +20,13 @@ def should_ignore(file_path):
 
 def check_package_files(pkg_name):
     try:
-        result = subprocess.run(["dpkg", "-L", pkg_name], capture_output=True, text=True, timeout=5, check=False)
+        result = subprocess.run(
+            ["dpkg", "-L", pkg_name],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
         if result.returncode != 0:
             return pkg_name, None
         missing = []
@@ -41,7 +46,9 @@ def check_package_files(pkg_name):
 def main():
     output_file = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("missing_files.json")
     result = subprocess.run(["dpkg", "-l"], capture_output=True, text=True, check=False)
-    packages = [line.split()[1] for line in result.stdout.split("\n") if line.startswith("ii")]
+    packages = [
+        line.split()[1] for line in result.stdout.split("\n") if line.startswith("ii")
+    ]
     print(f"Scanning {len(packages)} packages...")
     results = {}
     with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
@@ -59,7 +66,7 @@ def main():
             f.write("\n".join(results.keys()))
         print(f"\n✓ {len(results)} packages with missing files → {output_file}")
         print(f"  Total missing: {sum(len(f) for f in results.values())}")
-    except IOError as e:
+    except OSError as e:
         print(f"Error writing output: {e}", file=sys.stderr)
         sys.exit(1)
 

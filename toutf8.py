@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert files with non-UTF8 encoding to UTF8.
-Uses parallel processing to handle multiple files efficiently.
-"""
 
 from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Generator, Tuple
 
 import chardet
 from binaryornot import is_binary
@@ -26,7 +22,7 @@ def detect_encoding(file_path: Path) -> str:
         return "utf-8"
 
 
-def convert_file(file_path: Path) -> Tuple[Path, bool, str]:
+def convert_file(file_path: Path) -> tuple[Path, bool, str]:
     try:
         if is_binary(file_path):
             return file_path, False, "Skipped (binary/unsupported)"
@@ -62,9 +58,24 @@ def main():
         "  python script.py ./src ./docs       # Process specific directories\n"
         "  python script.py file.txt dir/      # Process file and directory",
     )
-    parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed output for each file")
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4)",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show detailed output for each file",
+    )
     args = parser.parse_args()
     input_paths = args.paths if args.paths else ["."]
     files = list(collect_files(input_paths))
@@ -84,16 +95,14 @@ def main():
                 status = "✓" if success else "✗"
                 print(f"{status} {file_path.relative_to(Path.cwd())} - {message}")
             if success:
-                if "Already UTF8" in message:
-                    skipped += 1
-                elif "Skipped" in message:
+                if "Already UTF8" in message or "Skipped" in message:
                     skipped += 1
                 else:
                     converted += 1
             else:
                 errors += 1
     print(f"\n{'=' * 42}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Converted: {converted}")
     print(f"  Skipped:   {skipped}")
     print(f"  Errors:    {errors}")

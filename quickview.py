@@ -8,7 +8,9 @@ LINES_PER_FILE = 20
 
 
 def list_files() -> list[Path]:
-    return sorted([p for p in Path().iterdir() if p.is_file()], key=lambda p: p.name.lower())
+    return sorted(
+        [p for p in Path().iterdir() if p.is_file()], key=lambda p: p.name.lower()
+    )
 
 
 def head_lines(path, n: int):

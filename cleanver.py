@@ -11,7 +11,14 @@ def cleanver(path: Path) -> None:
     for line in lines:
         if not line or line.startswith("#"):
             continue
-        pkg = line.split("==")[0].split(">=")[0].split("<=")[0].split("~=")[0].split(" @ ")[0].split(" ")[0]
+        pkg = (
+            line.split("==")[0]
+            .split(">=")[0]
+            .split("<=")[0]
+            .split("~=")[0]
+            .split(" @ ")[0]
+            .split(" ")[0]
+        )
         package_names.append(pkg.strip())
         path.write_text("\n".join(package_names) + "\n", encoding="utf-8")
 

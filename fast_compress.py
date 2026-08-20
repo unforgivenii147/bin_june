@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Recursive file compression/decompression tool using Zstandard.
-Compresses files in current directory recursively, skipping certain extensions and .git folders.
-Uses Path.walk() for memory-efficient traversal.
-"""
 
 from __future__ import annotations
 
@@ -352,7 +347,9 @@ def fsz(bytes_size: float) -> str:
     return f"{bytes_size:.2f} PB"
 
 
-def process_stream(base_dir: Path, compress: bool, level: int, threads: int, remove_original: bool):
+def process_stream(
+    base_dir: Path, compress: bool, level: int, threads: int, remove_original: bool
+):
     print(f"\n{'Compressing' if compress else 'Decompressing'} files (streaming)...")
     print(f"Remove original files: {'Yes' if remove_original else 'No'}")
     print("-" * 42)
@@ -407,7 +404,11 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
                     completed += 1
                     progress = int(completed / max(1, total_submitted + skipped) * 42)
                     bar = "█" * progress + "░" * (50 - progress)
-                    print(f"\rProgress: [{bar}] {completed}/{total_submitted + skipped} files", end="", flush=True)
+                    print(
+                        f"\rProgress: [{bar}] {completed}/{total_submitted + skipped} files",
+                        end="",
+                        flush=True,
+                    )
                     if not result[0]:
                         failed.append((result[1], result[2]))
                     break
@@ -416,7 +417,11 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
             completed += 1
             progress = int(completed / max(1, total_submitted + skipped) * 42)
             bar = "█" * progress + "░" * (50 - progress)
-            print(f"\rProgress: [{bar}] {completed}/{total_submitted + skipped} files", end="", flush=True)
+            print(
+                f"\rProgress: [{bar}] {completed}/{total_submitted + skipped} files",
+                end="",
+                flush=True,
+            )
             if not result[0]:
                 failed.append((result[1], result[2]))
         print()
@@ -439,7 +444,9 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
     else:
         success_count = total_submitted
         if success_count > 0:
-            print(f"\n✅ Successfully {'compressed' if compress else 'decompressed'} {success_count} files!")
+            print(
+                f"\n✅ Successfully {'compressed' if compress else 'decompressed'} {success_count} files!"
+            )
             if remove_original:
                 print("   Original files have been removed.")
         else:
@@ -447,17 +454,40 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Recursively compress or decompress files using Zstandard")
-    group = parser.add_mutually_exclusive_group(required=False)
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no action specified)")
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
-    parser.add_argument(
-        "--level", type=int, default=3, choices=range(1, 23), help="Compression level (1-22, default: 3)"
+    parser = argparse.ArgumentParser(
+        description="Recursively compress or decompress files using Zstandard"
     )
-    parser.add_argument("--threads", type=int, default=4, help="Number of threads to use (default: 8)")
-    parser.add_argument("--dir", type=str, default=".", help="Directory to process (default: current directory)")
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files (default if no action specified)",
+    )
+    group.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress files"
+    )
     parser.add_argument(
-        "--keep", default=False, action="store_true", help="Keep original files (default: remove on success)"
+        "--level",
+        type=int,
+        default=3,
+        choices=range(1, 23),
+        help="Compression level (1-22, default: 3)",
+    )
+    parser.add_argument(
+        "--threads", type=int, default=4, help="Number of threads to use (default: 8)"
+    )
+    parser.add_argument(
+        "--dir",
+        type=str,
+        default=".",
+        help="Directory to process (default: current directory)",
+    )
+    parser.add_argument(
+        "--keep",
+        default=False,
+        action="store_true",
+        help="Keep original files (default: remove on success)",
     )
     args = parser.parse_args()
     if not args.compress and not args.decompress:

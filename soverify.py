@@ -44,18 +44,28 @@ class CtypesVerifier:
 
     def verify_with_symbols(self, file_path: Path) -> tuple[bool, dict]:
         can_load, msg = self.verify_so_file(file_path)
-        symbol_info = {"can_load": can_load, "message": msg, "has_symbols": False, "symbol_count": 0}
+        symbol_info = {
+            "can_load": can_load,
+            "message": msg,
+            "has_symbols": False,
+            "symbol_count": 0,
+        }
         if not can_load:
             return (False, symbol_info)
         try:
-            result = subprocess.run(["nm", str(file_path)], capture_output=True, timeout=10, text=True)
+            result = subprocess.run(
+                ["nm", str(file_path)], capture_output=True, timeout=10, text=True
+            )
             if result.returncode == 0:
                 lines = [line for line in result.stdout.split("\n") if line.strip()]
                 symbol_info["symbol_count"] = len(lines)
                 symbol_info["has_symbols"] = len(lines) > 0
                 self.log(f"Found {len(lines)} symbols in {file_path.name}")
         except FileNotFoundError:
-            self.log("'nm' command not found. Install binutils for symbol analysis", "WARNING")
+            self.log(
+                "'nm' command not found. Install binutils for symbol analysis",
+                "WARNING",
+            )
         except subprocess.TimeoutExpired:
             self.log(f"Symbol extraction timed out for {file_path.name}", "WARNING")
         except Exception as e:
@@ -123,7 +133,9 @@ def main() -> None:
         print(f"{'=' * 42}")
         for file_path in error_files:
             print(f"  ✗ {file_path}")
-    logger.info(f"Verification complete: {valid_count} valid, {error_count} errors out of {len(files)} files")
+    logger.info(
+        f"Verification complete: {valid_count} valid, {error_count} errors out of {len(files)} files"
+    )
     if error_count > 0:
         sys.exit(1)
 

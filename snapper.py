@@ -114,7 +114,10 @@ def compress(data: bytes) -> bytes:
             offset = pos - candidate
             match_len = 4
             max_match = min(data_len - pos, 64)
-            while match_len < max_match and data[candidate + match_len] == data[pos + match_len]:
+            while (
+                match_len < max_match
+                and data[candidate + match_len] == data[pos + match_len]
+            ):
                 match_len += 1
             _emit_copy(output, offset, match_len)
             pos += match_len
@@ -233,7 +236,12 @@ def decompress(data: bytes) -> bytes:
             if pos + 4 > len(data):
                 msg = "error length"
                 raise CompressionError(msg, algorithm="snappy")
-            offset = data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24
+            offset = (
+                data[pos]
+                | data[pos + 1] << 8
+                | data[pos + 2] << 16
+                | data[pos + 3] << 24
+            )
             pos += 4
             if offset == 0:
                 msg = "error length"

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Spell check all text files recursively using pyspellchecker.
-Supports parallel processing and optional auto-fix mode.
-"""
 
 from __future__ import annotations
 
@@ -10,7 +6,6 @@ import argparse
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 from dh import TXT_EXT
 from loguru import logger
@@ -29,7 +24,7 @@ logger.add(
 )
 
 
-def find_text_files(paths: List[Path], extensions: set | None = None) -> List[Path]:
+def find_text_files(paths: list[Path], extensions: set | None = None) -> list[Path]:
     if extensions is None:
         extensions = TXT_EXT
     text_files = []
@@ -50,14 +45,14 @@ def find_text_files(paths: List[Path], extensions: set | None = None) -> List[Pa
     return list(set(text_files))
 
 
-def extract_words(text: str) -> List[Tuple[str, int, int]]:
+def extract_words(text: str) -> list[tuple[str, int, int]]:
     words = []
     for match in re.finditer(r"\b[a-zA-Z]+\b", text):
         words.append((match.group(), match.start(), match.end()))
     return words
 
 
-def check_file(file_path: Path) -> Dict:
+def check_file(file_path: Path) -> dict:
     try:
         spell = SpellChecker()
         content = file_path.read_text(encoding="utf-8", errors="ignore")
@@ -78,13 +73,22 @@ def check_file(file_path: Path) -> Dict:
             logger.info(f"{file_path}: Found {len(misspellings)} misspellings")
             for ms in misspellings:
                 logger.debug(f"  '{ms['word']}' → '{ms['correction']}' in {file_path}")
-        return {"file": str(file_path), "misspellings": misspellings, "content": content}
+        return {
+            "file": str(file_path),
+            "misspellings": misspellings,
+            "content": content,
+        }
     except Exception as e:
         logger.error(f"Error checking {file_path}: {e}")
-        return {"file": str(file_path), "error": str(e), "misspellings": [], "content": None}
+        return {
+            "file": str(file_path),
+            "error": str(e),
+            "misspellings": [],
+            "content": None,
+        }
 
 
-def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
+def fix_file(file_path: Path, corrections: dict[str, str]) -> bool:
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
         words = extract_words(content)
@@ -103,10 +107,12 @@ def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
         return False
 
 
-def process_files_parallel(files: List[Path], max_workers: int | None = None) -> Dict:
+def process_files_parallel(files: list[Path], max_workers: int | None = None) -> dict:
     results = {}
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(check_file, file_path): file_path for file_path in files}
+        future_to_file = {
+            executor.submit(check_file, file_path): file_path for file_path in files
+        }
         for i, future in enumerate(as_completed(future_to_file), 1):
             file_path = future_to_file[future]
             try:
@@ -116,12 +122,17 @@ def process_files_parallel(files: List[Path], max_workers: int | None = None) ->
                     print(f"\rProcessed {i}/{len(files)} files...", end="", flush=True)
             except Exception as e:
                 logger.error(f"Error processing {file_path}: {e}")
-                results[str(file_path)] = {"file": str(file_path), "error": str(e), "misspellings": [], "content": None}
+                results[str(file_path)] = {
+                    "file": str(file_path),
+                    "error": str(e),
+                    "misspellings": [],
+                    "content": None,
+                }
     print()
     return results
 
 
-def display_results(results: Dict, show_candidates: bool = False):
+def display_results(results: dict, show_candidates: bool = False):
     total_misspellings = 0
     files_with_errors = 0
     for file_path, result in sorted(results.items()):
@@ -146,11 +157,13 @@ def display_results(results: Dict, show_candidates: bool = False):
         if len(misspellings) > 10:
             print(f"  ... and {len(misspellings) - 10} more")
     print("\n" + "=" * 42)
-    print(f"📊 Summary: {files_with_errors} files with {total_misspellings} total misspellings")
+    print(
+        f"📊 Summary: {files_with_errors} files with {total_misspellings} total misspellings"
+    )
     print("-" * 42)
 
 
-def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Dict:
+def get_context(content: str, position: tuple[int, int], window: int = 40) -> dict:
     if not content:
         return {"line": 0, "text": ""}
     start, end = position
@@ -163,7 +176,10 @@ def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Di
         before = "..." + before if before_start > 0 else before
     if after:
         after = after + "..." if after_end < len(content) else after
-    return {"line": line_num, "text": f"{before} [{content[start:end]}] {after}".strip()}
+    return {
+        "line": line_num,
+        "text": f"{before} [{content[start:end]}] {after}".strip(),
+    }
 
 
 def confirm_action(prompt: str) -> bool:
@@ -195,18 +211,39 @@ Examples:
         default=["."],
         help="Files or directories to scan (default: current directory)",
     )
-    parser.add_argument("-a", "--autofix", action="store_true", help="Automatically fix misspelled words in-place")
     parser.add_argument(
-        "-i", "--interactive", action="store_true", help="Ask for confirmation before each fix (only with -a)"
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Automatically fix misspelled words in-place",
     )
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)"
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="Ask for confirmation before each fix (only with -a)",
     )
-    parser.add_argument("-e", "--extensions", nargs="+", help="File extensions to check (default: common text files)")
-    parser.add_argument("-c", "--candidates", action="store_true", help="Show candidate corrections")
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count)",
+    )
+    parser.add_argument(
+        "-e",
+        "--extensions",
+        nargs="+",
+        help="File extensions to check (default: common text files)",
+    )
+    parser.add_argument(
+        "-c", "--candidates", action="store_true", help="Show candidate corrections"
+    )
     args = parser.parse_args()
     if args.extensions:
-        extensions = {ext if ext.startswith(".") else f".{ext}" for ext in args.extensions}
+        extensions = {
+            ext if ext.startswith(".") else f".{ext}" for ext in args.extensions
+        }
     else:
         extensions = TXT_EXT
     logger.info(f"Starting spell check with {len(args.paths)} path(s)")
@@ -225,12 +262,16 @@ Examples:
     results = process_files_parallel(files, args.workers)
     display_results(results, args.candidates)
     if args.autofix:
-        total_misspellings = sum(len(r["misspellings"]) for r in results.values() if not r.get("error"))
+        total_misspellings = sum(
+            len(r["misspellings"]) for r in results.values() if not r.get("error")
+        )
         if total_misspellings == 0:
             print("✅ No misspellings to fix!")
             return
         if args.interactive:
-            proceed = confirm_action(f"\n🔧 Found {total_misspellings} misspellings. Apply fixes?")
+            proceed = confirm_action(
+                f"\n🔧 Found {total_misspellings} misspellings. Apply fixes?"
+            )
         else:
             print(f"\n🔧 Auto-fixing {total_misspellings} misspellings...")
             proceed = True
@@ -247,14 +288,16 @@ Examples:
                         print(f"  Suggested: '{ms['correction']}'")
                         if ms["candidates"]:
                             print(f"  Candidates: {', '.join(ms['candidates'])}")
-                        action = input("  Apply this fix? (y/n/s[kip all]/q[uit]): ").lower().strip()
+                        action = (
+                            input("  Apply this fix? (y/n/s[kip all]/q[uit]): ")
+                            .lower()
+                            .strip()
+                        )
                         if action in ["q", "quit"]:
                             logger.info("User quit during interactive fix")
                             print("Quitting...")
                             return
-                        elif action in ["s", "skip"]:
-                            continue
-                        elif action not in ["y", "yes"]:
+                        elif action in ["s", "skip"] or action not in ["y", "yes"]:
                             continue
                     corrections[ms["word"].lower()] = ms["correction"]
                 if corrections and fix_file(Path(file_path), corrections):

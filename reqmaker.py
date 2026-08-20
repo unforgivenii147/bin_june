@@ -36,14 +36,21 @@ def save_to_req(packages) -> None:
 
 def run_pip_check():
     try:
-        result = subprocess.run([sys.executable, "-m", "pip", "check"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "check"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         return e.stdout.strip() if e.stdout else ""
 
 
 def parse_pip_check(output):
-    pattern = re.compile(r"^(\S+)\s+.*requires\s+([^,]+),\s+which is not installed\.$", re.MULTILINE)
+    pattern = re.compile(
+        r"^(\S+)\s+.*requires\s+([^,]+),\s+which is not installed\.$", re.MULTILINE
+    )
     missing_deps = defaultdict(list)
     for line in output.splitlines():
         match = pattern.match(line.strip())

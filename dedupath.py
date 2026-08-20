@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove duplicate entries from $PATH and update ~/.bashrc
-"""
 
 from __future__ import annotations
 
@@ -35,7 +32,9 @@ def update_bashrc_with_path(bashrc_content, new_path_entries):
     new_path_str = ":".join(new_path_entries)
     path_export = f'export PATH="{new_path_str}"\n'
     lines = bashrc_content.split("\n")
-    path_line_indices = [i for i, line in enumerate(lines) if line.strip().startswith("export PATH=")]
+    path_line_indices = [
+        i for i, line in enumerate(lines) if line.strip().startswith("export PATH=")
+    ]
     if path_line_indices:
         lines[path_line_indices[0]] = path_export.rstrip()
         updated_content = "\n".join(lines)

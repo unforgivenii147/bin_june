@@ -93,16 +93,34 @@ def choose_keep(files: list, policy: str = "oldest") -> Path:
 
 def main() -> None:
     cwd = Path.cwd()
-    p = argparse.ArgumentParser(description="Find and delete duplicate files by content.")
-    p.add_argument(
-        "-r", "--recursive", action="store_true", default=True, help="Search directories recursively (default: True)."
+    p = argparse.ArgumentParser(
+        description="Find and delete duplicate files by content."
     )
     p.add_argument(
-        "-n", "--dry-run", action="store_true", default=False, help="Don't delete; just show what would be done."
+        "-r",
+        "--recursive",
+        action="store_true",
+        default=True,
+        help="Search directories recursively (default: True).",
     )
-    p.add_argument("--follow-symlinks", action="store_true", default=False, help="Follow symlinks to files.")
     p.add_argument(
-        "--min-size", type=int, default=1, help="Minimum file size (bytes) to consider. Default 1 (skip zero-size)."
+        "-n",
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Don't delete; just show what would be done.",
+    )
+    p.add_argument(
+        "--follow-symlinks",
+        action="store_true",
+        default=False,
+        help="Follow symlinks to files.",
+    )
+    p.add_argument(
+        "--min-size",
+        type=int,
+        default=1,
+        help="Minimum file size (bytes) to consider. Default 1 (skip zero-size).",
     )
     p.add_argument(
         "-k",
@@ -111,7 +129,9 @@ def main() -> None:
         default="oldest",
         help="Which file to keep within duplicates.",
     )
-    p.add_argument("--workers", type=int, default=8, help="Number of worker threads (default: 8).")
+    p.add_argument(
+        "--workers", type=int, default=8, help="Number of worker threads (default: 8)."
+    )
     args = p.parse_args()
     root = Path.cwd()
     print("Phase 1: Scanning files and grouping by size...")
@@ -129,7 +149,9 @@ def main() -> None:
         print(f"Scanned {total_files} files. No potential duplicates found.")
         return
     candidate_count = sum(len(v) for v in candidates.values())
-    print(f"Phase 1 complete: {candidate_count} files in {len(candidates)} size-groups to examine.")
+    print(
+        f"Phase 1 complete: {candidate_count} files in {len(candidates)} size-groups to examine."
+    )
     print("Phase 2: Quick hash comparison...")
     quick_groups = defaultdict(list)
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
@@ -150,7 +172,9 @@ def main() -> None:
         print("No duplicates found after quick hash comparison.")
         return
     full_candidates = sum(len(g) for g in need_full)
-    print(f"Phase 2 complete: {full_candidates} files in {len(need_full)} groups need full hash.")
+    print(
+        f"Phase 2 complete: {full_candidates} files in {len(need_full)} groups need full hash."
+    )
     print("Phase 3: Full hash comparison...")
     full_groups = defaultdict(list)
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
@@ -225,7 +249,9 @@ def main() -> None:
     if failed:
         print(f"  Failed to delete: {failed}")
     if freed_space:
-        print(f"  Space freed: {freed_space:,} bytes ({freed_space / 1024 / 1024:.2f} MB)")
+        print(
+            f"  Space freed: {freed_space:,} bytes ({freed_space / 1024 / 1024:.2f} MB)"
+        )
 
 
 if __name__ == "__main__":

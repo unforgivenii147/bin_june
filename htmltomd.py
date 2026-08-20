@@ -16,7 +16,9 @@ def clean_html(html_content: str) -> str:
         script.decompose()
     for style in soup.find_all("style"):
         style.decompose()
-    for comment in soup.find_all(string=lambda text: isinstance(text, str) and text.strip().startswith("<!--")):
+    for comment in soup.find_all(
+        string=lambda text: isinstance(text, str) and text.strip().startswith("<!--")
+    ):
         comment.extract()
     for tag in soup.find_all(["nav", "footer", "aside", "iframe", "noscript"]):
         tag.decompose()
@@ -25,7 +27,9 @@ def clean_html(html_content: str) -> str:
     return str(soup)
 
 
-def convert_html_to_md(html_file: Path, options: Options | None = None) -> tuple[Path, bool]:
+def convert_html_to_md(
+    html_file: Path, options: Options | None = None
+) -> tuple[Path, bool]:
     if html_file.suffix.lower() not in {".html", ".htm"}:
         print(f"Warning: {html_file} doesn't have .html/.htm extension, skipping.")
         return html_file, False
@@ -41,7 +45,9 @@ def convert_html_to_md(html_file: Path, options: Options | None = None) -> tuple
                 github_flavored=True,
             )
         markdown_content = convert(cleaned_html, options=options)
-        markdown_content = "\n".join(line for line in markdown_content.split("\n") if line.strip() or line == "")
+        markdown_content = "\n".join(
+            line for line in markdown_content.split("\n") if line.strip() or line == ""
+        )
         import re
 
         markdown_content = re.sub(r"\n{3,}", "\n\n", markdown_content)
@@ -105,7 +111,11 @@ Examples:
         default=cpu_count(),
         help=f"Number of worker processes (default: {cpu_count()})",
     )
-    parser.add_argument("--keep-forms", action="store_true", help="Keep form elements (default: remove them)")
+    parser.add_argument(
+        "--keep-forms",
+        action="store_true",
+        help="Keep form elements (default: remove them)",
+    )
     parser.add_argument(
         "--github-flavored",
         action="store_true",
@@ -133,7 +143,9 @@ Examples:
             sys.exit(0)
         print(f"Found {len(html_files)} HTML file(s) to process")
     else:
-        print(f"Error: '{input_path}' is neither a file nor a directory.", file=sys.stderr)
+        print(
+            f"Error: '{input_path}' is neither a file nor a directory.", file=sys.stderr
+        )
         sys.exit(1)
     if len(html_files) == 1:
         convert_html_to_md(html_files[0], options)
@@ -144,7 +156,9 @@ Examples:
             results = pool.map(process_file_wrapper, process_args)
         successful = sum(1 for _, success in results if success)
         print(f"\n{'=' * 42}")
-        print(f"Conversion complete: {successful}/{len(html_files)} files converted successfully")
+        print(
+            f"Conversion complete: {successful}/{len(html_files)} files converted successfully"
+        )
 
 
 if __name__ == "__main__":

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-QR Code Reader Script
-Usage: python qr_reader.py <image_path>
-"""
 
 from __future__ import annotations
 
@@ -27,7 +23,9 @@ def read_qr_code(image_path):
             print(f"QR Code {i}:")
             print(f"  Data: {data}")
             print(f"  Type: {obj.type}")
-            print(f"  Position: (left={rect.left}, top={rect.top}, width={rect.width}, height={rect.height})")
+            print(
+                f"  Position: (left={rect.left}, top={rect.top}, width={rect.width}, height={rect.height})"
+            )
             print()
             results.append(data)
         return results

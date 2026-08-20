@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert CodePen-style HTML (body only) to a complete HTML document.
-Adds proper <head> section with links to style.css and script.js
-"""
 
 from __future__ import annotations
 
@@ -43,7 +39,9 @@ def process_file(input_file, output_file=None, title=None):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python codepen_converter.py <input_file> [output_file] [--title 'Page Title']")
+        print(
+            "Usage: python codepen_converter.py <input_file> [output_file] [--title 'Page Title']"
+        )
         print("\nExample:")
         print("  python codepen_converter.py index.html")
         print("  python codepen_converter.py codepen.html output.html")

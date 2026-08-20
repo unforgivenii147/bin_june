@@ -1,28 +1,53 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from __future__ import annotations
 
-import pathlib
+
+import argparse
 import pydoc
-import sys
+from pathlib import Path
 
 
-def view_file(file_path):
-    with open(file_path, encoding="utf-8") as f:
-        content = f.read()
-        pydoc.pager(content)
+def collect_files(root: Path, recursive: bool) -> list[Path]:
+    paths = root.rglob("*") if recursive else root.iterdir()
+    return sorted(
+        (path for path in paths if path.is_file()),
+        key=lambda path: str(path).lower(),
+    )
 
 
-def main():
-    recursive = "-r" in sys.argv
-    current_dir = pathlib.Path(".")
-    if recursive:
-        files = current_dir.rglob("*")
-    else:
-        files = current_dir.glob("*")
-    files = [f for f in files if f.is_file()]
-    for file_path in files:
-        print(f"Viewing: {file_path}")
-        view_file(file_path)
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="View files in the current directory with paging."
+    )
+    parser.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="include files in subdirectories",
+    )
+    args = parser.parse_args()
+
+    root = Path.cwd()
+    files = collect_files(root, args.recursive)
+
+    if not files:
+        print("No files found.")
+        return
+
+    output = []
+
+    for path in files:
+        try:
+            content = path.read_text(encoding="utf-8", errors="replace")
+        except OSError as exc:
+            content = f"[Could not read file: {exc}]"
+
+        output.append(f"\n{'=' * 80}")
+        output.append(f"FILE: {path.relative_to(root)}")
+        output.append("=" * 80)
+        output.append(content)
+
+    # Use the system pager. Press PageDown/PageUp to navigate and q to exit.
+    pydoc.pager("\n".join(output))
 
 
 if __name__ == "__main__":

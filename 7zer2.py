@@ -20,7 +20,10 @@ def setup_logging() -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(processName)s %(message)s",
-        handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8"), logging.StreamHandler()],
+        handlers=[
+            logging.FileHandler(LOG_FILE, encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
     )
 
 
@@ -31,7 +34,9 @@ def choose_best_py7zr_method():
     for name in PREFERRED_METHODS:
         if hasattr(comp, name):
             return getattr(comp, name)
-    msg = f"No supported compression methods found. Tried: {', '.join(PREFERRED_METHODS)}"
+    msg = (
+        f"No supported compression methods found. Tried: {', '.join(PREFERRED_METHODS)}"
+    )
     raise RuntimeError(msg)
 
 
@@ -75,7 +80,9 @@ def create_tar_from_dir(src_dir: Path, tar_path: Path) -> None:
 
 def compress_file_to_7z(src_file: Path, out_path: Path) -> None:
     logging.info("Compress file: %s -> %s", src_file, out_path)
-    with py7zr.SevenZipFile(out_path, mode="w", filters=[{"id": BEST_METHOD, "preset": 9}]) as archive:
+    with py7zr.SevenZipFile(
+        out_path, mode="w", filters=[{"id": BEST_METHOD, "preset": 9}]
+    ) as archive:
         archive.write(src_file, arcname=src_file.name)
 
 

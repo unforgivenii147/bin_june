@@ -23,7 +23,9 @@ def format_python_file(filepath: Path) -> None:
             content = f_in.read()
             f_bak.write(content)
     except OSError as e:
-        print(f"Error creating backup file {backup_filepath.name}: {e}", file=sys.stderr)
+        print(
+            f"Error creating backup file {backup_filepath.name}: {e}", file=sys.stderr
+        )
         return
     formatted_lines = []
     lines = content.splitlines()
@@ -43,10 +45,14 @@ def format_python_file(filepath: Path) -> None:
                 current_multiline_string_lines = [line]
             else:
                 current_multiline_string_lines.append(line)
-                if line.strip().endswith(string_type) and len(line.strip()) > len(string_type):
+                if line.strip().endswith(string_type) and len(line.strip()) > len(
+                    string_type
+                ):
                     in_multiline_string = False
                     processed_string = "\n".join(current_multiline_string_lines)
-                    content_to_wrap = processed_string[len(string_type) : -len(string_type)]
+                    content_to_wrap = processed_string[
+                        len(string_type) : -len(string_type)
+                    ]
                     wrapped_content = textwrap.fill(
                         content_to_wrap,
                         width=35,
@@ -63,7 +69,9 @@ def format_python_file(filepath: Path) -> None:
             continue
         if in_multiline_string:
             current_multiline_string_lines.append(line)
-            if line.strip().endswith(string_type) and len(line.strip()) > len(string_type):
+            if line.strip().endswith(string_type) and len(line.strip()) > len(
+                string_type
+            ):
                 in_multiline_string = False
                 processed_string = "\n".join(current_multiline_string_lines)
                 content_to_wrap = processed_string[len(string_type) : -len(string_type)]
@@ -96,7 +104,9 @@ def format_python_file(filepath: Path) -> None:
                     break_long_words=False,
                     break_on_hyphens=False,
                 )
-                formatted_lines.append(code_part + wrapped_comment[len(comment_indent + "# ") :])
+                formatted_lines.append(
+                    code_part + wrapped_comment[len(comment_indent + "# ") :]
+                )
             else:
                 formatted_lines.append(line)
         else:
@@ -108,9 +118,13 @@ def format_python_file(filepath: Path) -> None:
         ast.parse(final_formatted_content)
         try:
             Path(filepath).write_text(final_formatted_content, encoding="utf-8")
-            print(f"Successfully formatted {filepath}. Backup created at {backup_filepath}")
+            print(
+                f"Successfully formatted {filepath}. Backup created at {backup_filepath}"
+            )
         except OSError as e:
-            print(f"Error writing formatted content to {filepath}: {e}", file=sys.stderr)
+            print(
+                f"Error writing formatted content to {filepath}: {e}", file=sys.stderr
+            )
     except SyntaxError as e:
         temp_file = Path("temporary.py")
         temp_file.write_text(final_formatted_content, encoding="utf-8")

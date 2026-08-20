@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""HTML minifier - Python port of nodejs html-minifier."""
 
 import re
 import sys
@@ -43,7 +42,9 @@ class HTMLMinifier:
         if node.text and self.collapse_whitespace:
             node.text = self._collapse_whitespace(node.text)
         if self.remove_empty_attributes and node.attrib:
-            attrs_to_remove = [k for k, v in node.attrib.items() if not v or v.isspace()]
+            attrs_to_remove = [
+                k for k, v in node.attrib.items() if not v or v.isspace()
+            ]
             for attr in attrs_to_remove:
                 del node.attrib[attr]
         for child in list(node):
@@ -67,6 +68,7 @@ class HTMLMinifier:
         return html_str
 
     def _minify_style_tags(self, html_str: str) -> str:
+
         def minify_css(match):
             css = match.group(1)
             css = re.sub(r"/\*.*?\*/", "", css, flags=re.DOTALL)
@@ -74,9 +76,12 @@ class HTMLMinifier:
             css = re.sub(r";\s*}", "}", css)
             return f"<style>{css.strip()}</style>"
 
-        return re.sub(r"<style[^>]*>(.*?)</style>", minify_css, html_str, flags=re.DOTALL)
+        return re.sub(
+            r"<style[^>]*>(.*?)</style>", minify_css, html_str, flags=re.DOTALL
+        )
 
     def _minify_script_tags(self, html_str: str) -> str:
+
         def minify_js(match):
             js = match.group(1)
             js = re.sub(r"//.*?$", "", js, flags=re.MULTILINE)
@@ -84,7 +89,9 @@ class HTMLMinifier:
             js = re.sub(r"\s+", " ", js)
             return f"<script>{js.strip()}</script>"
 
-        return re.sub(r"<script[^>]*>(.*?)</script>", minify_js, html_str, flags=re.DOTALL)
+        return re.sub(
+            r"<script[^>]*>(.*?)</script>", minify_js, html_str, flags=re.DOTALL
+        )
 
 
 def minify(

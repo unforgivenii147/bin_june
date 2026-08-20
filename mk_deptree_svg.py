@@ -1,23 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Create an SVG dependency graph for installed Python packages.
-
-Requirements:
-    pip install joblib
-
-Usage:
-    python dependency_tree.py
-    python dependency_tree.py --output dependencies.svg
-    python dependency_tree.py --root requests
-"""
 
 from __future__ import annotations
 
 import argparse
 import html
-import importlib.metadata as metadata
 import re
 from collections import defaultdict, deque
+from importlib import metadata
 from pathlib import Path
 
 from joblib import Parallel, delayed
@@ -26,12 +15,10 @@ WORKERS = 4
 
 
 def normalize_name(name: str) -> str:
-    """Normalize package names according to Python packaging conventions."""
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
 def get_installed_packages() -> dict[str, metadata.Distribution]:
-    """Return installed distributions keyed by normalized package name."""
     packages = {}
 
     for distribution in metadata.distributions():
@@ -45,13 +32,11 @@ def get_installed_packages() -> dict[str, metadata.Distribution]:
 def package_dependencies(
     item: tuple[str, metadata.Distribution],
 ) -> tuple[str, list[str]]:
-    """Read dependencies for one installed package."""
     package_name, distribution = item
     print(f"procesding ... {package_name}")
     dependencies = []
 
     for requirement in distribution.requires or []:
-        # Remove environment markers and extras for a simple dependency graph.
         dependency_name = requirement.split(";", 1)[0]
         dependency_name = re.split(r"[<>=!~\[\s]", dependency_name, maxsplit=1)[0]
 
@@ -64,7 +49,6 @@ def package_dependencies(
 def build_dependency_graph(
     packages: dict[str, metadata.Distribution],
 ) -> dict[str, list[str]]:
-    """Build the installed-package dependency graph in parallel."""
     results = Parallel(n_jobs=WORKERS, prefer="threads")(
         delayed(package_dependencies)(item) for item in packages.items()
     )
@@ -73,8 +57,9 @@ def build_dependency_graph(
     graph = {}
 
     for package_name, dependencies in results:
-        # Keep missing dependencies in the graph so they can be displayed.
-        graph[package_name] = [dependency for dependency in dependencies if dependency in installed_names]
+        graph[package_name] = [
+            dependency for dependency in dependencies if dependency in installed_names
+        ]
 
     return graph
 
@@ -83,11 +68,12 @@ def reachable_graph(
     graph: dict[str, list[str]],
     roots: list[str] | None,
 ) -> tuple[dict[str, list[str]], list[str]]:
-    """Limit the graph to dependencies reachable from selected roots."""
     if not roots:
         selected_roots = sorted(graph)
     else:
-        selected_roots = [normalize_name(root) for root in roots if normalize_name(root) in graph]
+        selected_roots = [
+            normalize_name(root) for root in roots if normalize_name(root) in graph
+        ]
 
     if not selected_roots:
         raise ValueError("None of the requested root packages are installed.")
@@ -108,7 +94,11 @@ def reachable_graph(
                 queue.append(dependency)
 
     limited_graph = {
-        package: [dependency for dependency in graph.get(package, []) if dependency in included]
+        package: [
+            dependency
+            for dependency in graph.get(package, [])
+            if dependency in included
+        ]
         for package in sorted(included)
     }
 
@@ -119,12 +109,6 @@ def topological_levels(
     graph: dict[str, list[str]],
     roots: list[str],
 ) -> dict[str, int]:
-    """
-    Assign vertical levels.
-
-    Roots are placed at level 0. Dependencies are placed below their
-    dependent packages. Cycles are handled without infinite recursion.
-    """
     levels = {root: 0 for root in roots}
     queue = deque(roots)
 
@@ -139,7 +123,6 @@ def topological_levels(
                 levels[dependency] = proposed_level
                 queue.append(dependency)
 
-    # Include any disconnected nodes that may remain.
     for package in graph:
         levels.setdefault(package, 0)
 
@@ -170,7 +153,6 @@ def create_svg(
     roots: list[str],
     output: Path,
 ) -> None:
-    """Render the dependency graph to an SVG file."""
     levels = topological_levels(graph, roots)
     by_level = defaultdict(list)
 
@@ -189,15 +171,23 @@ def create_svg(
     max_nodes_on_level = max(len(nodes) for nodes in by_level.values())
     width = max(
         900,
-        margin * 2 + max_nodes_on_level * node_width + max(0, max_nodes_on_level - 1) * horizontal_gap,
+        margin * 2
+        + max_nodes_on_level * node_width
+        + max(0, max_nodes_on_level - 1) * horizontal_gap,
     )
 
-    height = margin * 2 + (max(by_level) + 1) * node_height + max(0, max(by_level)) * vertical_gap
+    height = (
+        margin * 2
+        + (max(by_level) + 1) * node_height
+        + max(0, max(by_level)) * vertical_gap
+    )
 
     positions: dict[str, tuple[int, int]] = {}
 
     for level, packages in by_level.items():
-        total_width = len(packages) * node_width + max(0, len(packages) - 1) * horizontal_gap
+        total_width = (
+            len(packages) * node_width + max(0, len(packages) - 1) * horizontal_gap
+        )
         start_x = max(margin, (width - total_width) // 2)
         y = margin + level * (node_height + vertical_gap)
 
@@ -207,7 +197,9 @@ def create_svg(
 
     parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">'),
+        (
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">'
+        ),
         "<defs>",
         """
         <marker id="arrow" markerWidth="10" markerHeight="10"
@@ -223,7 +215,7 @@ def create_svg(
         </filter>
         """,
         "</defs>",
-        f'<rect width="100%" height="100%" fill="#f7f8fa"/>',
+        '<rect width="100%" height="100%" fill="#f7f8fa"/>',
         svg_text(
             width // 2,
             30,
@@ -233,7 +225,6 @@ def create_svg(
         ),
     ]
 
-    # Draw edges first so nodes appear above them.
     for package, dependencies in graph.items():
         if package not in positions:
             continue
@@ -256,7 +247,6 @@ def create_svg(
                 f'marker-end="url(#arrow)"/>'
             )
 
-    # Draw package nodes.
     for package, (x, y) in positions.items():
         is_root = package in roots
         fill = "#dbeafe" if is_root else "#ffffff"
@@ -285,7 +275,9 @@ def create_svg(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Create an SVG dependency graph for installed Python packages.")
+    parser = argparse.ArgumentParser(
+        description="Create an SVG dependency graph for installed Python packages."
+    )
     parser.add_argument(
         "-o",
         "--output",

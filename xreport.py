@@ -1,12 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-ArchiveScan v1.4.2 - Recursive Archive Detection, Size Analysis & Integrity Engine
-Auto-detects archives recursively, identifies specific archive types (.zip, .tar.gz, .7z, etc.),
-reports extracted & compressed sizes, tests archive integrity (-t), and auto-extracts (-a).
-"""
 
 import argparse
-import bz2
 import gzip
 import json
 import os
@@ -173,7 +167,9 @@ def analyze_archive(filepath):
                 ext_size = sum(info.file_size for info in zf.infolist())
                 file_count = len(zf.infolist())
                 integrity_ok = zf.testzip() is None
-        elif ext and (ext.startswith(".tar") or ext in (".tgz", ".txz", ".tbz2", ".tzst")):
+        elif ext and (
+            ext.startswith(".tar") or ext in (".tgz", ".txz", ".tbz2", ".tzst")
+        ):
             mode = "r:*"
             if ext in (".tar.gz", ".tgz"):
                 mode = "r:gz"
@@ -302,7 +298,11 @@ def scan_directory(target_dir, auto_extract=False, test_integrity=False, verbose
                 res = analyze_archive(full_path)
                 found_archives.append(res)
                 if verbose:
-                    status_str = "\033[32m[PASS]\033[0m" if res["integrity"] else "\033[31m[FAIL]\033[0m"
+                    status_str = (
+                        "\033[32m[PASS]\033[0m"
+                        if res["integrity"]
+                        else "\033[31m[FAIL]\033[0m"
+                    )
                     print(
                         f" -> Found: {res['filename']} | Type: {res['archive_type']} | Comp: {format_size(res['compressed_size'])} -> Ext: {format_size(res['extracted_size'])} | {status_str}"
                     )
@@ -331,16 +331,24 @@ def scan_directory(target_dir, auto_extract=False, test_integrity=False, verbose
     print(f"Total Extracted Size  : \033[1;32m{format_size(total_extracted)}\033[0m")
     if total_compressed > 0:
         ratio = total_extracted / total_compressed
-        print(f"Overall Expansion     : {ratio:.2f}x ({format_size(total_extracted - total_compressed)} saved)")
+        print(
+            f"Overall Expansion     : {ratio:.2f}x ({format_size(total_extracted - total_compressed)} saved)"
+        )
     if auto_extract and found_archives:
         out_subdir = os.path.join(target, "extracted_archives")
-        print(f"\n\033[38;5;214m[-a] Auto-extracting {len(found_archives)} archives into:\033[0m {out_subdir}")
+        print(
+            f"\n\033[38;5;214m[-a] Auto-extracting {len(found_archives)} archives into:\033[0m {out_subdir}"
+        )
         for item in found_archives:
             ok, dest_or_err = extract_archive(item["path"], out_subdir)
             if ok:
-                print(f"  \033[32m[✓]\033[0m Extracted {item['filename']} -> {dest_or_err}")
+                print(
+                    f"  \033[32m[✓]\033[0m Extracted {item['filename']} -> {dest_or_err}"
+                )
             else:
-                print(f"  \033[31m[✗]\033[0m Failed to extract {item['filename']}: {dest_or_err}")
+                print(
+                    f"  \033[31m[✗]\033[0m Failed to extract {item['filename']}: {dest_or_err}"
+                )
     return found_archives
 
 
@@ -349,7 +357,10 @@ def main():
         description="ArchiveScan CLI v1.4.2 - Recursive archive detection & size calculator"
     )
     parser.add_argument(
-        "directory", nargs="?", default=".", help="Directory to scan recursively (default: current dir)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan recursively (default: current dir)",
     )
     parser.add_argument(
         "-a",
@@ -358,10 +369,20 @@ def main():
         help="Automatically extract all found archives into subdirectories",
     )
     parser.add_argument(
-        "-t", "--test-integrity", action="store_true", help="Validate archive integrity and display CLI art header"
+        "-t",
+        "--test-integrity",
+        action="store_true",
+        help="Validate archive integrity and display CLI art header",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Display verbose file logs while scanning")
-    parser.add_argument("-j", "--json", action="store_true", help="Output results in JSON format")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Display verbose file logs while scanning",
+    )
+    parser.add_argument(
+        "-j", "--json", action="store_true", help="Output results in JSON format"
+    )
     args = parser.parse_args()
     if args.json:
         target = pathlib.Path(args.directory).resolve()
@@ -375,7 +396,10 @@ def main():
         print(json.dumps(archives, indent=2))
     else:
         scan_directory(
-            args.directory, auto_extract=args.auto_extract_all, test_integrity=args.test_integrity, verbose=args.verbose
+            args.directory,
+            auto_extract=args.auto_extract_all,
+            test_integrity=args.test_integrity,
+            verbose=args.verbose,
         )
 
 

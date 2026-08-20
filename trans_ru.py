@@ -16,7 +16,11 @@ MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 4
 RETRY_DELAY: Final[float] = 0.6
 MAX_CHUNK_SIZE: Final[int] = 2000
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -130,7 +134,9 @@ def main() -> None:
     )
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        future_to_chunk = {executor.submit(translate_chunk, chunk): chunk for chunk in chunks}
+        future_to_chunk = {
+            executor.submit(translate_chunk, chunk): chunk for chunk in chunks
+        }
         completed = 0
         total = len(future_to_chunk)
         for future in as_completed(future_to_chunk):
@@ -151,21 +157,29 @@ def main() -> None:
                         )
                         for line in original_lines:
                             try:
-                                t = GoogleTranslator(source="ru", target="en").translate(line)
+                                t = GoogleTranslator(
+                                    source="ru", target="en"
+                                ).translate(line)
                                 results[line] = t if t is not None else line
                             except Exception as e:
-                                logger.error("Per-line fallback failed for '%s': %s", line[:50], e)
+                                logger.error(
+                                    "Per-line fallback failed for '%s': %s",
+                                    line[:50],
+                                    e,
+                                )
                                 results[line] = line
                     logger.info(
                         "Translated chunk %d/%d (sample: '%s' → '%s')",
                         completed,
                         total,
-                        original_lines[0][:40] + ("..." if len(original_lines[0]) > 40 else ""),
+                        original_lines[0][:40]
+                        + ("..." if len(original_lines[0]) > 40 else ""),
                         results.get(original_lines[0], "")[:60],
                     )
                 else:
                     logger.error(
-                        "Failed to translate chunk starting with: %s", (chunk[0][:60] + "...") if chunk else ""
+                        "Failed to translate chunk starting with: %s",
+                        (chunk[0][:60] + "...") if chunk else "",
                     )
             except Exception as e:
                 logger.error(

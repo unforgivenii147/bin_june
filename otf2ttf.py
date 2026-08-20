@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert OTF files to TTF recursively using multiprocessing.
-Removes original OTF files after successful conversion.
-Requires: pip install fonttools brotli
-"""
 
 from __future__ import annotations
 
@@ -60,7 +55,9 @@ def convert_otf_to_ttf(otf_path: Path) -> dict:
     return result
 
 
-def find_otf_files(root_dir: Path | None = None, pattern: str = "**/*.otf") -> list[Path]:
+def find_otf_files(
+    root_dir: Path | None = None, pattern: str = "**/*.otf"
+) -> list[Path]:
     if root_dir is None:
         root_dir = Path.cwd()
     else:

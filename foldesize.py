@@ -60,7 +60,9 @@ def analyze_size_distribution(files_info):
     }
 
 
-def organize_files_in_root(root_path: str = ".", target_folders: int = 4, max_get_size_mb=None) -> None:
+def organize_files_in_root(
+    root_path: str = ".", target_folders: int = 4, max_get_size_mb=None
+) -> None:
     print("-" * 42)
     print("File Organization - Direct to Root Path (No Subdirectories)")
     print("-" * 42)
@@ -98,7 +100,9 @@ def organize_files_in_root(root_path: str = ".", target_folders: int = 4, max_ge
             folders.append(current_folder)
         files_per_folder = 500
     else:
-        files_per_folder = calculate_optimal_files_per_folder(stats["count"], target_folders)
+        files_per_folder = calculate_optimal_files_per_folder(
+            stats["count"], target_folders
+        )
         num_folders = math.ceil(stats["count"] / files_per_folder)
         folders = []
         for i in range(num_folders):
@@ -131,7 +135,9 @@ def organize_files_in_root(root_path: str = ".", target_folders: int = 4, max_ge
             created_folders.append(folder_name)
             print(f"\n  Folder {idx}/{len(folders)}: {folder_name}")
             print(f"    Files: {len(folder_files)}")
-            print(f"    Size range: {convert_size(min_size)} - {convert_size(max_size)}")
+            print(
+                f"    Size range: {convert_size(min_size)} - {convert_size(max_size)}"
+            )
             print(f"    Total size: {convert_size(total_size)}")
             for file_info in folder_files:
                 src = file_info["path"]

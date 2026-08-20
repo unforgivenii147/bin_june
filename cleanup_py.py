@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove comments and docstrings from Python files using libcst.
-Preserves shebangs, # fmt, # type, and module docstrings.
-"""
 
 from __future__ import annotations
 
@@ -19,13 +15,19 @@ class CleanTransformer(cst.CSTTransformer):
         self.comments_removed = 0
         self.docstrings_removed = 0
 
-    def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
+    def leave_Module(
+        self, original_node: cst.Module, updated_node: cst.Module
+    ) -> cst.Module:
         return updated_node
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ) -> cst.FunctionDef:
         return self._strip_docstring(updated_node)
 
-    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+    def leave_ClassDef(
+        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
+    ) -> cst.ClassDef:
         return self._strip_docstring(updated_node)
 
     def _strip_docstring(self, node):
@@ -42,13 +44,17 @@ class CleanTransformer(cst.CSTTransformer):
                 self.docstrings_removed += 1
                 remaining = list(node.body.body[1:])
                 if not remaining:
-                    new_body = node.body.with_changes(body=[cst.SimpleStatementLine(body=[cst.Pass()])])
+                    new_body = node.body.with_changes(
+                        body=[cst.SimpleStatementLine(body=[cst.Pass()])]
+                    )
                 else:
                     new_body = node.body.with_changes(body=remaining)
                 return node.with_changes(body=new_body)
         return node
 
-    def leave_Comment(self, original_node: cst.Comment, updated_node: cst.Comment) -> cst.RemovalSentinel | cst.Comment:
+    def leave_Comment(
+        self, original_node: cst.Comment, updated_node: cst.Comment
+    ) -> cst.RemovalSentinel | cst.Comment:
         comment_text = original_node.value.strip()
         if (
             comment_text.startswith(("#!", "# fmt:", "# type:"))
@@ -125,7 +131,9 @@ def main():
                 total_comments += comments
                 total_docstrings += docstrings
                 if comments > 0 or docstrings > 0:
-                    print(f"✅ {file_path.name:<30} removed {comments:>2} comments, {docstrings:>2} docstrings")
+                    print(
+                        f"✅ {file_path.name:<30} removed {comments:>2} comments, {docstrings:>2} docstrings"
+                    )
                 else:
                     print(f"✓  {file_path.name:<30} (no changes)")
     print("\n" + "=" * 42)

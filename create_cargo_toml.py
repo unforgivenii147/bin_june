@@ -4,7 +4,6 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
 
 def parse_cargo_lock(filepath: str) -> dict:
@@ -28,7 +27,7 @@ def parse_cargo_lock(filepath: str) -> dict:
     return {"version": lock_version, "packages": packages}
 
 
-def parse_package_block(block: str) -> Optional[dict]:
+def parse_package_block(block: str) -> dict | None:
     pkg = {}
     name_match = re.search(r'^name\s*=\s*"([^"]*)"', block, re.MULTILINE)
     version_match = re.search(r'^version\s*=\s*"([^"]*)"', block, re.MULTILINE)
@@ -58,7 +57,7 @@ def parse_package_block(block: str) -> Optional[dict]:
     return pkg
 
 
-def parse_package_block_v1(block: str) -> Optional[dict]:
+def parse_package_block_v1(block: str) -> dict | None:
     pkg = {}
     name_match = re.search(r'^name\s*=\s*"([^"]*)"', block, re.MULTILINE)
     version_match = re.search(r'^version\s*=\s*"([^"]*)"', block, re.MULTILINE)
@@ -78,7 +77,7 @@ def parse_package_block_v1(block: str) -> Optional[dict]:
 
 def generate_cargo_toml(
     packages: list[dict],
-    root_package_name: Optional[str] = None,
+    root_package_name: str | None = None,
     root_version: str = "0.1.0",
     include_dev_deps: bool = False,
 ) -> str:
@@ -112,7 +111,7 @@ def generate_cargo_toml(
     return "\n".join(lines)
 
 
-def find_package(packages: list[dict], name: str) -> Optional[dict]:
+def find_package(packages: list[dict], name: str) -> dict | None:
     for pkg in packages:
         if pkg["name"] == name:
             return pkg

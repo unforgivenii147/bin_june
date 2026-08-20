@@ -30,8 +30,7 @@ async def main():
             if urls:
                 print(f"Found link in message ID {message.id}: {urls}")
                 with open("links.txt", "a") as f:
-                    for url in urls:
-                        f.write(url + "\n")
+                    f.writelines(url + "\n" for url in urls)
     await client.disconnect()
 
 

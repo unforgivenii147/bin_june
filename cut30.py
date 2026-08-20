@@ -40,9 +40,13 @@ def remove_old_commits(repo_path=".", days=30):
     if len(commits_to_remove) == 0:
         print("No old commits to remove.")
         return
-    print(f"\nOldest commit to keep: {earliest_commit_to_keep.hexsha[:7]} - {earliest_commit_to_keep.summary}")
+    print(
+        f"\nOldest commit to keep: {earliest_commit_to_keep.hexsha[:7]} - {earliest_commit_to_keep.summary}"
+    )
     print(f"Date: {datetime.fromtimestamp(earliest_commit_to_keep.committed_date)}")
-    response = input("\nWARNING: This operation will rewrite git history!\nContinue? (yes/no): ")
+    response = input(
+        "\nWARNING: This operation will rewrite git history!\nContinue? (yes/no): "
+    )
     if response.lower() != "yes":
         print("Operation cancelled.")
         return
@@ -52,13 +56,17 @@ def remove_old_commits(repo_path=".", days=30):
             parent_to_remove = earliest_commit_to_keep.parents[0]
             current_branch = repo.active_branch.name
             new_root = repo.git.commit_tree(
-                earliest_commit_to_keep.tree, "-m", f"Squashed history (keeping last {days} days)"
+                earliest_commit_to_keep.tree,
+                "-m",
+                f"Squashed history (keeping last {days} days)",
             )
             commits_to_apply = list(reversed(commits_to_keep[:-1]))
             repo.git.checkout(current_branch)
             repo.git.reset("--hard", earliest_commit_to_keep.hexsha)
             print("Old commits removed. History has been rewritten.")
-            print("\nIMPORTANT: You may need to force push if this is a remote repository:")
+            print(
+                "\nIMPORTANT: You may need to force push if this is a remote repository:"
+            )
             print(f"  git push --force origin {current_branch}")
     except Exception as e:
         print(f"Error during history rewrite: {e}")
@@ -92,7 +100,9 @@ def remove_commits_older_than_days(repo_path=".", days=30, auto_confirm=False):
     if not commits_to_keep:
         print("No commits to keep! Operation aborted.")
         return
-    print(f"Keeping {len(commits_to_keep)} recent commits out of {len(commits)} total commits")
+    print(
+        f"Keeping {len(commits_to_keep)} recent commits out of {len(commits)} total commits"
+    )
     if not auto_confirm:
         response = input("Continue with history rewrite? (yes/no): ")
         if response.lower() != "yes":
@@ -105,8 +115,10 @@ def remove_commits_older_than_days(repo_path=".", days=30, auto_confirm=False):
         repo.git.checkout("--orphan", new_branch_name)
         for commit in reversed(commits_to_keep):
             repo.git.cherry_pick("--allow-empty", commit.hexsha)
-        print(f"\nNew branch '{new_branch_name}' created with {len(commits_to_keep)} recent commits.")
-        print(f"\nTo replace the original branch, run:")
+        print(
+            f"\nNew branch '{new_branch_name}' created with {len(commits_to_keep)} recent commits."
+        )
+        print("\nTo replace the original branch, run:")
         print(f"  git checkout {current_branch.name}")
         print(f"  git reset --hard {new_branch_name}")
         print(f"  git branch -D {new_branch_name}")

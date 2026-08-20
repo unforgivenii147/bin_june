@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Parallel archive extractor for files in the current directory.
-Extracts various archive formats using system tools with parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -13,7 +9,6 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
 
 
 @dataclass
@@ -21,15 +16,19 @@ class ExtractionStats:
     archive_path: Path
     status: str
     extraction_time: float
-    output_dir: Optional[Path] = None
+    output_dir: Path | None = None
     extracted_files: int = 0
-    error_message: Optional[str] = None
+    error_message: str | None = None
     original_size: int = 0
 
     def __str__(self):
         size_mb = self.original_size / (1024 * 1024)
-        status_icon = "✓" if self.status == "success" else "✗" if self.status == "failed" else "○"
-        result = f"{status_icon} {self.archive_path.name} [{size_mb:.1f}MB] - {self.status}"
+        status_icon = (
+            "✓" if self.status == "success" else "✗" if self.status == "failed" else "○"
+        )
+        result = (
+            f"{status_icon} {self.archive_path.name} [{size_mb:.1f}MB] - {self.status}"
+        )
         if self.status == "success":
             result += f" ({self.extracted_files} files, {self.extraction_time:.1f}s)"
             if self.output_dir:
@@ -83,7 +82,12 @@ class ArchiveExtractor:
         try:
             suffix = archive_path.suffix.lower()
             if suffix == ".zip":
-                result = subprocess.run(["unzip", "-l", str(archive_path)], capture_output=True, text=True, timeout=30)
+                result = subprocess.run(
+                    ["unzip", "-l", str(archive_path)],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
                 if result.returncode == 0:
                     lines = result.stdout.strip().split("\n")
                     entries = []
@@ -97,18 +101,39 @@ class ArchiveExtractor:
                             parts = Path(entry).parts
                             if parts:
                                 first_parts.add(parts[0])
-                        return len(first_parts) == 1 and not all("/" not in e for e in entries)
-            elif suffix in [".tar", ".tar.gz", ".tar.bz2", ".tar.xz", ".tgz", ".tbz2", ".txz"]:
-                result = subprocess.run(["tar", "-tf", str(archive_path)], capture_output=True, text=True, timeout=30)
+                        return len(first_parts) == 1 and not all(
+                            "/" not in e for e in entries
+                        )
+            elif suffix in [
+                ".tar",
+                ".tar.gz",
+                ".tar.bz2",
+                ".tar.xz",
+                ".tgz",
+                ".tbz2",
+                ".txz",
+            ]:
+                result = subprocess.run(
+                    ["tar", "-tf", str(archive_path)],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
                 if result.returncode == 0:
-                    entries = [line.strip() for line in result.stdout.split("\n") if line.strip()]
+                    entries = [
+                        line.strip()
+                        for line in result.stdout.split("\n")
+                        if line.strip()
+                    ]
                     if entries:
                         first_parts = set()
                         for entry in entries:
                             parts = Path(entry).parts
                             if parts:
                                 first_parts.add(parts[0])
-                        return len(first_parts) == 1 and not all("/" not in e for e in entries)
+                        return len(first_parts) == 1 and not all(
+                            "/" not in e for e in entries
+                        )
         except (subprocess.TimeoutExpired, Exception):
             pass
         return False
@@ -133,11 +158,16 @@ class ArchiveExtractor:
         start_time = time.time()
         original_size = archive_path.stat().st_size if archive_path.exists() else 0
         stats = ExtractionStats(
-            archive_path=archive_path, status="failed", extraction_time=0, original_size=original_size
+            archive_path=archive_path,
+            status="failed",
+            extraction_time=0,
+            original_size=original_size,
         )
         archive_name = archive_path.name.lower()
         ext = None
-        for possible_ext in sorted(self.EXTRACTION_COMMANDS.keys(), key=len, reverse=True):
+        for possible_ext in sorted(
+            self.EXTRACTION_COMMANDS.keys(), key=len, reverse=True
+        ):
             if archive_name.endswith(possible_ext):
                 ext = possible_ext
                 break
@@ -154,7 +184,11 @@ class ArchiveExtractor:
             return stats
         try:
             needs_subdir = self._check_if_single_file_archive(archive_path)
-            output_dir = self._get_output_directory(archive_path) if needs_subdir else self.current_dir
+            output_dir = (
+                self._get_output_directory(archive_path)
+                if needs_subdir
+                else self.current_dir
+            )
             if needs_subdir:
                 output_dir.mkdir(exist_ok=True)
             cmd = list(self.EXTRACTION_COMMANDS[ext])
@@ -163,7 +197,15 @@ class ArchiveExtractor:
                 cmd[-2] = f"-o{output_dir}"
             elif ext == ".zip":
                 cmd.extend([str(archive_path), "-d", str(output_dir)])
-            elif ext in [".tar", ".tar.gz", ".tar.bz2", ".tar.xz", ".tgz", ".tbz2", ".txz"]:
+            elif ext in [
+                ".tar",
+                ".tar.gz",
+                ".tar.bz2",
+                ".tar.xz",
+                ".tgz",
+                ".tbz2",
+                ".txz",
+            ]:
                 cmd.extend(["-C", str(output_dir), str(archive_path)])
             elif ext == ".rar":
                 cmd.extend([str(archive_path), str(output_dir)])
@@ -177,7 +219,9 @@ class ArchiveExtractor:
                 shutil.copy2(archive_path, temp_archive)
                 cmd.append(str(temp_archive))
                 cwd = output_dir
-                result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=300)
+                result = subprocess.run(
+                    cmd, cwd=cwd, capture_output=True, text=True, timeout=300
+                )
                 if result.returncode == 0:
                     temp_archive.unlink(missing_ok=True)
                     stats.status = "success"
@@ -188,17 +232,29 @@ class ArchiveExtractor:
                     return stats
                 else:
                     raise subprocess.CalledProcessError(
-                        result.returncode, cmd, output=result.stdout, stderr=result.stderr
+                        result.returncode,
+                        cmd,
+                        output=result.stdout,
+                        stderr=result.stderr,
                     )
             else:
                 cmd.append(str(archive_path))
                 if output_dir != self.current_dir:
                     cmd.append(str(output_dir))
             if ext not in [".gz", ".bz2", ".xz", ".lzma", ".zst"]:
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, cwd=self.current_dir)
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                    cwd=self.current_dir,
+                )
                 if result.returncode != 0:
                     raise subprocess.CalledProcessError(
-                        result.returncode, cmd, output=result.stdout, stderr=result.stderr
+                        result.returncode,
+                        cmd,
+                        output=result.stdout,
+                        stderr=result.stderr,
                     )
             if needs_subdir:
                 extracted_count = self._count_files(output_dir)
@@ -224,7 +280,7 @@ class ArchiveExtractor:
         return stats
 
 
-def find_archives(directory: Path) -> List[Path]:
+def find_archives(directory: Path) -> list[Path]:
     archive_extensions = {
         ".7z",
         ".zip",
@@ -274,7 +330,10 @@ def main():
     results = []
     start_time = time.time()
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_archive = {executor.submit(extractor.extract_archive, archive): archive for archive in archives}
+        future_to_archive = {
+            executor.submit(extractor.extract_archive, archive): archive
+            for archive in archives
+        }
         for future in as_completed(future_to_archive):
             archive = future_to_archive[future]
             try:
@@ -288,7 +347,7 @@ def main():
     failed = sum(1 for r in results if r.status == "failed")
     skipped = sum(1 for r in results if r.status == "skipped")
     print(f"\n{'=' * 42}")
-    print(f"SUMMARY")
+    print("SUMMARY")
     print(f"{'=' * 42}")
     print(f"Total archives: {len(archives)}")
     print(f"✓ Successfully extracted: {successful}")
@@ -296,7 +355,7 @@ def main():
     print(f"○ Skipped: {skipped}")
     print(f"Total time: {total_time:.1f}s")
     if results:
-        print(f"\nDetailed results:")
+        print("\nDetailed results:")
         for result in results:
             print(f"  {result}")
 

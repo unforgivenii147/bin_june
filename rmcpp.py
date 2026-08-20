@@ -53,7 +53,9 @@ class TSCppRemover:
                     end = node.end_byte
                     text = source_bytes[start:end].decode("utf-8")
                     stripped = text.strip()
-                    if stripped.startswith(("//!", "///", "/**", "/*!", "///<", "//!<")):
+                    if stripped.startswith(
+                        ("//!", "///", "/**", "/*!", "///<", "//!<")
+                    ):
                         continue
                     comment_count += 1
                     if end < len(source_bytes) and source_bytes[end : end + 1] == b"\n":
@@ -101,16 +103,22 @@ if __name__ == "__main__":
     files = (
         [Path(p) for p in args]
         if args
-        else get_files(cwd, ext=[".js", ".cpp", ".cc", ".cxx", ".h", ".hpp", ".hxx", ".hh"])
+        else get_files(
+            cwd, ext=[".js", ".cpp", ".cc", ".cxx", ".h", ".hpp", ".hxx", ".hh"]
+        )
     )
     before = gsz(cwd)
-    with get_context("spawn").Pool(processes=8, initializer=ts_remover_initializer) as pool:
+    with get_context("spawn").Pool(
+        processes=8, initializer=ts_remover_initializer
+    ) as pool:
         results = pool.map(process_file, files)
     diffsize = before - gsz(cwd)
-    changed = sum((1 for r in results if r[0] == "changed"))
+    changed = sum(1 for r in results if r[0] == "changed")
     errors = [r for r in results if r[0] == "error"]
-    nochg = sum((1 for r in results if r[0] == "nochange"))
-    print(f"Files: {len(files)} | Changed: {changed} | Unchanged: {nochg} | Errors: {len(errors)}")
+    nochg = sum(1 for r in results if r[0] == "nochange")
+    print(
+        f"Files: {len(files)} | Changed: {changed} | Unchanged: {nochg} | Errors: {len(errors)}"
+    )
     if errors:
         print("\nErrors in:")
         for _, fn, *_ in errors:

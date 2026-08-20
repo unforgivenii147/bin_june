@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert GIF files in the current directory (recursively) to JPG.
-Skips near-duplicate frames where only minor motion (e.g. mouse pointer) occurred.
-Dependencies:
-    pip install Pillow joblib numpy
-"""
 
 from __future__ import annotations
 
@@ -36,7 +30,10 @@ def frames_are_similar(arr_a: np.ndarray, arr_b: np.ndarray) -> bool:
     diff = np.abs(arr_a.astype(np.int16) - arr_b.astype(np.int16))
     mean_diff = diff.mean()
     changed_fraction = (diff > 10).any(axis=-1).mean()
-    return mean_diff < SIMILARITY_THRESHOLD and changed_fraction < MIN_CHANGED_PIXEL_FRACTION
+    return (
+        mean_diff < SIMILARITY_THRESHOLD
+        and changed_fraction < MIN_CHANGED_PIXEL_FRACTION
+    )
 
 
 def extract_unique_frames(gif_path: Path) -> list[np.ndarray]:
@@ -47,7 +44,9 @@ def extract_unique_frames(gif_path: Path) -> list[np.ndarray]:
                 canvas = Image.new("RGB", img.size, (255, 255, 255))
                 canvas.paste(
                     img.convert("RGBA"),
-                    mask=img.convert("RGBA").split()[3] if img.mode in ("RGBA", "P") else None,
+                    mask=img.convert("RGBA").split()[3]
+                    if img.mode in ("RGBA", "P")
+                    else None,
                 )
                 frames.append(np.asarray(canvas))
                 return frames
@@ -65,7 +64,11 @@ def extract_unique_frames(gif_path: Path) -> list[np.ndarray]:
                 canvas.paste(frame, mask=frame.split()[3])
                 arr = np.asarray(canvas.convert("RGB"))
                 if frames and frames_are_similar(frames[-1], arr):
-                    log.debug("  Skipping near-duplicate frame %d in %s", frame_idx, gif_path.name)
+                    log.debug(
+                        "  Skipping near-duplicate frame %d in %s",
+                        frame_idx,
+                        gif_path.name,
+                    )
                     continue
                 frames.append(arr)
     except (UnidentifiedImageError, OSError) as exc:
@@ -103,7 +106,13 @@ def convert_gif(gif_path: Path) -> tuple[Path, int, int]:
             saved += 1
         except OSError as exc:
             log.error("Failed to save %s: %s", out_path, exc)
-    log.info("%-50s  %d/%d frames kept → %d JPG(s)", str(gif_path), len(frames), total_in_gif, saved)
+    log.info(
+        "%-50s  %d/%d frames kept → %d JPG(s)",
+        str(gif_path),
+        len(frames),
+        total_in_gif,
+        saved,
+    )
     return gif_path, total_in_gif, saved
 
 
@@ -125,7 +134,9 @@ def main() -> None:
         len(unique_gifs),
         "all CPUs" if N_JOBS == -1 else str(N_JOBS),
     )
-    results = Parallel(n_jobs=N_JOBS, backend="loky", verbose=0)(delayed(convert_gif)(p) for p in unique_gifs)
+    results = Parallel(n_jobs=N_JOBS, backend="loky", verbose=0)(
+        delayed(convert_gif)(p) for p in unique_gifs
+    )
     total_gifs = len(results)
     total_frames = sum(r[1] for r in results)
     total_saved = sum(r[2] for r in results)

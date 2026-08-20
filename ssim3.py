@@ -46,7 +46,9 @@ class FileSimilarityDetector:
                     continue
                 self.file_hashes[path] = {"xxhash": xh, "ssdeep": sh}
                 self.duplicates[xh].append(path)
-        self.duplicates = {h: paths for h, paths in self.duplicates.items() if len(paths) > 1}
+        self.duplicates = {
+            h: paths for h, paths in self.duplicates.items() if len(paths) > 1
+        }
 
     def find_similarity_groups(self, threshold: int):
         excluded = {p for group in self.duplicates.values() for p in group}
@@ -110,7 +112,9 @@ def main() -> None:
         action="store_true",
         help="Keep one file per similarity group and delete the rest",
     )
-    parser.add_argument("-o", "--output", default="output", help="Output directory (copy mode only)")
+    parser.add_argument(
+        "-o", "--output", default="output", help="Output directory (copy mode only)"
+    )
     args = parser.parse_args()
     detector = FileSimilarityDetector()
     files = list(detector.scan_files())

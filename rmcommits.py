@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Delete commits older than n days from a Git repository.
-WARNING: This is a destructive operation. Use with caution!
-"""
 
 from __future__ import annotations
 
@@ -24,7 +20,9 @@ def delete_old_commits(days: int) -> None:
         cutoff_date = datetime.now(UTC) - timedelta(days=days)
         print(f"Cutoff date: {cutoff_date.strftime('%Y-%m-%d %H:%M:%S UTC')}")
         if repo.is_dirty(untracked_files=True):
-            print("Error: Working directory is not clean. Please commit or stash changes.")
+            print(
+                "Error: Working directory is not clean. Please commit or stash changes."
+            )
             sys.exit(1)
         commits = list(repo.iter_commits(current_branch))
         if not commits:
@@ -42,30 +40,42 @@ def delete_old_commits(days: int) -> None:
             print(f"No commits older than {days} days found.")
             return
         if not commits_to_keep:
-            print("Error: All commits would be deleted. At least one commit must remain.")
+            print(
+                "Error: All commits would be deleted. At least one commit must remain."
+            )
             sys.exit(1)
-        print(f"\nFound {len(commits_to_delete)} commits to delete (older than {days} days)")
+        print(
+            f"\nFound {len(commits_to_delete)} commits to delete (older than {days} days)"
+        )
         print(f"Keeping {len(commits_to_keep)} commits")
         preview_count = min(5, len(commits_to_delete))
         print("\nPreview of commits to delete (oldest first):")
         for commit in commits_to_delete[-preview_count:]:
             commit_date = commit.committed_datetime.replace(tzinfo=UTC)
-            print(f"  {commit.hexsha[:8]} - {commit_date.strftime('%Y-%m-%d %H:%M')} - {commit.summary}")
+            print(
+                f"  {commit.hexsha[:8]} - {commit_date.strftime('%Y-%m-%d %H:%M')} - {commit.summary}"
+            )
         if len(commits_to_delete) > preview_count:
             print(f"  ... and {len(commits_to_delete) - preview_count} more")
         new_head_commit = commits_to_keep[0]
-        print(f"\nNew HEAD will be: {new_head_commit.hexsha[:8]} - {new_head_commit.summary}")
+        print(
+            f"\nNew HEAD will be: {new_head_commit.hexsha[:8]} - {new_head_commit.summary}"
+        )
         response = input("""
 This operation will PERMANENTLY DELETE these commits. Continue? (yes/no): """)
         if response.lower() != "yes":
             print("Operation cancelled.")
             return
-        backup_branch = f"backup-{current_branch}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        backup_branch = (
+            f"backup-{current_branch}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        )
         print(f"\nCreating backup branch: {backup_branch}")
         repo.create_head(backup_branch)
         print(f"Resetting {current_branch} to {new_head_commit.hexsha[:8]}...")
         repo.git.reset("--hard", new_head_commit.hexsha)
-        print(f"\nSuccessfully deleted {len(commits_to_delete)} commits older than {days} days.")
+        print(
+            f"\nSuccessfully deleted {len(commits_to_delete)} commits older than {days} days."
+        )
         print(f"Backup branch '{backup_branch}' contains the original commits.")
         print("""
 NOTE: If you've already pushed the old commits to a remote, you'll need to force push:""")

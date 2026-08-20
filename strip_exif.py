@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Strip EXIF data from image files using pathlib only.
-Supports parallel processing, size reporting, and file/directory input.
-"""
 
 from __future__ import annotations
 
@@ -46,7 +42,9 @@ def strip_exif_single(image_path, backup=False, verbose=False):
             elif img.format == "PNG":
                 format_kwargs["optimize"] = True
             if img.format == "JPEG":
-                img_without_exif.save(buffer, format=img.format, quality=95, optimize=True, exif=None)
+                img_without_exif.save(
+                    buffer, format=img.format, quality=95, optimize=True, exif=None
+                )
             else:
                 try:
                     img_without_exif.save(buffer, **format_kwargs, exif=None)
@@ -62,8 +60,12 @@ def strip_exif_single(image_path, backup=False, verbose=False):
                 percent_change = size_change / original_size * 100
                 if verbose:
                     print(f"  ✅ {image_path.name}")
-                    print(f"     {fsz(original_size)} → {fsz(new_size)} ({percent_change:+.1f}%)")
-                result["message"] = f"Stripped EXIF: {size_change:+.0f}B ({percent_change:+.1f}%)"
+                    print(
+                        f"     {fsz(original_size)} → {fsz(new_size)} ({percent_change:+.1f}%)"
+                    )
+                result["message"] = (
+                    f"Stripped EXIF: {size_change:+.0f}B ({percent_change:+.1f}%)"
+                )
     except Exception as e:
         result["success"] = False
         result["message"] = f"Error: {e!s}"
@@ -88,9 +90,7 @@ def find_image_files(paths, extensions, recursive=True):
             print(f"⚠️  Path does not exist: {path}")
             continue
         if path.is_file():
-            if path.suffix.lower() in all_extensions:
-                image_files.append(path)
-            elif not extensions:
+            if path.suffix.lower() in all_extensions or not extensions:
                 image_files.append(path)
         elif path.is_dir():
             if recursive:
@@ -139,15 +139,26 @@ Examples:
         default=None,
         help=f"Number of parallel workers (default: CPU count = {cpu_count()})",
     )
-    parser.add_argument("--no-recursive", action="store_true", help="Do not process subdirectories recursively")
+    parser.add_argument(
+        "--no-recursive",
+        action="store_true",
+        help="Do not process subdirectories recursively",
+    )
     parser.add_argument(
         "--extensions",
         nargs="+",
         default=[".jpg", ".jpeg", ".png", ".tiff", ".tif", ".bmp", ".webp"],
         help="File extensions to process (default: .jpg .jpeg .png .tiff .tif .bmp .webp)",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed output for each file")
-    parser.add_argument("--no-size-report", action="store_true", help="Skip folder size change report")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show detailed output for each file",
+    )
+    parser.add_argument(
+        "--no-size-report", action="store_true", help="Skip folder size change report"
+    )
     args = parser.parse_args()
     if args.jobs is None:
         max_workers = min(cpu_count(), 4)
@@ -174,7 +185,8 @@ Examples:
     processed = 0
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_file = {
-            executor.submit(process_image_file, img, args.backup, args.verbose): img for img in image_files
+            executor.submit(process_image_file, img, args.backup, args.verbose): img
+            for img in image_files
         }
         for future in as_completed(future_to_file):
             processed += 1
@@ -187,7 +199,9 @@ Examples:
                 elif not args.verbose and result["success"]:
                     progress = f"[{processed}/{len(image_files)}]"
                     result["new_size"] - result["original_size"]
-                    print(f"  {progress} {'✅' if result['success'] else '❌'} {img.name}")
+                    print(
+                        f"  {progress} {'✅' if result['success'] else '❌'} {img.name}"
+                    )
             except Exception as e:
                 print(f"❌ {img.name}: Unexpected error: {e!s}")
                 results.append(
@@ -224,7 +238,9 @@ Examples:
             if change != 0:
                 percent = change / initial_size * 100 if initial_size > 0 else 0
                 print(f"   {dir_path}:")
-                print(f"      {fsz(initial_size)} → {fsz(final_size)} ({percent:+.1f}%)")
+                print(
+                    f"      {fsz(initial_size)} → {fsz(final_size)} ({percent:+.1f}%)"
+                )
     backups = [r for r in results if r.get("backup_created", False)]
     if backups:
         print(f"\n💾 Backups created for {len(backups)} file(s)")

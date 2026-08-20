@@ -14,14 +14,18 @@ def read_links_from_file(filename="links.txt"):
             links = [line.strip() for line in file if line.strip()]
         return links
     except FileNotFoundError:
-        print(f"Error: {filename} not found. Please create a {filename} with website URLs.")
+        print(
+            f"Error: {filename} not found. Please create a {filename} with website URLs."
+        )
         return []
 
 
 def extract_th18_bases(website_url, timeout=10):
     th18_links = []
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
         response = requests.get(website_url, headers=headers, timeout=timeout)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "html.parser")

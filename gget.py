@@ -12,7 +12,14 @@ from urllib.parse import unquote
 
 import requests
 from rich.console import Console
-from rich.progress import BarColumn, DownloadColumn, Progress, TextColumn, TimeRemainingColumn, TransferSpeedColumn
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+)
 
 console = Console()
 CHUNK_SIZE = 1024 * 1024 * 5
@@ -59,7 +66,9 @@ class Downloader:
                 console.print(f"Got:      {calculated_hash}")
         else:
             console.print(f"[bold yellow]SHA-256 Checksum:[/] {calculated_hash}")
-            console.print("[italic]Provide this hash next time to verify automatically.[/]")
+            console.print(
+                "[italic]Provide this hash next time to verify automatically.[/]"
+            )
 
     def _load_state(self) -> None:
         if self.state_file.exists():
@@ -99,10 +108,15 @@ class Downloader:
         if not Path(self.filename).exists():
             with Path(self.filename).open("wb") as f:
                 f.truncate(self.file_size)
-        chunks = [(i, min(i + 32768 - 1, self.file_size - 1)) for i in range(0, self.file_size, 32768)]
+        chunks = [
+            (i, min(i + 32768 - 1, self.file_size - 1))
+            for i in range(0, self.file_size, 32768)
+        ]
         self.progress_data["total_chunks"] = len(chunks)
         pending_chunks = [
-            (idx, s, e) for idx, (s, e) in enumerate(chunks) if idx not in self.progress_data["downloaded_chunks"]
+            (idx, s, e)
+            for idx, (s, e) in enumerate(chunks)
+            if idx not in self.progress_data["downloaded_chunks"]
         ]
         if not pending_chunks:
             console.print(f"[bold green]✔ {self.filename} is already finished![/]")
@@ -126,7 +140,9 @@ class Downloader:
             signal.signal(signal.SIGINT, lambda s, f: self.stop_event.set())
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
                 futures = [
-                    executor.submit(self._download_chunk, cid, s, e, progress, main_task)
+                    executor.submit(
+                        self._download_chunk, cid, s, e, progress, main_task
+                    )
                     for cid, s, e in pending_chunks
                 ]
                 for f in futures:
@@ -144,7 +160,9 @@ class Downloader:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        console.print("[bold red]Usage:[/] python downloader.py <URL> [output_name] [expected_sha256]")
+        console.print(
+            "[bold red]Usage:[/] python downloader.py <URL> [output_name] [expected_sha256]"
+        )
         sys.exit(1)
     url_arg = sys.argv[1]
     out_arg = sys.argv[2] if len(sys.argv) > 2 else None

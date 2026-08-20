@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to detect and keep only the latest version of wheel or deb files in current directory recursively.
-"""
 
 from __future__ import annotations
 
@@ -23,7 +20,9 @@ def parse_wheel_version(filename: str) -> tuple[str, str] | None:
     version_parts = []
     found_version = False
     for i, part in enumerate(parts):
-        if not found_version and (re.match(r"^\d", part) or part.lower() in ["v", "ver", "version"]):
+        if not found_version and (
+            re.match(r"^\d", part) or part.lower() in ["v", "ver", "version"]
+        ):
             found_version = True
             version_parts.append(part)
         elif not found_version:
@@ -87,7 +86,9 @@ def process_file(file_path: Path, file_type: str) -> tuple[str, str, Path] | Non
     return None
 
 
-def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> dict[str, list[tuple[str, Path]]]:
+def scan_directory(
+    directory: Path, file_type: str, check_all: bool = False
+) -> dict[str, list[tuple[str, Path]]]:
     packages = defaultdict(list)
     extensions = []
     if check_all:
@@ -128,7 +129,9 @@ def get_latest_version(versions: list[tuple[str, Path]]) -> tuple[str, Path]:
     return latest
 
 
-def keep_latest_versions(packages: dict[str, list[tuple[str, Path]]], dry_run: bool = False) -> int:
+def keep_latest_versions(
+    packages: dict[str, list[tuple[str, Path]]], dry_run: bool = False
+) -> int:
     total_deleted = 0
     for pkg_name, versions in packages.items():
         if len(versions) <= 1:
@@ -160,10 +163,28 @@ def main() -> int:
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--deb", action="store_true", help="Check .deb files")
     group.add_argument("-w", "--wheel", action="store_true", help="Check .whl files")
-    group.add_argument("-a", "--all", action="store_true", help="Check all package types (.whl and .deb)")
-    parser.add_argument("--dry-run", action="store_true", help="Simulate deletion without actually removing files")
-    parser.add_argument("--dir", type=str, default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("--verbose", action="store_true", help="Show detailed information about each file")
+    group.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Check all package types (.whl and .deb)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simulate deletion without actually removing files",
+    )
+    parser.add_argument(
+        "--dir",
+        type=str,
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show detailed information about each file",
+    )
     args = parser.parse_args()
     if not (args.deb or args.wheel or args.all):
         args.wheel = True

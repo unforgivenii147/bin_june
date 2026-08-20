@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
@@ -45,7 +44,11 @@ def process_file(path: Path) -> None:
     tree = parser.parse(src)
     root = tree.root_node
     impoz = []
-    results = [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
+    results = [
+        src[node.start_byte : node.end_byte].decode()
+        for node in root.children
+        if node.type in VALID
+    ]
     if results:
         for k in results:
             if k.startswith("import "):

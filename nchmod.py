@@ -52,7 +52,9 @@ def normalize_permissions(cwd: Path) -> None:
             if path.is_dir():
                 if current_perm != DIR_PERM:
                     Path(path).chmod(DIR_PERM)
-                    print(f"{path.relative_to(cwd)} {oct(current_perm)} : {oct(DIR_PERM)}")
+                    print(
+                        f"{path.relative_to(cwd)} {oct(current_perm)} : {oct(DIR_PERM)}"
+                    )
             elif path.is_file():
                 if path.suffix in {".sh", ".so"} and not is_exec(path):
                     mkx(path)
@@ -60,7 +62,9 @@ def normalize_permissions(cwd: Path) -> None:
                 if current_perm != FILE_PERM:
                     if path.parent.name != "bin" and path.suffix != ".sh":
                         path.chmod(FILE_PERM)
-                    print(f"{path.relative_to(cwd)}: {oct(current_perm)} --> {oct(FILE_PERM)}")
+                    print(
+                        f"{path.relative_to(cwd)}: {oct(current_perm)} --> {oct(FILE_PERM)}"
+                    )
         except PermissionError as e:
             print(f"Permission denied: {path.name} ({e})")
         except FileNotFoundError:

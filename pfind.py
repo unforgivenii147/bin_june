@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Search for filenames recursively with archive support and parallel processing."""
 
 from __future__ import annotations
 
@@ -105,7 +104,16 @@ def process_path(args):
     path, pattern = args
     if any(
         path.name.endswith(ext)
-        for ext in [".tar.gz", ".tar.xz", ".tar.bz2", ".tar.7z", ".tar.br", ".tar.zst", ".zip", ".whl"]
+        for ext in [
+            ".tar.gz",
+            ".tar.xz",
+            ".tar.bz2",
+            ".tar.7z",
+            ".tar.br",
+            ".tar.zst",
+            ".zip",
+            ".whl",
+        ]
     ):
         return search_in_archive(path, pattern)
     return search_file(path, pattern)

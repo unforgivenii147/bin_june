@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-zreport_optimized_by_gemini.py — Report uncompressed sizes of compressed files.
-Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
-"""
 
 from __future__ import annotations
 
@@ -110,7 +106,10 @@ def get_7z_size(path: Path) -> tuple[int | None, str | None]:
         return (None, "py7zr not installed")
     try:
         with py7zr.SevenZipFile(path, mode="r") as z:
-            return (sum(f.uncompressed for f in z.list() if f.uncompressed is not None), None)
+            return (
+                sum(f.uncompressed for f in z.list() if f.uncompressed is not None),
+                None,
+            )
     except Exception as e:
         return (None, str(e))
 
@@ -136,7 +135,9 @@ HANDLERS: Final[dict[str, tuple[str, Callable]]] = {
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Report uncompressed sizes of compressed files")
+    parser = argparse.ArgumentParser(
+        description="Report uncompressed sizes of compressed files"
+    )
     parser.add_argument("path", type=Path, nargs="?", default=Path.cwd())
     args = parser.parse_args()
     root = args.path.resolve()
@@ -151,7 +152,9 @@ def main() -> None:
     for item in sorted(root.rglob("*")):
         if not item.is_file() or any(part in SKIP_DIRS for part in item.parts):
             continue
-        handler_info = next((v for k, v in HANDLERS.items() if item.name.endswith(k)), None)
+        handler_info = next(
+            (v for k, v in HANDLERS.items() if item.name.endswith(k)), None
+        )
         if not handler_info:
             continue
         label, handler = handler_info
@@ -182,7 +185,9 @@ def main() -> None:
     _, _, free = shutil.disk_usage(root)
     print(f"Free disk space:    {fsz(free)}")
     if grand_uncomp > free:
-        print(f"\n⚠️  WARNING: Not enough space to extract all files! (Shortfall: {fsz(grand_uncomp - free)})")
+        print(
+            f"\n⚠️  WARNING: Not enough space to extract all files! (Shortfall: {fsz(grand_uncomp - free)})"
+        )
 
 
 if __name__ == "__main__":

@@ -44,9 +44,13 @@ def copy_file(src, dst_folder: Path | None) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Recursively watch folder for file changes")
+    parser = argparse.ArgumentParser(
+        description="Recursively watch folder for file changes"
+    )
     parser.add_argument("folder", help="Folder to watch")
-    parser.add_argument("-c", "--copy", action="store_true", help="Copy changed files to ~/tmp/tmp")
+    parser.add_argument(
+        "-c", "--copy", action="store_true", help="Copy changed files to ~/tmp/tmp"
+    )
     args = parser.parse_args()
     folder = Path(args.folder)
     copy_enabled = args.copy

@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to create directory tree structure from a tree.txt file.
-Reads a tree structure and creates the corresponding folders and files.
-Usage: python create_tree.py [tree_file]
-       (defaults to 'tree.txt' if no argument is provided)
-"""
 
 import re
 import sys
@@ -12,7 +6,6 @@ from pathlib import Path
 
 
 def parse_tree_file(filename):
-    """Parse the tree file and extract file/directory paths."""
     paths = []
     try:
         with open(filename, "r", encoding="utf-8") as f:
@@ -56,7 +49,9 @@ def parse_tree_file(filename):
         while len(path_stack) > depth:
             path_stack.pop()
         if path_stack:
-            parent_path = path_stack[-1] if len(path_stack) > depth else Path(*path_stack[:depth])
+            parent_path = (
+                path_stack[-1] if len(path_stack) > depth else Path(*path_stack[:depth])
+            )
         else:
             parent_path = Path(".")
 
@@ -72,7 +67,6 @@ def parse_tree_file(filename):
 
 
 def create_tree(paths):
-    """Create directories and files based on parsed paths."""
     created_dirs = 0
     created_files = 0
     for path, is_directory in paths:
@@ -104,7 +98,7 @@ def main():
 
     created_dirs, created_files = create_tree(paths)
     print("-" * 50)
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Directories created: {created_dirs}")
     print(f"  Files created: {created_files}")
     print(f"  Total items: {created_dirs + created_files}")

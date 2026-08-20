@@ -4,18 +4,20 @@ from __future__ import annotations
 import ast
 import logging
 import operator
-from os import scandir as os_scandir
 from pathlib import Path
 
 from joblib import Parallel, delayed
 from xxhash import xxh64
 
-
 OUTPUT_DIR = Path("output")
 OUTPUT_FILE = OUTPUT_DIR / "const.py"
 LOG_FILE = OUTPUT_DIR / "error.log"
 OUTPUT_DIR.mkdir(exist_ok=True)
-logging.basicConfig(filename=LOG_FILE, level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.ERROR,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 
 def get_file_hash(filepath: Path) -> str:
@@ -47,7 +49,9 @@ def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
                         const_name = node.target.id
                         const_value = ast.unparse(node.value)
                         const_type = (
-                            type(node.value.value).__name__ if isinstance(node.value, ast.Constant) else "unknown"
+                            type(node.value.value).__name__
+                            if isinstance(node.value, ast.Constant)
+                            else "unknown"
                         )
                         constants.append((const_name, const_value, const_type))
     except SyntaxError as e:
@@ -83,7 +87,9 @@ def main() -> None:
                 if file_hash not in all_constants_by_hash:
                     all_constants_by_hash[file_hash] = []
                 found = False
-                for idx, (existing_name, existing_value, _existing_type) in enumerate(all_constants_by_hash[file_hash]):
+                for idx, (existing_name, existing_value, _existing_type) in enumerate(
+                    all_constants_by_hash[file_hash]
+                ):
                     if existing_name == name and existing_value == value:
                         all_constants_by_hash[file_hash][idx] = name, value, ctype
                         found = True
@@ -104,7 +110,9 @@ def main() -> None:
                 f.write(f"# Type: {ctype}\n")
                 f.write(f"{constant_line}\n\n")
                 written_consts.add(constant_line)
-    print(f"Successfully extracted {len(written_consts)} unique constants to {OUTPUT_FILE}")
+    print(
+        f"Successfully extracted {len(written_consts)} unique constants to {OUTPUT_FILE}"
+    )
     if LOG_FILE.exists():
         print(f"Errors logged to {LOG_FILE}")
 

@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to remove dependencies on the 'dh' custom module by inlining function code.
-Supports multiple files/folders as input with parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -80,14 +76,28 @@ class PythonFileProcessor:
             transformer = ImportRemover(self.definitions)
             transformer.visit(tree)
             if not transformer.has_dh_imports:
-                return ProcessResult(file_path=file_path, modified=False, new_content=None, error=None)
-            new_content = self._build_new_content(original_content, transformer.inlined_code)
-            return ProcessResult(file_path=file_path, modified=True, new_content=new_content, error=None)
+                return ProcessResult(
+                    file_path=file_path, modified=False, new_content=None, error=None
+                )
+            new_content = self._build_new_content(
+                original_content, transformer.inlined_code
+            )
+            return ProcessResult(
+                file_path=file_path, modified=True, new_content=new_content, error=None
+            )
         except SyntaxError as e:
-            return ProcessResult(file_path=file_path, modified=False, new_content=None, error=f"Syntax error: {e}")
+            return ProcessResult(
+                file_path=file_path,
+                modified=False,
+                new_content=None,
+                error=f"Syntax error: {e}",
+            )
         except Exception as e:
             return ProcessResult(
-                file_path=file_path, modified=False, new_content=None, error=f"{type(e).__name__}: {e}"
+                file_path=file_path,
+                modified=False,
+                new_content=None,
+                error=f"{type(e).__name__}: {e}",
             )
 
     def _build_new_content(self, original_content: str, inlined_code: list[str]) -> str:
@@ -101,7 +111,11 @@ class PythonFileProcessor:
                 import_end_idx = i + 1
             else:
                 break
-        filtered_lines = [line for line in lines if not ("from dh import" in line or "import dh" in line)]
+        filtered_lines = [
+            line
+            for line in lines
+            if not ("from dh import" in line or "import dh" in line)
+        ]
         new_lines = filtered_lines[:import_end_idx]
         if inlined_code:
             new_lines.append("\n# ===== Inlined from dh module =====\n")
@@ -137,7 +151,9 @@ class ProjectCleaner:
                         py_files.add(py_file)
         return sorted(py_files)
 
-    def process_parallel(self, py_files: list[Path], dry_run: bool = False) -> dict[str, int]:
+    def process_parallel(
+        self, py_files: list[Path], dry_run: bool = False
+    ) -> dict[str, int]:
         if not py_files:
             print("No Python files to process.")
             return {"total": 0, "modified": 0, "errors": 0}
@@ -147,7 +163,10 @@ class ProjectCleaner:
         modified_count = 0
         error_count = 0
         with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self.processor.process, py_file): py_file for py_file in py_files}
+            futures = {
+                executor.submit(self.processor.process, py_file): py_file
+                for py_file in py_files
+            }
             for future in as_completed(futures):
                 py_file = futures[future]
                 try:
@@ -169,7 +188,11 @@ class ProjectCleaner:
                 except Exception as e:
                     print(f"✗ Exception processing {py_file}: {e}")
                     error_count += 1
-        stats = {"total": len(py_files), "modified": modified_count, "errors": error_count}
+        stats = {
+            "total": len(py_files),
+            "modified": modified_count,
+            "errors": error_count,
+        }
         return stats
 
     def print_summary(self, stats: dict[str, int], dry_run: bool = False):
@@ -195,13 +218,28 @@ def parse_args() -> argparse.Namespace:
         epilog="\nExamples:\n  # Process current directory recursively\n  %(prog)s\n\n  # Process specific files\n  %(prog)s script1.py script2.py\n\n  # Process specific directories\n  %(prog)s src/ tests/\n\n  # Mix files and directories\n  %(prog)s main.py src/ tests/utils.py\n\n  # Dry run to preview changes\n  %(prog)s --dry-run\n\n  # Custom dh module path\n  %(prog)s --dh-path /path/to/dh/src/dh src/\n\n  # Parallel processing with specific workers\n  %(prog)s --workers 4 src/ tests/\n        ",
     )
     parser.add_argument(
-        "paths", nargs="*", type=Path, help="Files or directories to process (default: current directory)"
+        "paths",
+        nargs="*",
+        type=Path,
+        help="Files or directories to process (default: current directory)",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be changed without modifying files")
     parser.add_argument(
-        "--dh-path", type=Path, default=DH_SOURCE_PATH, help=f"Path to dh module source (default: {DH_SOURCE_PATH})"
+        "--dry-run",
+        action="store_true",
+        help="Show what would be changed without modifying files",
     )
-    parser.add_argument("--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)")
+    parser.add_argument(
+        "--dh-path",
+        type=Path,
+        default=DH_SOURCE_PATH,
+        help=f"Path to dh module source (default: {DH_SOURCE_PATH})",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count)",
+    )
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
     return parser.parse_args()
 

@@ -1,15 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Detect and optionally remove repeated multi-line comment blocks (starting with '#')
-in Python files under the current directory.
-Repeated means the exact same consecutive group of comment lines (2 or more lines)
-appears in at least two places (across files or within the same file).
-This is intended to catch license headers and similar boilerplate that developers
-paste into many files.
-Excluded lines:
-  - Shebang lines (e.g.,
-  - Lines starting with '# type', '# fmt', '# pylint', '# ruff', '# mypy'
-"""
 
 from __future__ import annotations
 
@@ -28,7 +17,9 @@ def is_comment_line(stripped: str) -> bool:
     return not any(stripped.startswith(prefix) for prefix in EXCLUDED_PREFIXES)
 
 
-def extract_comment_blocks(lines: list[str], start_line: int) -> list[tuple[str, int, list[str]]]:
+def extract_comment_blocks(
+    lines: list[str], start_line: int
+) -> list[tuple[str, int, list[str]]]:
     blocks = []
     i = 0
     while i < len(lines):
@@ -77,7 +68,11 @@ def collect_comment_blocks(root: Path) -> dict[str, list[tuple[Path, int, list[s
 def find_repeated_blocks(
     blocks: dict[str, list[tuple[Path, int, list[str]]]],
 ) -> dict[str, list[tuple[Path, int, list[str]]]]:
-    return {block: occurrences for block, occurrences in blocks.items() if len(occurrences) >= 2}
+    return {
+        block: occurrences
+        for block, occurrences in blocks.items()
+        if len(occurrences) >= 2
+    }
 
 
 def report(repeated: dict[str, list[tuple[Path, int, list[str]]]]) -> None:
@@ -95,7 +90,9 @@ def report(repeated: dict[str, list[tuple[Path, int, list[str]]]]) -> None:
             print(f"    {Path(filepath).name}:{lineno}")
 
 
-def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]]) -> None:
+def remove_repeated_blocks(
+    repeated: dict[str, list[tuple[Path, int, list[str]]]],
+) -> None:
     file_removals: dict[Path, list[tuple[int, list[str]]]] = defaultdict(list)
     for _block_text, occurrences in repeated.items():
         for filepath, start_lineno, original_lines in occurrences:
@@ -137,7 +134,9 @@ def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]
             )
         except Exception as e:
             print(f"Error: cannot write {filepath}: {e}", file=sys.stderr)
-    print(f"\nDone. Removed {removed_total} repeated comment line(s) from {files_changed} file(s).")
+    print(
+        f"\nDone. Removed {removed_total} repeated comment line(s) from {files_changed} file(s)."
+    )
 
 
 def main() -> None:

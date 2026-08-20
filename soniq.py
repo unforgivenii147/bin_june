@@ -86,14 +86,18 @@ if __name__ == "__main__":
     try:
         removed, duplicates = sort_uniq(path)
         if removed > 0:
-            print(f"\n✓ {removed} duplicate{('s' if removed != 1 else '')} removed and file sorted")
+            print(
+                f"\n✓ {removed} duplicate{('s' if removed != 1 else '')} removed and file sorted"
+            )
             if not quiet and duplicates:
                 print("\nDuplicate lines removed:")
                 sorted_dupes = sorted(duplicates)
                 for line in sorted_dupes[:50]:
                     print(f"  {line}")
                 if len(sorted_dupes) > 50:
-                    print(f"... ({len(sorted_dupes) - 50} more duplicate lines not shown)")
+                    print(
+                        f"... ({len(sorted_dupes) - 50} more duplicate lines not shown)"
+                    )
             elif quiet:
                 print("  (Use without --quiet to see the actual duplicate lines)")
         else:

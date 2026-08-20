@@ -60,7 +60,7 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
@@ -90,9 +90,12 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                             stack.append(entry)
                     elif entry.is_file(follow_symlinks=False):
                         p = Path(entry.path)
-                        if p.suffix == ".py":
-                            pyfiles.append(p)
-                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
+                        if (
+                            p.suffix == ".py"
+                            or not p.suffix
+                            and (not p.name.startswith("."))
+                            and is_python_file(p)
+                        ):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
@@ -174,13 +177,20 @@ def build_decl_for_assign(node, lines):
     for name in names:
         decls.append(
             Decl(
-                kind="assign", name=name, lineno=node.lineno, end_lineno=node.end_lineno, source=source, content_hash=h
+                kind="assign",
+                name=name,
+                lineno=node.lineno,
+                end_lineno=node.end_lineno,
+                source=source,
+                content_hash=h,
             )
         )
     return decls
 
 
-def build_decl(node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name: str, lines) -> Decl:
+def build_decl(
+    node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name: str, lines
+) -> Decl:
     return Decl(
         kind=kind,
         name=name,
@@ -243,7 +253,9 @@ def process_file(src_path) -> None:
     remove_lines = set()
     for start, end in duplicate_ranges:
         remove_lines.update(range(start, end + 1))
-    kept_lines = [line for i, line in enumerate(lines, start=1) if i not in remove_lines]
+    kept_lines = [
+        line for i, line in enumerate(lines, start=1) if i not in remove_lines
+    ]
     out = []
     out.append(f"\n# Duplicates moved from {src_path.name}\n")
     for decl, reason in duplicate_reasons:

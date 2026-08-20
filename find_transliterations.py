@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Find transliterated Persian words in a dictionary JSON file.
-Detects entries where the "translation" is just the English phonetic spelling
-of the Persian word rather than an actual translation.
-"""
 
 from __future__ import annotations
 
@@ -104,7 +99,11 @@ def is_transliteration(persian_word, english_word):
         r"^[A-Z][a-z]*ar$",
         r"^[A-Z][a-z]*ad$",
     ]
-    pattern_matches = sum(1 for pattern in transliteration_patterns if re.match(pattern, english_word, re.IGNORECASE))
+    pattern_matches = sum(
+        1
+        for pattern in transliteration_patterns
+        if re.match(pattern, english_word, re.IGNORECASE)
+    )
     if pattern_matches >= 1:
         return True
     if english_word[0].isupper() and english_word[1:].islower():
@@ -168,17 +167,37 @@ def save_json_file(data, filepath):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Find transliterated Persian words in dictionary JSON")
-    parser.add_argument("input_file", nargs="?", default="words.json", help="Input JSON file (default: words.json)")
-    parser.add_argument(
-        "-m", "--move", action="store_true", help="Move found transliterations to errors.json and update words.json"
+    parser = argparse.ArgumentParser(
+        description="Find transliterated Persian words in dictionary JSON"
     )
     parser.add_argument(
-        "-e", "--errors-file", default="errors.json", help="Output file for transliterations (default: errors.json)"
+        "input_file",
+        nargs="?",
+        default="words.json",
+        help="Input JSON file (default: words.json)",
     )
-    parser.add_argument("-o", "--output", help="Output file for cleaned dictionary (default: overwrite input file)")
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Show detailed output for each transliteration found"
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move found transliterations to errors.json and update words.json",
+    )
+    parser.add_argument(
+        "-e",
+        "--errors-file",
+        default="errors.json",
+        help="Output file for transliterations (default: errors.json)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Output file for cleaned dictionary (default: overwrite input file)",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show detailed output for each transliteration found",
     )
     args = parser.parse_args()
     print(f"Loading dictionary from '{args.input_file}'...")
@@ -199,10 +218,14 @@ def main():
                 break
     print(f"Remaining valid translations: {len(valid_translations)}")
     if args.move:
-        print(f"\nMoving {len(transliterations)} transliterations to '{args.errors_file}'...")
+        print(
+            f"\nMoving {len(transliterations)} transliterations to '{args.errors_file}'..."
+        )
         save_json_file(transliterations, args.errors_file)
         output_file = args.output if args.output else args.input_file
-        print(f"Saving {len(valid_translations)} valid translations to '{output_file}'...")
+        print(
+            f"Saving {len(valid_translations)} valid translations to '{output_file}'..."
+        )
         save_json_file(valid_translations, output_file)
         print("Done!")
     else:

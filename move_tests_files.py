@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Move test files to ~/tmp/tests while preserving directory structure.
-Supports parallel processing and reversible operations.
-"""
 
 from __future__ import annotations
 
@@ -125,7 +121,12 @@ def main():
         default=MOVED_FILES_LOG,
         help=f"Path to log file (default: {MOVED_FILES_LOG}).",
     )
-    parser.add_argument("--workers", type=int, default=4, help="Number of parallel workers (default: 4).")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4).",
+    )
     args = parser.parse_args()
     try:
         if args.reverse:
@@ -146,7 +147,9 @@ def main():
                 sys.exit(0)
             print(f"📦 Found {len(test_files)} test file(s)")
             print(f"📍 Destination: {TESTS_DIR}\n")
-            file_mapping, results = move_files_parallel(test_files, args.dir, max_workers=args.workers)
+            file_mapping, results = move_files_parallel(
+                test_files, args.dir, max_workers=args.workers
+            )
             save_log(file_mapping, args.log)
             print(f"\n✅ Moved {len(file_mapping)} file(s)")
     except FileNotFoundError as e:

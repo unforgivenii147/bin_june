@@ -1,17 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-strip_comments.py — Strip comments (and optionally docstrings) from source files.
-Supported flags:
-  --rs    Rust  (.rs)
-  --toml  TOML  (.toml)
-  --js    JS/TS (.js .ts .jsx .tsx .mjs .cjs)
-  --py    Python (.py) — strips comments & docstrings, preserves module docstring,
-                         shebang, # type:, # fmt:, # noqa:
-  --sh    Shell (.sh .bash)
-  --lua   Lua   (.lua)
-Usage:
-  python strip_comments.py [dirs...] [--rs] [--toml] [--js] [--py] [--sh] [--lua]
-"""
 
 from __future__ import annotations
 
@@ -84,7 +71,12 @@ def strip_rust(source: str) -> str:
                 result.append(source[i:end_idx])
                 i = end_idx
                 continue
-        if not in_raw_string and (not in_char) and (source[i] == '"') and (not in_string):
+        if (
+            not in_raw_string
+            and (not in_char)
+            and (source[i] == '"')
+            and (not in_string)
+        ):
             in_string = True
             result.append(source[i])
             i += 1
@@ -233,7 +225,9 @@ def strip_js(source: str) -> str:
     return _collapse_blank_lines("".join(result))
 
 
-_PRESERVE_COMMENT = re.compile("^\\s*#\\s*(type|fmt|noqa|pyright|pylint|mypy|ruff)\\s*[:\\s]")
+_PRESERVE_COMMENT = re.compile(
+    "^\\s*#\\s*(type|fmt|noqa|pyright|pylint|mypy|ruff)\\s*[:\\s]"
+)
 
 
 def strip_python(source: str) -> str:
@@ -282,7 +276,9 @@ def strip_python(source: str) -> str:
                     continue
             if module_docstring_done:
                 stripped_line = tline.strip()
-                is_docstring = stripped_line.startswith(ttext[:3]) if len(ttext) >= 3 else False
+                is_docstring = (
+                    stripped_line.startswith(ttext[:3]) if len(ttext) >= 3 else False
+                )
                 if is_docstring and ttext.startswith(('"""', "'''", 'r"""', "r'''")):
                     prev_end = tend
                     continue
@@ -508,7 +504,9 @@ def print_file_result(r: FileResult) -> None:
     if r.changed:
         status = _c(" stripped ", BOLD, GREEN)
         lines_badge = (
-            _c(f"-{r.lines_removed}", YELLOW) + _c(" lines", DIM) if r.lines_removed > 0 else _c("±0 lines", DIM)
+            _c(f"-{r.lines_removed}", YELLOW) + _c(" lines", DIM)
+            if r.lines_removed > 0
+            else _c("±0 lines", DIM)
         )
         bytes_badge = _c(f"-{_human_bytes(r.bytes_saved)}", MAGENTA)
         print(f"  {icon}  {_c(r.rel, WHITE)}  {status}  {lines_badge}  {bytes_badge}")
@@ -519,11 +517,11 @@ def print_file_result(r: FileResult) -> None:
 
 def print_summary(results: list[FileResult], elapsed: float) -> None:
     total = len(results)
-    changed = sum((1 for r in results if r.changed))
-    clean = sum((1 for r in results if not r.changed and (not r.error)))
-    errors = sum((1 for r in results if r.error))
-    lines_saved = sum((r.lines_removed for r in results))
-    bytes_saved = sum((r.bytes_saved for r in results))
+    changed = sum(1 for r in results if r.changed)
+    clean = sum(1 for r in results if not r.changed and (not r.error))
+    errors = sum(1 for r in results if r.error)
+    lines_saved = sum(r.lines_removed for r in results)
+    bytes_saved = sum(r.bytes_saved for r in results)
     print()
     print(_c("  " + "─" * 42, DIM))
     print(
@@ -550,11 +548,25 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    p.add_argument("dirs", nargs="*", default=["."], help="Directories to scan (default: current directory)")
+    p.add_argument(
+        "dirs",
+        nargs="*",
+        default=["."],
+        help="Directories to scan (default: current directory)",
+    )
     for flag, exts in _FLAG_EXTS.items():
-        p.add_argument(f"--{flag}", action="store_true", help=f"Strip comments from {', '.join(exts)} files")
+        p.add_argument(
+            f"--{flag}",
+            action="store_true",
+            help=f"Strip comments from {', '.join(exts)} files",
+        )
     p.add_argument("--all", action="store_true", help="Enable all language strippers")
-    p.add_argument("--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)")
+    p.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count)",
+    )
     return p
 
 
@@ -588,7 +600,9 @@ def main() -> int:
             if getattr(args, flag):
                 active_exts.update(exts)
     if not active_exts:
-        parser.error("No language flag specified. Use --rs, --toml, --js, --py, --sh, --lua, or --all.")
+        parser.error(
+            "No language flag specified. Use --rs, --toml, --js, --py, --sh, --lua, or --all."
+        )
     cwd = Path(".").resolve()
     files = collect_files(args.dirs, active_exts)
     if not files:
@@ -607,7 +621,7 @@ def main() -> int:
     elapsed = time.perf_counter() - t0
     results.sort(key=lambda r: r.rel)
     print_summary(results, elapsed)
-    return 1 if any((r.error for r in results)) else 0
+    return 1 if any(r.error for r in results) else 0
 
 
 if __name__ == "__main__":

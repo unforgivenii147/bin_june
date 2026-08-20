@@ -10,7 +10,9 @@ def get_ast_sexp(node, source: bytes, depth: int = 0) -> str:
     if node.child_count == 0:
         token = source[node.start_byte : node.end_byte].decode("utf-8")
         return f'({node.type} "{token}")'
-    children_sexp = " ".join(get_ast_sexp(child, source, depth + 1) for child in node.children)
+    children_sexp = " ".join(
+        get_ast_sexp(child, source, depth + 1) for child in node.children
+    )
     return f"({node.type} {children_sexp})"
 
 

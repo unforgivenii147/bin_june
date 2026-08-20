@@ -19,7 +19,11 @@ def process_file(path):
     src = path.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
-    return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
+    return [
+        src[node.start_byte : node.end_byte].decode()
+        for node in root.children
+        if node.type in VALID
+    ]
 
 
 def main() -> None:

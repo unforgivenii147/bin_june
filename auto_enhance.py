@@ -9,7 +9,9 @@ import cv2
 import numpy as np
 
 
-def enhance_image(image_path: Path, verbose: bool = False, progress: tuple | None = None) -> bool:
+def enhance_image(
+    image_path: Path, verbose: bool = False, progress: tuple | None = None
+) -> bool:
     try:
         if progress:
             current, total = progress
@@ -56,7 +58,9 @@ def collect_images(input_paths) -> list:
     valid_extensions = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff"}
     images_to_process = []
     if not input_paths:
-        print("[INFO] No inputs provided. Scanning current directory '.' recursively...")
+        print(
+            "[INFO] No inputs provided. Scanning current directory '.' recursively..."
+        )
         input_paths = [Path(".")]
     for path_str in input_paths:
         path = Path(path_str)
@@ -98,9 +102,22 @@ def main():
         description="Google Photos Style Auto-Enhancer (In-place replacement)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("inputs", nargs="*", help="Files or folders to process. Defaults to recursive '.' if empty.")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print details for every image processed.")
-    parser.add_argument("--parallel", action="store_true", help="Enable multiprocessing (sequential is default).")
+    parser.add_argument(
+        "inputs",
+        nargs="*",
+        help="Files or folders to process. Defaults to recursive '.' if empty.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print details for every image processed.",
+    )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="Enable multiprocessing (sequential is default).",
+    )
     parser.add_argument(
         "-j",
         "--jobs",
@@ -124,7 +141,9 @@ def main():
             num_cores = args.jobs if args.jobs else mp.cpu_count()
             results = process_parallel(tasks, num_cores)
         except ImportError:
-            print("[WARNING] multiprocessing not available. Falling back to sequential.")
+            print(
+                "[WARNING] multiprocessing not available. Falling back to sequential."
+            )
             results = process_sequential(tasks, args.verbose)
     else:
         print("[SYSTEM] Processing sequentially (default mode)...")

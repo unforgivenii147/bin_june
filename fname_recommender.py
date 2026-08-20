@@ -1,17 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Analyze Python files and suggest meaningful filenames based on content analysis.
-Supports parallel processing with optional in-place renaming via --apply flag.
-"""
 
 import argparse
 import ast
 import re
 import sys
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator
 
 
 @dataclass
@@ -57,7 +53,11 @@ class FileAnalyzer:
         return None
 
     def extract_purpose(self) -> str | None:
-        return self.get_module_docstring() or self.get_argparse_epilog() or self.get_main_docstring()
+        return (
+            self.get_module_docstring()
+            or self.get_argparse_epilog()
+            or self.get_main_docstring()
+        )
 
     def is_meaningful_name(self) -> bool:
         name = self.filepath.stem
@@ -74,7 +74,18 @@ class FileAnalyzer:
         words = re.findall(r"\b[a-z][a-z0-9]*\b", purpose.lower())
         if not words:
             return None
-        stop_words = {"this", "that", "from", "with", "for", "the", "and", "or", "are", "is"}
+        stop_words = {
+            "this",
+            "that",
+            "from",
+            "with",
+            "for",
+            "the",
+            "and",
+            "or",
+            "are",
+            "is",
+        }
         keywords = [w for w in words if len(w) > 3 and w not in stop_words]
         if keywords:
             return "_".join(keywords[:3])
@@ -90,7 +101,9 @@ def collect_py_files(paths: list[Path]) -> Generator[Path, None, None]:
 
 
 def analyze_file(filepath: Path) -> FileStats:
-    stats = FileStats(path=filepath, current_name=filepath.stem, suggestion=None, has_meaning=False)
+    stats = FileStats(
+        path=filepath, current_name=filepath.stem, suggestion=None, has_meaning=False
+    )
     try:
         analyzer = FileAnalyzer(filepath)
         stats.has_meaning = analyzer.is_meaningful_name()
@@ -114,7 +127,9 @@ def rename_file(filepath: Path, new_name: str) -> tuple[bool, str | None]:
         return False, str(e)
 
 
-def process_files(paths: list[Path], apply: bool = False, max_workers: int = 4) -> list[FileStats]:
+def process_files(
+    paths: list[Path], apply: bool = False, max_workers: int = 4
+) -> list[FileStats]:
     results = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {}
@@ -142,7 +157,9 @@ def report_stats(stats_list: list[FileStats], cwd: Path, apply: bool) -> None:
     mode = "APPLY" if apply else "DRY RUN"
     print(f"\n{'=' * 78}")
     print(f"  Mode: {mode}")
-    print(f"  Total files: {len(stats_list)} | Meaningful: {meaningful} | Unnamed: {unnamed}")
+    print(
+        f"  Total files: {len(stats_list)} | Meaningful: {meaningful} | Unnamed: {unnamed}"
+    )
     print(f"  Errors: {errors} | Renamed: {renamed}")
     print(f"{'=' * 78}\n")
     if unnamed > 0:
@@ -155,7 +172,7 @@ def report_stats(stats_list: list[FileStats], cwd: Path, apply: bool) -> None:
                 if stats.suggestion:
                     print(f"     Suggest: {stats.suggestion}")
                 else:
-                    print(f"     Suggest: (no suggestion available)")
+                    print("     Suggest: (no suggestion available)")
                 if stats.error:
                     print(f"     Error:   {stats.error}")
                 elif stats.renamed:
@@ -189,8 +206,19 @@ Examples:
         default=[Path(".")],
         help="Files or directories to analyze (default: current directory)",
     )
-    parser.add_argument("-a", "--apply", action="store_true", help="Apply suggestions and rename files in place")
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
+    parser.add_argument(
+        "-a",
+        "--apply",
+        action="store_true",
+        help="Apply suggestions and rename files in place",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4)",
+    )
     args = parser.parse_args()
     try:
         cwd = Path.cwd()

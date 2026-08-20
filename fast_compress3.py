@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Recursive file compression/decompression tool using Zstandard.
-Compresses files in current directory recursively, skipping certain extensions and .git folders.
-Uses pure generator for memory-efficient streaming traversal.
-"""
 
 from __future__ import annotations
 
@@ -259,14 +254,20 @@ def walk_files(directory: Path, compress: bool):
     if stats["skipped_symlinks"] > 0:
         print(f"⚠️  Skipped {stats['skipped_symlinks']} symlinks")
     if stats["skipped_media"] > 0:
-        print(f"ℹ️  Skipped {stats['skipped_media']} media/binary files (already compressed)")
+        print(
+            f"ℹ️  Skipped {stats['skipped_media']} media/binary files (already compressed)"
+        )
     if stats["skipped_extensions"] > 0:
-        print(f"ℹ️  Skipped {stats['skipped_extensions']} files with unwanted extensions")
+        print(
+            f"ℹ️  Skipped {stats['skipped_extensions']} files with unwanted extensions"
+        )
     if stats["skipped_editable"] > 0:
         print(f"ℹ️  Skipped {stats['skipped_editable']} editable package directories")
     if stats["skipped_dirs"] > 0:
         print(f"ℹ️  Skipped {stats['skipped_dirs']} excluded directories")
-    print(f"Scanned {stats['dirs']} directories, found {stats['files']} files to process")
+    print(
+        f"Scanned {stats['dirs']} directories, found {stats['files']} files to process"
+    )
 
 
 def compress_file(
@@ -282,8 +283,7 @@ def compress_file(
         compressor = zstd.ZstdCompressor(level=level, threads=threads)
         with open(input_path, "rb") as infile, open(output_path, "wb") as outfile:
             reader = compressor.stream_reader(infile)
-            for chunk in iter(lambda: reader.read(8192), b""):
-                outfile.write(chunk)
+            outfile.writelines(iter(lambda: reader.read(8192), b""))
         compressed_size = output_path.stat().st_size
         stats.add(original_size, compressed_size)
         if remove_original:
@@ -296,14 +296,19 @@ def compress_file(
         return False, input_path, str(e), 0, 0
 
 
-def decompress_file(input_path: Path, output_path: Path, threads: int, remove_original: bool, stats: SpaceStats):
+def decompress_file(
+    input_path: Path,
+    output_path: Path,
+    threads: int,
+    remove_original: bool,
+    stats: SpaceStats,
+):
     try:
         compressed_size = input_path.stat().st_size
         decompressor = zstd.ZstdDecompressor()
         with open(input_path, "rb") as infile, open(output_path, "wb") as outfile:
             reader = decompressor.stream_reader(infile)
-            for chunk in iter(lambda: reader.read(8192), b""):
-                outfile.write(chunk)
+            outfile.writelines(iter(lambda: reader.read(8192), b""))
         decompressed_size = output_path.stat().st_size
         stats.add(decompressed_size, compressed_size)
         if remove_original:
@@ -324,7 +329,9 @@ def fsz(bytes_size: int) -> str:
     return f"{bytes_size:.2f} PB"
 
 
-def process_files(file_generator, compress: bool, level: int, threads: int, remove_original: bool):
+def process_files(
+    file_generator, compress: bool, level: int, threads: int, remove_original: bool
+):
     stats = SpaceStats()
     failed = []
     skipped = 0
@@ -349,7 +356,15 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
                     skipped += 1
                     processed += 1
                     continue
-                future = executor.submit(compress_file, file_path, output_path, level, threads, remove_original, stats)
+                future = executor.submit(
+                    compress_file,
+                    file_path,
+                    output_path,
+                    level,
+                    threads,
+                    remove_original,
+                    stats,
+                )
             else:
                 output_path = file_path.with_suffix("")
                 if output_path.exists():
@@ -357,7 +372,14 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
                     skipped += 1
                     processed += 1
                     continue
-                future = executor.submit(decompress_file, file_path, output_path, threads, remove_original, stats)
+                future = executor.submit(
+                    decompress_file,
+                    file_path,
+                    output_path,
+                    threads,
+                    remove_original,
+                    stats,
+                )
             futures[future] = file_path, output_path
         for future in as_completed(futures):
             result = future.result()
@@ -393,10 +415,16 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Recursively compress or decompress files using Zstandard")
+    parser = argparse.ArgumentParser(
+        description="Recursively compress or decompress files using Zstandard"
+    )
     action_group = parser.add_mutually_exclusive_group(required=False)
-    action_group.add_argument("-c", "--compress", action="store_true", help="Compress files (default)")
-    action_group.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
+    action_group.add_argument(
+        "-c", "--compress", action="store_true", help="Compress files (default)"
+    )
+    action_group.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress files"
+    )
     parser.add_argument(
         "--level",
         type=int,
@@ -404,9 +432,17 @@ def main():
         choices=range(1, 23),
         help="Compression level (1-22, default: 3)",
     )
-    parser.add_argument("--threads", type=int, default=4, help="Number of threads (default: 4)")
-    parser.add_argument("--dir", type=str, default=".", help="Directory to process (default: current)")
-    parser.add_argument("--keep", action="store_true", help="Keep original files (default: remove on success)")
+    parser.add_argument(
+        "--threads", type=int, default=4, help="Number of threads (default: 4)"
+    )
+    parser.add_argument(
+        "--dir", type=str, default=".", help="Directory to process (default: current)"
+    )
+    parser.add_argument(
+        "--keep",
+        action="store_true",
+        help="Keep original files (default: remove on success)",
+    )
     args = parser.parse_args()
     if not args.compress and not args.decompress:
         args.compress = True
@@ -427,7 +463,9 @@ def main():
     print(f"Keep original files: {'Yes' if args.keep else 'No'}")
     print("\nScanning directory tree...")
     file_generator = walk_files(base_dir, args.compress)
-    process_files(file_generator, args.compress, args.level, args.threads, remove_original)
+    process_files(
+        file_generator, args.compress, args.level, args.threads, remove_original
+    )
 
 
 if __name__ == "__main__":

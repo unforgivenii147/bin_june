@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Monolith: Download a URL as a single, self-contained HTML file."""
 
 import argparse
 import sys
@@ -120,10 +119,14 @@ class Monolith:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download a URL as a single, self-contained HTML file.")
+    parser = argparse.ArgumentParser(
+        description="Download a URL as a single, self-contained HTML file."
+    )
     parser.add_argument("url", help="URL to download")
     parser.add_argument("-o", "--output", help="Output file (default: stdout)")
-    parser.add_argument("-t", "--timeout", type=int, default=10, help="Request timeout in seconds")
+    parser.add_argument(
+        "-t", "--timeout", type=int, default=10, help="Request timeout in seconds"
+    )
     args = parser.parse_args()
     try:
         mono = Monolith(args.url, timeout=args.timeout)

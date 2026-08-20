@@ -23,7 +23,9 @@ def deduplicate_json_list(data_list, unique_by=None):
         if not isinstance(entry, dict):
             new_list.append(entry)
             continue
-        identifier = entry.get(unique_by) if unique_by else json.dumps(entry, sort_keys=True)
+        identifier = (
+            entry.get(unique_by) if unique_by else json.dumps(entry, sort_keys=True)
+        )
         if identifier not in seen:
             seen.add(identifier)
             new_list.append(entry)

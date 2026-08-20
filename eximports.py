@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from os import scandir as os_scandir
 from pathlib import Path
 
 import tree_sitter_python as tsp
@@ -78,7 +77,11 @@ def process_file(path: Path) -> list[str]:
     src = path.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
-    return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
+    return [
+        src[node.start_byte : node.end_byte].decode()
+        for node in root.children
+        if node.type in VALID
+    ]
 
 
 def normalize_import(import_line: str) -> str | None:

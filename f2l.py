@@ -18,7 +18,12 @@ def main() -> None:
     formatted_content = "{" + ", ".join(items) + "}"
     filepath.write_text(formatted_content, encoding="utf-8")
     try:
-        subprocess.run(["termux-clipboard-set"], input=formatted_content, text=True, capture_output=True)
+        subprocess.run(
+            ["termux-clipboard-set"],
+            input=formatted_content,
+            text=True,
+            capture_output=True,
+        )
         print(f"✓ Updated and copied: {filepath}")
     except FileNotFoundError:
         print(f"✓ File updated: {filepath}")

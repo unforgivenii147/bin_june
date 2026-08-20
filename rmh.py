@@ -1,17 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Safely remove single-line and multi-line comments from C/C++ source files.
-Features:
-- Accept multiple files/folders as input (or process current directory recursively)
-- Recursive directory traversal using pathlib
-- Parallel processing with multiprocessing
-- Handles both // (single-line) and /* */ (multi-line) comments
-- Preserves string literals and character literals
-- Updates files in-place with backup creation
-- Progress tracking with tqdm
-- Detailed logging of changes
-- Reports disk space freed at the end
-"""
 
 from __future__ import annotations
 
@@ -171,7 +158,9 @@ def collect_source_files(targets: list[str]) -> list[Path]:
     return sorted(all_files)
 
 
-def process_files_parallel(paths: list[Path], num_workers: int | None = None) -> list[ProcessResult]:
+def process_files_parallel(
+    paths: list[Path], num_workers: int | None = None
+) -> list[ProcessResult]:
     num_workers = num_workers or cpu_count()
     remover = CommentRemover()
     with Pool(num_workers) as pool:
@@ -264,7 +253,9 @@ def main(
                 final_size = len(cleaned.encode("utf-8"))
                 freed = original_size - final_size
                 total_preview_freed += freed
-                logger.info(f"  {path.name}: {comments} comments, would free {_format_bytes(freed)}")
+                logger.info(
+                    f"  {path.name}: {comments} comments, would free {_format_bytes(freed)}"
+                )
             except Exception as e:
                 logger.error(f"  {path.name}: {e}")
         if len(source_files) > 5:
@@ -298,10 +289,25 @@ if __name__ == "__main__":
         epilog="Examples:\n  %(prog)s                           # Process current directory\n  %(prog)s src/ include/             # Process multiple directories\n  %(prog)s file.cpp                  # Process single file\n  %(prog)s src/ file.h               # Process directory and file\n",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("targets", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("-w", "--workers", type=int, help="Number of parallel workers (default: CPU count)")
-    parser.add_argument("--no-backup", action="store_true", help="Remove .bak backup files after processing")
-    parser.add_argument("--dry-run", action="store_true", help="Preview changes without modifying files")
+    parser.add_argument(
+        "targets",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        help="Number of parallel workers (default: CPU count)",
+    )
+    parser.add_argument(
+        "--no-backup",
+        action="store_true",
+        help="Remove .bak backup files after processing",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview changes without modifying files"
+    )
     args = parser.parse_args()
     targets = args.targets if args.targets else None
     exit_code = main(

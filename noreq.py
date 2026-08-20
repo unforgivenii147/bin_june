@@ -267,9 +267,11 @@ def find_files_to_process() -> list[Path]:
             continue
         file_name = file_path.name
         file_name_lower = file_name.lower()
-        if file_name in TARGET_FILES or file_name.endswith(".metadata"):
-            files_to_process.append(file_path)
-        elif file_name_lower.endswith((".zip", ".whl", ".tar.gz", ".tgz", ".tar")):
+        if (
+            file_name in TARGET_FILES
+            or file_name.endswith(".metadata")
+            or file_name_lower.endswith((".zip", ".whl", ".tar.gz", ".tgz", ".tar"))
+        ):
             files_to_process.append(file_path)
     return files_to_process
 

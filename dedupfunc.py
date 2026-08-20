@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Duplicate Function Detector and Remover
-Detects functions with identical bodies (ignoring whitespace and comments)
-and optionally removes duplicates with user confirmation.
-"""
 
 from __future__ import annotations
 
@@ -16,7 +11,9 @@ from pathlib import Path
 
 
 class FunctionInfo:
-    def __init__(self, name: str, body: str, lineno: int, node: ast.FunctionDef) -> None:
+    def __init__(
+        self, name: str, body: str, lineno: int, node: ast.FunctionDef
+    ) -> None:
         self.name = name
         self.body = self._normalize_body(body)
         self.original_body = body
@@ -44,7 +41,9 @@ class DuplicateFunctionFinder(ast.NodeVisitor):
         body_end = node.body[-1].end_lineno
         body_lines = self.source_lines[body_start:body_end]
         body_code = "\n".join(body_lines)
-        func_info = FunctionInfo(name=node.name, body=body_code, lineno=node.lineno, node=node)
+        func_info = FunctionInfo(
+            name=node.name, body=body_code, lineno=node.lineno, node=node
+        )
         self.functions.append(func_info)
         self.generic_visit(node)
 
@@ -83,7 +82,9 @@ class DuplicateFunctionRemover:
         start_line, end_line = self._get_function_lines(func_info)
         return "\n".join(self.lines[start_line - 1 : end_line])
 
-    def remove_duplicates(self, groups: dict[str, list[FunctionInfo]], keep_choice: dict[str, int]) -> bool:
+    def remove_duplicates(
+        self, groups: dict[str, list[FunctionInfo]], keep_choice: dict[str, int]
+    ) -> bool:
         with open(self.filepath, encoding="utf-8") as f:
             self.content = f.read()
             self.lines = self.content.splitlines()
@@ -111,7 +112,10 @@ class DuplicateFunctionRemover:
 
     def backup_file(self) -> str:
         backup_path = self.filepath.with_suffix(self.filepath.suffix + ".backup")
-        with open(self.filepath, encoding="utf-8") as src, open(backup_path, "w", encoding="utf-8") as dst:
+        with (
+            open(self.filepath, encoding="utf-8") as src,
+            open(backup_path, "w", encoding="utf-8") as dst,
+        ):
             dst.write(src.read())
         return str(backup_path)
 
@@ -156,7 +160,9 @@ def get_user_choices(groups: dict[str, list[FunctionInfo]]) -> dict[str, int]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Find and optionally remove duplicate functions in Python files")
+    parser = argparse.ArgumentParser(
+        description="Find and optionally remove duplicate functions in Python files"
+    )
     parser.add_argument("file", help="Python file to analyze")
     parser.add_argument(
         "-r",
@@ -164,7 +170,11 @@ def main() -> None:
         action="store_true",
         help="Remove duplicate functions with user confirmation",
     )
-    parser.add_argument("--backup", action="store_true", help="Create a backup before removing (implies -r)")
+    parser.add_argument(
+        "--backup",
+        action="store_true",
+        help="Create a backup before removing (implies -r)",
+    )
     args = parser.parse_args()
     filepath = args.file
     if not Path(filepath).exists():

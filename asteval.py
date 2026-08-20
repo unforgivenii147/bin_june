@@ -6,8 +6,8 @@ import ast
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Pool, cpu_count
-from os import scandir as os_scandir
 from pathlib import Path
+
 from dh import get_pyfiles
 
 
@@ -90,7 +90,10 @@ def process_files_threadpool(files: list[Path], dry_run: bool = False) -> None:
         process_file((path, idx, total, dry_run))
 
     with ThreadPoolExecutor(max_workers=min(cpu_count() * 2, len(files))) as executor:
-        futures = {executor.submit(worker, path, idx): path for idx, path in enumerate(files, 1)}
+        futures = {
+            executor.submit(worker, path, idx): path
+            for idx, path in enumerate(files, 1)
+        }
         for future in as_completed(futures):
             try:
                 future.result()
@@ -117,9 +120,16 @@ def main() -> int:
         description="Check Python files for syntax errors and move invalid ones to 'error' directories",
         epilog="Example: python script.py --dry-run /path/to/project",
     )
-    parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
     parser.add_argument(
-        "--dry-run", "-n", action="store_true", help="Show what would be done without actually moving files"
+        "paths",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Show what would be done without actually moving files",
     )
     parser.add_argument(
         "--parallel",

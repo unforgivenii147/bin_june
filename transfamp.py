@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Translate Persian text files to English using deep_translator.
-Each file contains one Persian word per line.
-Results saved as JSON files with fa:en mappings.
-Uses pathlib and parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -26,17 +20,23 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
         translator = GoogleTranslator(source="fa", target="en")
         translated_text = translator.translate(content)
         original_lines = [line.strip() for line in content.split("\n") if line.strip()]
-        translated_lines = [line.strip() for line in translated_text.split("\n") if line.strip()]
+        translated_lines = [
+            line.strip() for line in translated_text.split("\n") if line.strip()
+        ]
         if len(original_lines) != len(translated_lines):
             translations = {}
             for i, line in enumerate(original_lines):
                 if line:
                     try:
-                        translated = GoogleTranslator(source="fa", target="en").translate(line)
+                        translated = GoogleTranslator(
+                            source="fa", target="en"
+                        ).translate(line)
                         translations[line] = translated
                     except Exception as e:
                         translations[line] = f"TRANSLATION_ERROR: {e!s}"
-                        print(f"  ⚠️  Error translating line {i + 1} in {file_path.name}: {e}")
+                        print(
+                            f"  ⚠️  Error translating line {i + 1} in {file_path.name}: {e}"
+                        )
         else:
             translations = dict(zip(original_lines, translated_lines, strict=False))
         print(f"✅ Translated: {file_path.name} ({len(translations)} words)")
@@ -46,7 +46,9 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
         return file_path, {}
 
 
-def save_translation(input_path: Path, translations: dict, output_dir: Path | None = None):
+def save_translation(
+    input_path: Path, translations: dict, output_dir: Path | None = None
+):
     if output_dir is None:
         output_dir = input_path.parent
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -74,7 +76,10 @@ def main():
     successful = 0
     failed = 0
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(translate_file, file_path): file_path for file_path in text_files}
+        future_to_file = {
+            executor.submit(translate_file, file_path): file_path
+            for file_path in text_files
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:

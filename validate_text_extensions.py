@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Sanity check script to validate text file extensions.
-Traverses the filesystem to find files with extensions in TXT_EXT,
-verifies they are actually text-based files, and reports mismatches.
-Uses memory-efficient os.walk traversal with progress reporting.
-"""
 
 from __future__ import annotations
 
@@ -17,7 +11,9 @@ from pathlib import Path
 
 from dh import TXT_EXT
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +30,9 @@ class SpinnerProgressReporter:
         if file_count - self.last_count >= 500:
             self.last_count = file_count
             self.spinner_index = (self.spinner_index + 1) % len(self.spinner)
-            path_display = current_path[:60] + "..." if len(current_path) > 60 else current_path
+            path_display = (
+                current_path[:60] + "..." if len(current_path) > 60 else current_path
+            )
             msg = f"\r{self.spinner[self.spinner_index]} Files: {file_count:8d} | {path_display}"
             print(msg, end="", flush=True)
 
@@ -123,7 +121,9 @@ def check_file(file_path: Path) -> tuple[Path, str, bool, str]:
         return (file_path, file_path.suffix.lower(), None, "error")
 
 
-def validate_extensions(root_dir: str = "/", num_workers: int | None = None, verbose: bool = True) -> dict:
+def validate_extensions(
+    root_dir: str = "/", num_workers: int | None = None, verbose: bool = True
+) -> dict:
     if num_workers is None:
         num_workers = max(1, cpu_count() - 1)
     root_path = Path(root_dir)
@@ -137,7 +137,11 @@ def validate_extensions(root_dir: str = "/", num_workers: int | None = None, ver
     progress = SpinnerProgressReporter(verbose=verbose)
     matching_files = list(
         memory_efficient_file_finder(
-            root_dir, TXT_EXT, progress_callback=progress, skip_symlinks=True, skip_mount_points=True
+            root_dir,
+            TXT_EXT,
+            progress_callback=progress,
+            skip_symlinks=True,
+            skip_mount_points=True,
         )
     )
     print()
@@ -163,14 +167,18 @@ def validate_extensions(root_dir: str = "/", num_workers: int | None = None, ver
     for file_path, ext, is_text, mime_type in results:
         if ext not in by_extension:
             by_extension[ext] = {"text": 0, "binary": 0, "error": 0, "files": []}
-        by_extension[ext]["files"].append({"path": str(file_path), "is_text": is_text, "mime_type": mime_type})
+        by_extension[ext]["files"].append(
+            {"path": str(file_path), "is_text": is_text, "mime_type": mime_type}
+        )
         if is_text is True:
             text_count += 1
             by_extension[ext]["text"] += 1
         elif is_text is False:
             binary_count += 1
             by_extension[ext]["binary"] += 1
-            mismatches.append({"path": str(file_path), "extension": ext, "mime_type": mime_type})
+            mismatches.append(
+                {"path": str(file_path), "extension": ext, "mime_type": mime_type}
+            )
         else:
             error_count += 1
             by_extension[ext]["error"] += 1
@@ -194,11 +202,15 @@ def print_report(results: dict):
     print(f"  Binary files:         {results['binary_files']}")
     print(f"  Access errors:        {results['access_errors']}")
     if results["mismatches"]:
-        print(f"\n⚠️  MISMATCHES FOUND: {len(results['mismatches'])} files with .txt extension are NOT text files")
+        print(
+            f"\n⚠️  MISMATCHES FOUND: {len(results['mismatches'])} files with .txt extension are NOT text files"
+        )
         print("-" * 42)
         for i, mismatch in enumerate(results["mismatches"][:20], 1):
             print(f"  {i}. {mismatch['path']}")
-            print(f"     └─ Extension: {mismatch['extension']} | MIME: {mismatch['mime_type']}")
+            print(
+                f"     └─ Extension: {mismatch['extension']} | MIME: {mismatch['mime_type']}"
+            )
         if len(results["mismatches"]) > 20:
             print(f"  ... and {len(results['mismatches']) - 20} more")
     else:
@@ -206,7 +218,9 @@ def print_report(results: dict):
     print("\nBreakdown by extension:")
     print("-" * 42)
     for ext, stats in sorted(results["by_extension"].items()):
-        print(f"  {ext:12} - Text: {stats['text']:6}  Binary: {stats['binary']:6}  Errors: {stats['error']:6}")
+        print(
+            f"  {ext:12} - Text: {stats['text']:6}  Binary: {stats['binary']:6}  Errors: {stats['error']:6}"
+        )
     print("\n" + "=" * 42)
 
 

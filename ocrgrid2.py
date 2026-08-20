@@ -22,7 +22,9 @@ def prepare_image_for_ocr(img_path: Path):
         raise ValueError(msg)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.fastNlMeansDenoising(gray, h=15)
-    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
+    thresh = cv2.adaptiveThreshold(
+        gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2
+    )
     coords = cv2.findNonZero(thresh)
     rect = cv2.minAreaRect(coords)
     angle = rect[-1]
@@ -35,7 +37,10 @@ def prepare_image_for_ocr(img_path: Path):
 
 def run_tesseract_on_image(
     img, oem: int, psm: int
-) -> tuple[bytes | dict[str, bytes | str] | str, str, float, str] | tuple[str, str, float, str]:
+) -> (
+    tuple[bytes | dict[str, bytes | str] | str, str, float, str]
+    | tuple[str, str, float, str]
+):
     config = f"--oem {oem} --psm {psm} -l eng"
     start = time.time()
     try:

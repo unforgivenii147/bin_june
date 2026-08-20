@@ -22,14 +22,18 @@ def detect_version(file_path: Path) -> None:
         py3_score += 1
         reasons.append("Parsed successfully with Python 3 syntax.")
     except SyntaxError:
-        print(f"{file_path.name}\nConfidence: High\nReason: Syntax error when parsed with Python 3.")
+        print(
+            f"{file_path.name}\nConfidence: High\nReason: Syntax error when parsed with Python 3."
+        )
         return
     if "print " in source and "print(" not in source:
         py2_score += 2
         reasons.append("Uses print statement without parentheses (Python 2 style).")
     if "__future__" in source and "print_function" in source:
         py3_score += 2
-        reasons.append("Uses 'from __future__ import print_function' (Python 3 compatibility).")
+        reasons.append(
+            "Uses 'from __future__ import print_function' (Python 3 compatibility)."
+        )
     for node in ast.walk(tree):
         if isinstance(node, (ast.AsyncFunctionDef, ast.Await)):
             py3_score += 3
@@ -41,7 +45,9 @@ def detect_version(file_path: Path) -> None:
             for arg in node.args.args:
                 if hasattr(arg, "annotation") and arg.annotation is not None:
                     py3_score += 2
-                    reasons.append("Uses function argument annotations (Python 3 feature).")
+                    reasons.append(
+                        "Uses function argument annotations (Python 3 feature)."
+                    )
     if py2_score > py3_score:
         version = "2"
         confidence = "High" if py2_score - py3_score > 2 else "Medium"

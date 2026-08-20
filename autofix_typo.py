@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Auto typo fixer with pattern learning.
-Learns from common substitution errors (b→n, 8→i, etc.) and user corrections.
-"""
 
 from __future__ import annotations
 
@@ -86,7 +82,10 @@ class PatternLearner:
                     self.learned_corrections = data.get("corrections", {})
                     self.error_frequency.update(data.get("frequencies", {}))
                     self.context_rules = data.get("context_rules", [])
-                print(f"Loaded {len(self.learned_corrections)} learned corrections", file=sys.stderr)
+                print(
+                    f"Loaded {len(self.learned_corrections)} learned corrections",
+                    file=sys.stderr,
+                )
             except Exception as e:
                 print(f"Error loading learning DB: {e}", file=sys.stderr)
 
@@ -113,7 +112,11 @@ class PatternLearner:
         multi_changes = 0
         for i, char in enumerate(word):
             if char in self.substitution_patterns:
-                multi_corrected = multi_corrected[:i] + self.substitution_patterns[char] + multi_corrected[i + 1 :]
+                multi_corrected = (
+                    multi_corrected[:i]
+                    + self.substitution_patterns[char]
+                    + multi_corrected[i + 1 :]
+                )
                 multi_changes += 1
         if multi_changes > 0 and multi_corrected != word:
             candidates.append((multi_corrected, 0.8 - multi_changes * 0.1))
@@ -134,7 +137,10 @@ class PatternLearner:
                     self.error_frequency[pattern] += 1
                     if self.error_frequency[pattern] > 2:
                         self.substitution_patterns[w_char] = c_char
-                        print(f"  Learned pattern: '{w_char}' → '{c_char}'", file=sys.stderr)
+                        print(
+                            f"  Learned pattern: '{w_char}' → '{c_char}'",
+                            file=sys.stderr,
+                        )
         elif len(wrong) == len(correct) + 1:
             for i in range(len(wrong)):
                 if wrong[:i] + wrong[i + 1 :] == correct:
@@ -149,7 +155,9 @@ class PatternLearner:
 
 
 class TypoFixerWithLearning:
-    def __init__(self, preview: bool = True, learning_db: str = "typo_patterns.json") -> None:
+    def __init__(
+        self, preview: bool = True, learning_db: str = "typo_patterns.json"
+    ) -> None:
         self.preview = preview
         self.learner = PatternLearner(learning_db)
         self.changes_made = 0
@@ -220,7 +228,9 @@ class TypoFixerWithLearning:
         try:
             from difflib import get_close_matches
 
-            matches = get_close_matches(word.lower(), self.valid_words, n=1, cutoff=0.75)
+            matches = get_close_matches(
+                word.lower(), self.valid_words, n=1, cutoff=0.75
+            )
             if matches:
                 if word[0].isupper():
                     return matches[0].capitalize()
@@ -240,11 +250,7 @@ class TypoFixerWithLearning:
             if choice == "y" and suggestion:
                 self.learner.learn_from_correction(word, suggestion, line)
                 return suggestion
-            elif choice == "y" and not suggestion:
-                manual = input("Enter correction: ")
-                self.learner.learn_from_correction(word, manual, line)
-                return manual
-            elif choice == "e":
+            elif choice == "y" and not suggestion or choice == "e":
                 manual = input("Enter correction: ")
                 self.learner.learn_from_correction(word, manual, line)
                 return manual
@@ -279,7 +285,10 @@ class TypoFixerWithLearning:
                     if correction:
                         changes += 1
                         if self.preview:
-                            print(f"  Line {line_num}: '{word}' → '{correction}'", file=sys.stderr)
+                            print(
+                                f"  Line {line_num}: '{word}' → '{correction}'",
+                                file=sys.stderr,
+                            )
                         return correction
                     elif self.interactive_mode:
                         correction = self.interactive_fix(word, line)
@@ -311,8 +320,14 @@ class TypoFixerWithLearning:
                     print(f"\nProcessing: {filepath}", file=sys.stderr)
                     self.fix_file(filepath)
         print(f"\nSummary: Processed {self.files_processed} files", file=sys.stderr)
-        print(f"Active patterns: {len(self.learner.substitution_patterns)}", file=sys.stderr)
-        print(f"Learned corrections: {len(self.learner.learned_corrections)}", file=sys.stderr)
+        print(
+            f"Active patterns: {len(self.learner.substitution_patterns)}",
+            file=sys.stderr,
+        )
+        print(
+            f"Learned corrections: {len(self.learner.learned_corrections)}",
+            file=sys.stderr,
+        )
         if self.changes_made > 0:
             self.learner.save()
 
@@ -320,16 +335,26 @@ class TypoFixerWithLearning:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Auto-fix typos with pattern learning")
     parser.add_argument("--apply", action="store_true", help="Actually apply fixes")
-    parser.add_argument("--interactive", action="store_true", help="Interactive mode (learn from each fix)")
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Interactive mode (learn from each fix)",
+    )
     parser.add_argument("--dir", type=str, default=".", help="Directory to process")
-    parser.add_argument("--db", type=str, default="typo_patterns.json", help="Learning database file")
-    parser.add_argument("--show-patterns", action="store_true", help="Show learned patterns and exit")
+    parser.add_argument(
+        "--db", type=str, default="typo_patterns.json", help="Learning database file"
+    )
+    parser.add_argument(
+        "--show-patterns", action="store_true", help="Show learned patterns and exit"
+    )
     args = parser.parse_args()
     if args.show_patterns:
         learner = PatternLearner(args.db)
         print(f"\nLearned Corrections ({len(learner.learned_corrections)}):")
         for wrong, correct in sorted(learner.learned_corrections.items()):
-            print(f"  {wrong} → {correct} (seen {learner.error_frequency[wrong]} times)")
+            print(
+                f"  {wrong} → {correct} (seen {learner.error_frequency[wrong]} times)"
+            )
         print(f"\nActive Substitution Patterns ({len(learner.substitution_patterns)}):")
         for wrong, correct in sorted(learner.substitution_patterns.items()):
             if wrong in COMMON_SUBSTITUTIONS:

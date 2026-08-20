@@ -45,7 +45,7 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
@@ -75,9 +75,12 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                             stack.append(entry)
                     elif entry.is_file(follow_symlinks=False):
                         p = Path(entry.path)
-                        if p.suffix == ".py":
-                            pyfiles.append(p)
-                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
+                        if (
+                            p.suffix == ".py"
+                            or not p.suffix
+                            and (not p.name.startswith("."))
+                            and is_python_file(p)
+                        ):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
@@ -86,7 +89,10 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
 def process_file(path) -> tuple[str, Path]:
     path = Path(path)
-    return (xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))), path)
+    return (
+        xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))),
+        path,
+    )
 
 
 def main() -> None:

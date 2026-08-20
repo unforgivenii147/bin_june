@@ -1,25 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-font_convert.py — Convert TTF/OTF/WOFF/WOFF2 font files using fontTools.
-
-Scope note:
-    fontTools can freely re-wrap the SAME outline format between the raw
-    SFNT container (.ttf/.otf) and the compressed web formats (.woff/.woff2).
-    It does NOT convert glyph outlines between TrueType (glyf) and
-    PostScript/CFF (CFF /CFF2) — that requires outline-level tooling
-    (cu2qu, AFDKO, etc.) and is out of scope. Requests that would need that
-    (e.g. a CFF/OTF font -> .ttf, or a TrueType font -> .otf) are detected
-    and reported as SKIPPED rather than producing a broken font.
-
-Requirements:
-    pip install "fonttools[woff]>=4.50,<5"   # [woff] pulls in brotli for woff2
-
-Usage:
-    python font_convert.py                          # cwd, recursive, -> woff2
-    python font_convert.py fonts/ extra.ttf --to otf
-    python font_convert.py fonts/ --to woff2 -r      # remove originals on success
-    python font_convert.py fonts/ --to ttf -j 8
-"""
 
 import argparse
 import sys
@@ -50,7 +29,6 @@ class ConvResult:
 
 
 def iter_font_files(paths: list[Path]) -> list[Path]:
-    """Expand files/dirs into a deduplicated, sorted list of font files."""
     found: set[Path] = set()
     for p in paths:
         if p.is_dir():
@@ -65,7 +43,6 @@ def iter_font_files(paths: list[Path]) -> list[Path]:
 
 
 def _outline_kind(font: TTFont) -> str:
-    """Return 'cff', 'truetype', or 'unknown' based on tables actually present."""
     tags = set(font.keys())
     if tags & CFF_TABLES:
         return "cff"
@@ -93,15 +70,11 @@ def convert_one(src: Path, target: str, remove_src: bool) -> ConvResult:
 
     font = None
     try:
-        # lazy=True: don't decompile tables we don't touch (memory efficiency).
-        # recalcBBoxes/recalcTimestamp=False: we're only re-flavoring the
-        # container, not editing glyph data, so skip the extra work/decompile
-        # that recalculation would force.
         font = TTFont(str(src), lazy=True, recalcBBoxes=False, recalcTimestamp=False)
         kind = _outline_kind(font)
 
         if target in ("woff", "woff2"):
-            font.flavor = target  # works for either outline kind
+            font.flavor = target
         else:
             if kind == "unknown":
                 res.skipped_reason = "no recognizable glyf/CFF outline table"
@@ -114,11 +87,9 @@ def convert_one(src: Path, target: str, remove_src: bool) -> ConvResult:
                 )
                 return res
             if not needs_cff and kind != "truetype":
-                res.skipped_reason = (
-                    "source has CFF outlines; converting to .ttf requires outline conversion, which is unsupported"
-                )
+                res.skipped_reason = "source has CFF outlines; converting to .ttf requires outline conversion, which is unsupported"
                 return res
-            font.flavor = None  # unwrap to raw sfnt container
+            font.flavor = None
 
         font.save(str(dst))
         res.dst = dst
@@ -133,8 +104,6 @@ def convert_one(src: Path, target: str, remove_src: bool) -> ConvResult:
                 res.error = f"converted ok, but failed to remove source: {exc}"
 
     except (TTLibError, OSError, Exception) as exc:
-        # Broad catch is deliberate: one malformed font must not kill the
-        # whole batch. Clean up any partial output file.
         res.error = f"conversion failed: {exc}"
         if dst.exists():
             try:
@@ -172,7 +141,9 @@ def print_report(results: list[ConvResult]) -> None:
     total_in = total_out = 0
 
     for r in results:
-        name = r.src.name if len(r.src.name) <= name_w else r.src.name[: name_w - 1] + "…"
+        name = (
+            r.src.name if len(r.src.name) <= name_w else r.src.name[: name_w - 1] + "…"
+        )
 
         if r.ok:
             ok += 1
@@ -181,14 +152,20 @@ def print_report(results: list[ConvResult]) -> None:
             ratio = (r.dst_size / r.src_size * 100) if r.src_size else 0.0
             size_str = f"{human_size(r.src_size)}->{human_size(r.dst_size)}"
             status = "OK*" if r.removed_src else "OK"
-            note = r.error or ""  # e.g. "removed source" failure, if any
-            print(f"{name:<{name_w}}  {status:<6}  {size_str:<18}  {ratio:5.1f}%  {r.seconds:5.2f}s  {note}")
+            note = r.error or ""
+            print(
+                f"{name:<{name_w}}  {status:<6}  {size_str:<18}  {ratio:5.1f}%  {r.seconds:5.2f}s  {note}"
+            )
         elif r.skipped_reason:
             skipped += 1
-            print(f"{name:<{name_w}}  {'SKIP':<6}  {'-':<18}  {'-':<7}  {r.seconds:5.2f}s  {r.skipped_reason}")
+            print(
+                f"{name:<{name_w}}  {'SKIP':<6}  {'-':<18}  {'-':<7}  {r.seconds:5.2f}s  {r.skipped_reason}"
+            )
         else:
             failed += 1
-            print(f"{name:<{name_w}}  {'FAIL':<6}  {'-':<18}  {'-':<7}  {r.seconds:5.2f}s  {r.error}")
+            print(
+                f"{name:<{name_w}}  {'FAIL':<6}  {'-':<18}  {'-':<7}  {r.seconds:5.2f}s  {r.error}"
+            )
 
     print("-" * len(header))
     print(f"Total: {len(results)}  ok={ok}  skipped={skipped}  failed={failed}")
@@ -248,7 +225,9 @@ def main(argv: list[str] | None = None) -> int:
 
     already_target = [f for f in files if f.suffix.lower().lstrip(".") == args.target]
     if already_target:
-        print(f"Skipping {len(already_target)} file(s) already in .{args.target} format.")
+        print(
+            f"Skipping {len(already_target)} file(s) already in .{args.target} format."
+        )
     files = [f for f in files if f not in already_target]
 
     if not files:
@@ -256,11 +235,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     max_workers = max(1, args.max_workers)
-    print(f"Converting {len(files)} file(s) -> .{args.target} with {max_workers} worker(s)...\n")
+    print(
+        f"Converting {len(files)} file(s) -> .{args.target} with {max_workers} worker(s)...\n"
+    )
 
     results: list[ConvResult] = []
     with ProcessPoolExecutor(max_workers=max_workers) as pool:
-        futures = {pool.submit(convert_one, f, args.target, args.remove): f for f in files}
+        futures = {
+            pool.submit(convert_one, f, args.target, args.remove): f for f in files
+        }
         for fut in as_completed(futures):
             results.append(fut.result())
 

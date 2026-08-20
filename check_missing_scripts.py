@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Check for Python packages with missing console scripts in system bin directory."""
 
 from __future__ import annotations
 
@@ -129,7 +128,9 @@ def main():
     report_lines.append(f"Python: {sys.version}")
     report_lines.append("")
     report_lines.append(f"Total packages scanned: {len(results)}")
-    report_lines.append(f"Packages with console_scripts: {len(packages_with_entry_points)}")
+    report_lines.append(
+        f"Packages with console_scripts: {len(packages_with_entry_points)}"
+    )
     report_lines.append(f"Packages with missing scripts: {len(packages_with_missing)}")
     report_lines.append(f"Total missing scripts: {total_missing}")
     report_lines.append("")
@@ -157,11 +158,18 @@ def main():
     report_lines.append("")
     for pkg in sorted(results, key=lambda x: x["package"]):
         if pkg["has_entry_points"]:
-            status = "✓ OK" if not pkg["missing_scripts"] else f"✗ Missing {len(pkg['missing_scripts'])}"
+            status = (
+                "✓ OK"
+                if not pkg["missing_scripts"]
+                else f"✗ Missing {len(pkg['missing_scripts'])}"
+            )
             report_lines.append(f"{pkg['package']:40s} {status}")
     for line in report_lines:
         print(line)
-    output_file = Path.cwd() / f"missing_scripts_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    output_file = (
+        Path.cwd()
+        / f"missing_scripts_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    )
     try:
         output_file.write_text("\n".join(report_lines) + "\n")
         print(f"\nReport saved to: {output_file}")

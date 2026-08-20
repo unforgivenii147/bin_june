@@ -32,7 +32,12 @@ def parse_size(size_str: str) -> int:
 def get_all_packages():
     try:
         print("📦 Fetching list of all available packages...")
-        result = subprocess.run(["apt", "list", "--all-versions"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["apt", "list", "--all-versions"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         packages = []
         lines = result.stdout.strip().split("\n")
         for line in lines:
@@ -48,7 +53,13 @@ def get_all_packages():
 
 def get_package_info(package):
     try:
-        result = subprocess.run(["apt", "show", package], capture_output=True, text=True, check=False, timeout=10)
+        result = subprocess.run(
+            ["apt", "show", package],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
         if result.returncode != 0:
             return package, 0, False
         for line in result.stdout.split("\n"):
@@ -63,7 +74,9 @@ def get_package_info(package):
         return package, 0, False
 
 
-def process_packages_parallel(packages, threshold_bytes: int, num_processes: int | None = None):
+def process_packages_parallel(
+    packages, threshold_bytes: int, num_processes: int | None = None
+):
     if num_processes is None:
         num_processes = min(cpu_count(), 8)
     print(f"🚀 Using {num_processes} parallel processes...")
@@ -93,7 +106,9 @@ def process_packages_parallel(packages, threshold_bytes: int, num_processes: int
         return large_packages, all_packages, no_size, total
 
 
-def save_json_results(data, filename: str, threshold_mb: float, include_all=False) -> bool:
+def save_json_results(
+    data, filename: str, threshold_mb: float, include_all=False
+) -> bool:
     output = {
         "metadata": {
             "threshold_mb": threshold_mb,
@@ -121,7 +136,9 @@ def main() -> None:
         try:
             threshold_mb = float(sys.argv[1])
         except ValueError:
-            print(f"Error: Invalid threshold '{sys.argv[1]}'. Using default {default_threshold_mb}MB.")
+            print(
+                f"Error: Invalid threshold '{sys.argv[1]}'. Using default {default_threshold_mb}MB."
+            )
             threshold_mb = default_threshold_mb
     else:
         threshold_mb = default_threshold_mb
@@ -138,12 +155,18 @@ def main() -> None:
         print("Make sure you have internet connection and run 'pkg update' first.")
         return
     print(f"📦 Found {len(packages)} available packages.")
-    large_packages, all_packages, no_size, total = process_packages_parallel(packages, threshold_bytes, num_processes)
+    large_packages, all_packages, no_size, total = process_packages_parallel(
+        packages, threshold_bytes, num_processes
+    )
     print("-" * 42)
-    print(f"\n📊 RESULTS: Found {len(large_packages)} packages larger than {threshold_mb}MB")
+    print(
+        f"\n📊 RESULTS: Found {len(large_packages)} packages larger than {threshold_mb}MB"
+    )
     print("-" * 42)
     if large_packages:
-        sorted_packages = sorted(large_packages.items(), key=lambda x: x[1], reverse=True)
+        sorted_packages = sorted(
+            large_packages.items(), key=lambda x: x[1], reverse=True
+        )
         total_size = 0
         print(f"{'PACKAGE NAME':<40} {'DOWNLOAD SIZE':>15}")
         print("-" * 42)
@@ -170,11 +193,17 @@ def main() -> None:
         json_filename = f"packages_above_{threshold_mb}mb.json"
         if save_json_results(json_data, json_filename, threshold_mb, include_all=False):
             print(f"\n💾 Results saved to: {json_filename}")
-            print(f"   Format: {{'package_name': size_in_bytes}} for packages > {threshold_mb}MB")
-    save_all = input("\n💾 Save ALL packages (including smaller ones) to JSON? (y/n): ").lower()
+            print(
+                f"   Format: {{'package_name': size_in_bytes}} for packages > {threshold_mb}MB"
+            )
+    save_all = input(
+        "\n💾 Save ALL packages (including smaller ones) to JSON? (y/n): "
+    ).lower()
     if save_all == "y":
         all_json_filename = "all_packages_sizes.json"
-        if save_json_results(json_data, all_json_filename, threshold_mb, include_all=True):
+        if save_json_results(
+            json_data, all_json_filename, threshold_mb, include_all=True
+        ):
             print(f"✅ All packages saved to: {all_json_filename}")
             print("   Format: {'package_name': size_in_bytes} for ALL packages")
     save_simple = input("\n💾 Save simple JSON (just {package: size})? (y/n): ").lower()

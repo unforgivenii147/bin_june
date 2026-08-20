@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Commit all files in current directory to a local git repository.
-Initializes a new repository if not already inside one.
-Automatically pushes to remote if configured.
-"""
 
 from __future__ import annotations
 
@@ -20,14 +16,21 @@ from git import InvalidGitRepositoryError, Repo
 
 
 def parse_arguments() -> Namespace:
-    parser = argparse.ArgumentParser(description="Commit and push all files to git repository")
+    parser = argparse.ArgumentParser(
+        description="Commit and push all files to git repository"
+    )
     parser.add_argument(
         "-c",
         "--create",
         action="store_true",
         help="Create remote repository on GitHub if it doesn't exist",
     )
-    parser.add_argument("-r", "--remote-name", default="origin", help="Remote name to use (default: origin)")
+    parser.add_argument(
+        "-r",
+        "--remote-name",
+        default="origin",
+        help="Remote name to use (default: origin)",
+    )
     return parser.parse_args()
 
 
@@ -41,11 +44,23 @@ def load_git_token() -> str | None:
     return token
 
 
-def create_github_repo(repo_name: str, description: str = "new git repo", private: bool = False):
+def create_github_repo(
+    repo_name: str, description: str = "new git repo", private: bool = False
+):
     token = load_git_token()
-    headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-    data = {"name": repo_name, "description": description, "private": private, "auto_init": True}
-    response = requests.post("https://api.github.com/user/repos", json=data, headers=headers)
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    data = {
+        "name": repo_name,
+        "description": description,
+        "private": private,
+        "auto_init": True,
+    }
+    response = requests.post(
+        "https://api.github.com/user/repos", json=data, headers=headers
+    )
     if response.status_code == 201:
         return response.json()["html_url"]
     else:
@@ -54,7 +69,10 @@ def create_github_repo(repo_name: str, description: str = "new git repo", privat
 
 def get_github_username(token: str) -> str | None:
     try:
-        headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+        headers = {
+            "Authorization": f"token {token}",
+            "Accept": "application/vnd.github.v3+json",
+        }
         response = requests.get("https://api.github.com/user", headers=headers)
         if response.status_code == 200:
             return response.json()["login"]
@@ -72,14 +90,18 @@ def get_cwd_name() -> str:
     return dir_name.lower()
 
 
-def setup_remote_repo(repo: Repo, token: str, remote_name: str, create_if_missing: bool) -> bool:
+def setup_remote_repo(
+    repo: Repo, token: str, remote_name: str, create_if_missing: bool
+) -> bool:
     existing_remote = None
     try:
         if remote_name in [r.name for r in repo.remotes]:
             existing_remote = repo.remote(remote_name)
             try:
                 list(existing_remote.urls)
-                print(f"Remote '{remote_name}' already configured: {existing_remote.url}")
+                print(
+                    f"Remote '{remote_name}' already configured: {existing_remote.url}"
+                )
                 return True
             except Exception:
                 print(f"⚠️ Remote '{remote_name}' has invalid URL, removing...")
@@ -139,7 +161,9 @@ def push_to_remote(repo: Repo, remote_name: str, token: str = load_git_token()) 
         if token:
             setup_git_auth(repo, token)
         try:
-            push_result = remote.push(refspec=f"{current_branch}:{current_branch}", set_upstream=True)
+            push_result = remote.push(
+                refspec=f"{current_branch}:{current_branch}", set_upstream=True
+            )
         except Exception as e:
             if "no upstream branch" in str(e):
                 print("Setting upstream and pushing...")
@@ -153,7 +177,10 @@ def push_to_remote(repo: Repo, remote_name: str, token: str = load_git_token()) 
                 if hasattr(result, "flags") and result.flags & result.ERROR:
                     print(f"❌ Push failed: {result.summary}", file=sys.stderr)
                     if "403" in result.summary or "401" in result.summary:
-                        print("🔐 Authentication failed. Check your GitHub token.", file=sys.stderr)
+                        print(
+                            "🔐 Authentication failed. Check your GitHub token.",
+                            file=sys.stderr,
+                        )
                     return
                 elif hasattr(result, "flags") and result.flags & result.UP_TO_DATE:
                     print("✅ Remote is already up to date.")

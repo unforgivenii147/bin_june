@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to show various extensions in current directory with file count for each extension.
-Uses pathlib and parallel processing for speedup.
-"""
 
 from __future__ import annotations
 
@@ -47,7 +43,8 @@ def main():
     ext_counts_total = defaultdict(int)
     with ProcessPoolExecutor(max_workers=8) as executor:
         future_to_batch = {
-            executor.submit(process_files_batch, batch): batch_idx for batch_idx, batch in enumerate(file_batches)
+            executor.submit(process_files_batch, batch): batch_idx
+            for batch_idx, batch in enumerate(file_batches)
         }
         for future in as_completed(future_to_batch):
             try:
@@ -63,10 +60,15 @@ def main():
         print("No files with recognized extensions found.")
         return
     sorted_extensions = sorted(ext_counts_total.items(), key=lambda x: (-x[1], x[0]))
-    max_ext_len = max(len(ext if ext != "NO_EXTENSION" else "(no extension)") for ext in ext_counts_total)
+    max_ext_len = max(
+        len(ext if ext != "NO_EXTENSION" else "(no extension)")
+        for ext in ext_counts_total
+    )
     for ext, count in sorted_extensions:
         display_ext = ext if ext != "NO_EXTENSION" else "(no extension)"
-        print(f"{display_ext:<{max_ext_len + 2}} {count} file{'s' if count != 1 else ''}")
+        print(
+            f"{display_ext:<{max_ext_len + 2}} {count} file{'s' if count != 1 else ''}"
+        )
     print("-" * 42)
     print(f"{'TOTAL':<{max_ext_len + 2}} {len(files)} files")
     print("-" * 42)

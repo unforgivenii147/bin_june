@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Zstandard Recursive File Compressor/Decompressor
-"""
 
 from __future__ import annotations
 
@@ -98,7 +95,13 @@ try:
     from rich import box
     from rich.console import Console
     from rich.panel import Panel
-    from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+    from rich.progress import (
+        BarColumn,
+        Progress,
+        SpinnerColumn,
+        TextColumn,
+        TimeElapsedColumn,
+    )
     from rich.table import Table
     from rich.text import Text
 
@@ -234,7 +237,9 @@ def get_files(
             if p.suffix.lower() in exclude_ext:
                 continue
             if ext_filter:
-                normalized_filter = [f if f.startswith(".") else f".{f}" for f in ext_filter]
+                normalized_filter = [
+                    f if f.startswith(".") else f".{f}" for f in ext_filter
+                ]
                 if p.suffix.lower() not in normalized_filter:
                     continue
             found.append(p)
@@ -251,7 +256,9 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
     total_time = sum(r.duration for r in results)
     if RICH_AVAILABLE:
         console = Console()
-        table = Table(title=f"Zstandard {operation.capitalize()} Results", box=box.ROUNDED)
+        table = Table(
+            title=f"Zstandard {operation.capitalize()} Results", box=box.ROUNDED
+        )
         table.add_column("File", style="cyan")
         table.add_column("Original", justify="right")
         table.add_column("Processed", justify="right")
@@ -278,26 +285,41 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
             f"Original Size: {fsz(total_orig)}\n",
             f"Processed Size: {fsz(total_proc)}\n",
             ("Ratio: ", "dim"),
-            (f"{((1 - total_proc / total_orig) * 100 if total_orig > 0 else 0):.1f}%\n", "bold green"),
+            (
+                f"{((1 - total_proc / total_orig) * 100 if total_orig > 0 else 0):.1f}%\n",
+                "bold green",
+            ),
             (f"Time: {total_time:.2f}s", "dim"),
         )
         console.print(Panel(summary, border_style="cyan"))
     else:
         print(f"\n--- {operation.capitalize()} Summary ---")
-        print(f"Processed {len(results)} files ({len(successes)} success, {len(failures)} failure)")
+        print(
+            f"Processed {len(results)} files ({len(successes)} success, {len(failures)} failure)"
+        )
         print(f"Original size: {fsz(total_orig)}")
         print(f"Processed size: {fsz(total_proc)}")
         print(f"Total time: {total_time:.2f}s")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Optimized Zstd Compressor/Decompressor")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to process")
-    parser.add_argument("-d", "--decompress", action="store_true", help="Decompress mode")
-    parser.add_argument("-l", "--level", type=int, default=19, help="Compression level (1-22)")
+    parser = argparse.ArgumentParser(
+        description="Optimized Zstd Compressor/Decompressor"
+    )
+    parser.add_argument(
+        "directory", nargs="?", default=".", help="Directory to process"
+    )
+    parser.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress mode"
+    )
+    parser.add_argument(
+        "-l", "--level", type=int, default=19, help="Compression level (1-22)"
+    )
     parser.add_argument("-w", "--workers", type=int, default=4, help="Parallel workers")
     parser.add_argument("-k", "--keep", action="store_true", help="Keep original files")
-    parser.add_argument("-t", "--tar", action="store_true", help="Tar subdirs first (compress only)")
+    parser.add_argument(
+        "-t", "--tar", action="store_true", help="Tar subdirs first (compress only)"
+    )
     parser.add_argument("-e", "--ext", nargs="+", help="Filter by extensions")
     parser.add_argument("--exclude", nargs="+", default=[], help="Patterns to exclude")
     args = parser.parse_args()
@@ -306,7 +328,14 @@ def main():
     if not root.is_dir():
         print(f"Error: {root} is not a directory.")
         sys.exit(1)
-    files = get_files(root, mode, EXCLUDED_EXTENSIONS, args.exclude, ext_filter=args.ext, recursive=not args.tar)
+    files = get_files(
+        root,
+        mode,
+        EXCLUDED_EXTENSIONS,
+        args.exclude,
+        ext_filter=args.ext,
+        recursive=not args.tar,
+    )
     if not files:
         print("No files found to process.")
         return
@@ -317,10 +346,16 @@ def main():
         for p in files:
             if mode == "compress":
                 out = p.with_suffix(p.suffix + ".zst")
-                futures.append(executor.submit(compress_file, p, out, args.level, 0, 1024 * 1024, args.keep))
+                futures.append(
+                    executor.submit(
+                        compress_file, p, out, args.level, 0, 1024 * 1024, args.keep
+                    )
+                )
             else:
                 out = p.with_suffix("")
-                futures.append(executor.submit(decompress_file, p, out, 1024 * 1024, args.keep))
+                futures.append(
+                    executor.submit(decompress_file, p, out, 1024 * 1024, args.keep)
+                )
         if RICH_AVAILABLE:
             with Progress(
                 SpinnerColumn(),
@@ -328,7 +363,9 @@ def main():
                 BarColumn(),
                 TimeElapsedColumn(),
             ) as progress:
-                task = progress.add_task(f"{mode.capitalize()}ing...", total=len(futures))
+                task = progress.add_task(
+                    f"{mode.capitalize()}ing...", total=len(futures)
+                )
                 for f in as_completed(futures):
                     results.append(f.result())
                     progress.advance(task)
@@ -336,7 +373,9 @@ def main():
             for i, f in enumerate(as_completed(futures), 1):
                 res = f.result()
                 results.append(res)
-                print(f"[{i}/{len(files)}] {res.path.name} - {('OK' if res.success else 'FAIL')}")
+                print(
+                    f"[{i}/{len(files)}] {res.path.name} - {('OK' if res.success else 'FAIL')}"
+                )
     print_summary(results, root, mode)
 
 

@@ -13,7 +13,9 @@ def replace_translations(input_file):
         translations = json.load(f)
     with open(input_file, "r", encoding="utf-8") as f:
         content = f.read()
-    sorted_translations = sorted(translations.items(), key=lambda x: len(x[0]), reverse=True)
+    sorted_translations = sorted(
+        translations.items(), key=lambda x: len(x[0]), reverse=True
+    )
     modified_content = content
     for chinese, english in sorted_translations:
         if chinese != english:

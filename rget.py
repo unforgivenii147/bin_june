@@ -111,9 +111,14 @@ def download_urls(urls: list[str], output_dir=OUTPUT_DIR) -> None:
         return
     print(f"🚀 Starting download of {len(safe_urls)} URLs...\n")
     session = requests.Session()
-    session.headers.update({"User-Agent": "Mozilla/5.0 (compatible; ResumableDownloader/1.0)"})
+    session.headers.update(
+        {"User-Agent": "Mozilla/5.0 (compatible; ResumableDownloader/1.0)"}
+    )
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_url = {executor.submit(download_one, url, session, output_dir): url for url in safe_urls}
+        future_to_url = {
+            executor.submit(download_one, url, session, output_dir): url
+            for url in safe_urls
+        }
         with tqdm(total=len(safe_urls), desc="Downloading", unit="file") as pbar:
             for future in as_completed(future_to_url):
                 url = future_to_url[future]
@@ -133,7 +138,9 @@ if __name__ == "__main__":
     urls = []
     try:
         with Path(URLS_FILE).open("r", encoding="utf-8") as f:
-            urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+            urls = [
+                line.strip() for line in f if line.strip() and not line.startswith("#")
+            ]
     except FileNotFoundError:
         print(f"❌ Error: {URLS_FILE} not found.")
         sys.exit(1)

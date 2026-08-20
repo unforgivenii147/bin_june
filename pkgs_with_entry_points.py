@@ -1,14 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to find Python packages in system site directories and categorize them based on entry_points.txt.
-Separates packages into:
-1. Pure Python without entry_points
-2. Non-pure (binary) without entry_points
-3. Pure Python with valid entry_points
-4. Non-pure with valid entry_points
-Uses multiprocessing for parallel scanning and pathlib for path operations.
-Optimized for Linux/Termux - only checks for .so files.
-"""
 
 from __future__ import annotations
 
@@ -32,7 +22,10 @@ def get_site_packages_dirs() -> list[Path]:
     if user_site:
         site_dirs.append(Path(user_site))
     common_paths = [
-        Path(sys.prefix) / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages",
+        Path(sys.prefix)
+        / "lib"
+        / f"python{sys.version_info.major}.{sys.version_info.minor}"
+        / "site-packages",
         Path(sys.prefix)
         / "local"
         / "lib"
@@ -71,7 +64,9 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
                     record_file = dist_info / "RECORD"
                     if record_file.exists():
                         try:
-                            content = record_file.read_text(encoding="utf-8", errors="ignore")
+                            content = record_file.read_text(
+                                encoding="utf-8", errors="ignore"
+                            )
                             if ".so" in content:
                                 return False
                         except Exception:
@@ -87,7 +82,9 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
                     sources_file = egg_info / "SOURCES.txt"
                     if sources_file.exists():
                         try:
-                            content = sources_file.read_text(encoding="utf-8", errors="ignore")
+                            content = sources_file.read_text(
+                                encoding="utf-8", errors="ignore"
+                            )
                             if ".so" in content:
                                 return False
                         except:
@@ -95,7 +92,11 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
                     native_libs = egg_info / "native_libs.txt"
                     if native_libs.exists():
                         return False
-        package_dir_patterns = [pkg_name, pkg_name.replace("-", "_"), pkg_name.replace("_", "-")]
+        package_dir_patterns = [
+            pkg_name,
+            pkg_name.replace("-", "_"),
+            pkg_name.replace("_", "-"),
+        ]
         for pattern in package_dir_patterns:
             for package_dir in site_dir.glob(pattern):
                 if (
@@ -106,7 +107,11 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
                     for item in package_dir.rglob("*"):
                         if item.is_file() and item.suffix == ".so":
                             return False
-                        if item.is_file() and ".cpython-" in str(item) and item.suffix == ".so":
+                        if (
+                            item.is_file()
+                            and ".cpython-" in str(item)
+                            and item.suffix == ".so"
+                        ):
                             return False
         return True
     except Exception:
@@ -209,7 +214,9 @@ def scan_package(package_path: Path, site_dir: Path) -> dict[str, any]:
     return result
 
 
-def find_packages_categorized(site_dir: Path) -> tuple[list[str], list[str], list[str], list[str]]:
+def find_packages_categorized(
+    site_dir: Path,
+) -> tuple[list[str], list[str], list[str], list[str]]:
     pure_without_ep = []
     nonpure_without_ep = []
     pure_with_ep = []
@@ -278,7 +285,9 @@ def main():
         default="ep_details.txt",
         help="Output file for detailed entry_points information (default: ep_details.txt)",
     )
-    parser.add_argument("-j", "--json", action="store_true", help="Output in JSON format")
+    parser.add_argument(
+        "-j", "--json", action="store_true", help="Output in JSON format"
+    )
     parser.add_argument(
         "-p",
         "--processes",
@@ -286,7 +295,9 @@ def main():
         default=None,
         help=f"Number of processes to use (default: {cpu_count()})",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Print verbose output"
+    )
     args = parser.parse_args()
     site_dirs = get_site_packages_dirs()
     if not site_dirs:
@@ -400,9 +411,13 @@ def main():
         for pkg in unique_ep_details:
             lines.append(f"{pkg['name']}:")
             if pkg["entry_points"]["console_scripts"]:
-                lines.append(f"  console_scripts: {', '.join(pkg['entry_points']['console_scripts'])}")
+                lines.append(
+                    f"  console_scripts: {', '.join(pkg['entry_points']['console_scripts'])}"
+                )
             if pkg["entry_points"]["gui_scripts"]:
-                lines.append(f"  gui_scripts: {', '.join(pkg['entry_points']['gui_scripts'])}")
+                lines.append(
+                    f"  gui_scripts: {', '.join(pkg['entry_points']['gui_scripts'])}"
+                )
             if pkg["entry_points"]["other"]:
                 lines.append(f"  other: {', '.join(pkg['entry_points']['other'])}")
             lines.append("")
@@ -416,7 +431,9 @@ def main():
     print("Without entry_points.txt:")
     print(f"  • Pure Python packages: {len(unique_pure_noep)}")
     print(f"  • Non-pure packages:    {len(unique_nonpure_noep)}")
-    print(f"  • Subtotal:             {len(unique_pure_noep) + len(unique_nonpure_noep)}")
+    print(
+        f"  • Subtotal:             {len(unique_pure_noep) + len(unique_nonpure_noep)}"
+    )
     print()
     print("With entry_points.txt:")
     print(f"  • Pure Python packages: {len(unique_pure_ep)}")
@@ -453,17 +470,29 @@ def scan_for_entry_points(site_dir: Path) -> list[dict]:
     processed = set()
     try:
         for item in site_dir.iterdir():
-            if not item.is_dir() or item.name.startswith("_") or item.name.startswith("."):
+            if (
+                not item.is_dir()
+                or item.name.startswith("_")
+                or item.name.startswith(".")
+            ):
                 continue
             init_file = item / "__init__.py"
-            is_package = init_file.exists() or item.suffix in [".dist-info", ".egg-info"]
+            is_package = init_file.exists() or item.suffix in [
+                ".dist-info",
+                ".egg-info",
+            ]
             if is_package:
                 result = scan_package(item, site_dir)
                 if result["error"] is None and result["has_entry_points"]:
                     pkg_name = result["name"]
                     if pkg_name not in processed:
                         processed.add(pkg_name)
-                        packages_with_ep.append({"name": pkg_name, "entry_points": result["entry_points_data"]})
+                        packages_with_ep.append(
+                            {
+                                "name": pkg_name,
+                                "entry_points": result["entry_points_data"],
+                            }
+                        )
     except:
         pass
     return packages_with_ep

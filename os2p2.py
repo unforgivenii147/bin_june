@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-import os
 import re
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from os import scandir as os_scandir
 from pathlib import Path
 
 from dh import cprint
@@ -54,7 +52,9 @@ class PathlibRefactorer:
             self.transformations.append(
                 Transformation(
                     pattern=pattern,
-                    replacement=lambda m, r=replacement: re.sub(r"\\\\(\\d+)", lambda x: m.group(int(x.group(1))), r),
+                    replacement=lambda m, r=replacement: re.sub(
+                        r"\\\\(\\d+)", lambda x: m.group(int(x.group(1))), r
+                    ),
                     type=TransformationType.SIMPLE_REPLACE,
                     description=f"Replace {pattern}",
                 )
@@ -70,7 +70,9 @@ class PathlibRefactorer:
         self.transformations.append(
             Transformation(
                 pattern=r"\bos\.path\.split\s*\(\s*([^)]+)\s*\)",
-                replacement=lambda m: f"(str(Path({m.group(1)}).parent), Path({m.group(1)}).name)",
+                replacement=lambda m: (
+                    f"(str(Path({m.group(1)}).parent), Path({m.group(1)}).name)"
+                ),
                 type=TransformationType.FUNCTION_CALL,
                 description="Convert os.path.split to tuple of parent/name",
             )
@@ -96,7 +98,9 @@ class PathlibRefactorer:
             self.transformations.append(
                 Transformation(
                     pattern=pattern,
-                    replacement=lambda m, r=replacement: re.sub(r"\\\\(\\d+)", lambda x: m.group(int(x.group(1))), r),
+                    replacement=lambda m, r=replacement: re.sub(
+                        r"\\\\(\\d+)", lambda x: m.group(int(x.group(1))), r
+                    ),
                     type=TransformationType.SIMPLE_REPLACE,
                     description=f"Replace {pattern}",
                 )
@@ -128,7 +132,9 @@ class PathlibRefactorer:
         self.transformations.append(
             Transformation(
                 pattern="\\bos\\.listdir\\s*\\(\\s*([^)]*)\\s*\\)",
-                replacement=lambda m: f"list(Path({m.group(1) if m.group(1) else '.'}).iterdir())",
+                replacement=lambda m: (
+                    f"list(Path({m.group(1) if m.group(1) else '.'}).iterdir())"
+                ),
                 type=TransformationType.FUNCTION_CALL,
                 description="Convert os.listdir to Path.iterdir()",
             )
@@ -172,7 +178,9 @@ class PathlibRefactorer:
                     applied.add(trans.description)
                     result = new_result
             except Exception as e:
-                cprint(f"  ⚠️ Transformation failed: {trans.description} - {e}", "yellow")
+                cprint(
+                    f"  ⚠️ Transformation failed: {trans.description} - {e}", "yellow"
+                )
         return result, applied
 
     def add_pathlib_import(self, source: str) -> str:
@@ -189,7 +197,9 @@ class PathlibRefactorer:
         lines.insert(insert_idx, "from pathlib import Path\n")
         return "".join(lines)
 
-    def refactor_file(self, file_path: Path, dry_run: bool = False, create_backup: bool = True) -> dict:
+    def refactor_file(
+        self, file_path: Path, dry_run: bool = False, create_backup: bool = True
+    ) -> dict:
         result = {
             "path": file_path,
             "success": False,
@@ -229,11 +239,17 @@ class PathlibRefactorer:
 def main() -> int:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Refactor Python files from os/path to pathlib")
+    parser = argparse.ArgumentParser(
+        description="Refactor Python files from os/path to pathlib"
+    )
     parser.add_argument("paths", nargs="*", help="Files or directories to process")
-    parser.add_argument("--dry-run", "-n", action="store_true", help="Preview changes without writing")
+    parser.add_argument(
+        "--dry-run", "-n", action="store_true", help="Preview changes without writing"
+    )
     parser.add_argument("--no-backup", action="store_true", help="Skip backup creation")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output"
+    )
     args = parser.parse_args()
     if args.paths:
         files = []
@@ -256,7 +272,9 @@ def main() -> int:
     for file_path in files:
         if args.verbose:
             cprint(f"\nProcessing: {file_path.name}", "white")
-        result = refactorer.refactor_file(file_path, dry_run=args.dry_run, create_backup=not args.no_backup)
+        result = refactorer.refactor_file(
+            file_path, dry_run=args.dry_run, create_backup=not args.no_backup
+        )
         results.append(result)
         if result["error"]:
             cprint(f"  ❌ Error: {result['error']}", "red")
@@ -266,7 +284,11 @@ def main() -> int:
                 for trans in result["transformations_applied"]:
                     cprint(f"     • {trans}", "cyan", attrs=["dark"])
             if result["backup_path"]:
-                cprint(f"     📦 Backup: {result['backup_path'].name}", "white", attrs=["dark"])
+                cprint(
+                    f"     📦 Backup: {result['backup_path'].name}",
+                    "white",
+                    attrs=["dark"],
+                )
         elif args.verbose:
             cprint("  ⏭️  No changes needed", "white", attrs=["dark"])
     changed = [r for r in results if r["changed"]]
@@ -277,7 +299,9 @@ def main() -> int:
     cprint(f"  Modified: {len(changed)}", "green" if changed else "white")
     cprint(f"  Errors: {len(errors)}", "red" if errors else "white")
     if args.dry_run and changed:
-        cprint("\n⚠️  This was a dry run. Run without --dry-run to apply changes.", "yellow")
+        cprint(
+            "\n⚠️  This was a dry run. Run without --dry-run to apply changes.", "yellow"
+        )
     return 0
 
 

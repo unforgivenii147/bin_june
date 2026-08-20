@@ -12,7 +12,9 @@ from tqdm import tqdm
 def find_png_files(directory: Path):
     png_files = []
     for root, _, files in os.walk(directory):
-        png_files.extend(os.path.join(root, file) for file in files if file.lower().endswith(".png"))
+        png_files.extend(
+            os.path.join(root, file) for file in files if file.lower().endswith(".png")
+        )
     return png_files
 
 

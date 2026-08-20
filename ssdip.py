@@ -35,7 +35,9 @@ def find_fuzzy_duplicates(threshold: int = 70) -> None:
             f2_path = processed_files[j]
             if not file_hashes.get(f2_path):
                 continue
-            comparison_score = ssdeep.compare(file_hashes[f1_path], file_hashes[f2_path])
+            comparison_score = ssdeep.compare(
+                file_hashes[f1_path], file_hashes[f2_path]
+            )
             if comparison_score >= threshold:
                 print(
                     f"Potential match: {f1_path.relative_to(start_dir)} and {f2_path.relative_to(start_dir)} (Score: {comparison_score})"
@@ -48,7 +50,9 @@ def find_fuzzy_duplicates(threshold: int = 70) -> None:
         for file, similar_files in duplicates.items():
             print(f"\nFile: {file.relative_to(start_dir)}")
             for dup_file, score in similar_files:
-                print(f"  - Similar: {dup_file.relative_to(start_dir)} (Score: {score})")
+                print(
+                    f"  - Similar: {dup_file.relative_to(start_dir)} (Score: {score})"
+                )
 
 
 if __name__ == "__main__":

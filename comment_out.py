@@ -23,7 +23,9 @@ EXTENSION_COMMENTS = {
 
 def main():
     if len(sys.argv) < 4:
-        print("Error: Missing arguments.\nUsage: python comment_range.py <filename> <start_line> <end_line>")
+        print(
+            "Error: Missing arguments.\nUsage: python comment_range.py <filename> <start_line> <end_line>"
+        )
         sys.exit(1)
     filepath = sys.argv[1]
     try:
@@ -33,7 +35,9 @@ def main():
         print("Error: Start and end lines must be valid integers.")
         sys.exit(1)
     if start_line < 1 or end_line < start_line:
-        print("Error: Line numbers must start from 1, and end line must be >= start line.")
+        print(
+            "Error: Line numbers must start from 1, and end line must be >= start line."
+        )
         sys.exit(1)
     if not os.path.exists(filepath):
         print(f"Error: The file '{filepath}' does not exist.")
@@ -44,7 +48,9 @@ def main():
         lines = f.readlines()
     total_lines = len(lines)
     if start_line > total_lines:
-        print(f"Error: Start line ({start_line}) exceeds file length ({total_lines} lines).")
+        print(
+            f"Error: Start line ({start_line}) exceeds file length ({total_lines} lines)."
+        )
         sys.exit(1)
     actual_end = min(end_line, total_lines)
     for i in range(start_line - 1, actual_end):
@@ -52,7 +58,9 @@ def main():
             lines[i] = f"{comment_char} {lines[i]}"
     with open(filepath, "w", encoding="utf-8") as f:
         f.writelines(lines)
-    print(f"Success: Commented out lines {start_line} to {actual_end} in '{filepath}' using '{comment_char}'.")
+    print(
+        f"Success: Commented out lines {start_line} to {actual_end} in '{filepath}' using '{comment_char}'."
+    )
 
 
 if __name__ == "__main__":

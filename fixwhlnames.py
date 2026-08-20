@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Fix batch-renamed .whl files by reading METADATA from inside each wheel.
-This is the most accurate method as it extracts the real distribution name and version.
-"""
 
 from __future__ import annotations
 
@@ -16,7 +12,9 @@ from pathlib import Path
 def extract_metadata_from_wheel(wheel_path: Path) -> dict[str, str] | None:
     try:
         with zipfile.ZipFile(wheel_path, "r") as zf:
-            metadata_files = [f for f in zf.namelist() if f.endswith(".dist-info/METADATA")]
+            metadata_files = [
+                f for f in zf.namelist() if f.endswith(".dist-info/METADATA")
+            ]
             if not metadata_files:
                 print(f"  Warning: No METADATA file found in {wheel_path.name}")
                 return None
@@ -29,7 +27,9 @@ def extract_metadata_from_wheel(wheel_path: Path) -> dict[str, str] | None:
             if name and version:
                 return {"name": name, "version": version}
             else:
-                print(f"  Warning: Could not find Name/Version in METADATA of {wheel_path.name}")
+                print(
+                    f"  Warning: Could not find Name/Version in METADATA of {wheel_path.name}"
+                )
                 return None
     except zipfile.BadZipFile:
         print(f"  Error: {wheel_path.name} is not a valid zip file")
@@ -55,7 +55,9 @@ def extract_wheel_tags(filename: str) -> tuple[str, str, str] | None:
     return None
 
 
-def reconstruct_wheel_name(wheel_path: Path, metadata: dict[str, str], original_filename: str) -> str | None:
+def reconstruct_wheel_name(
+    wheel_path: Path, metadata: dict[str, str], original_filename: str
+) -> str | None:
     name = metadata["name"]
     version = metadata["version"]
     tags = extract_wheel_tags(wheel_path.name)
@@ -74,13 +76,21 @@ def reconstruct_wheel_name(wheel_path: Path, metadata: dict[str, str], original_
                             py_match = re.search(r"Tag: (.*?)-(.*?)-", content)
                             if py_match:
                                 python_tag = py_match.group(1)
-                                abi_tag = py_match.group(2) if len(py_match.groups()) > 1 else "none"
+                                abi_tag = (
+                                    py_match.group(2)
+                                    if len(py_match.groups()) > 1
+                                    else "none"
+                                )
                                 return f"{name}-{version}-{python_tag}-{abi_tag}-{platform_tag}.whl"
-        print(f"  Warning: Could not determine tags for {wheel_path.name}, using generic 'py3-none-any'")
+        print(
+            f"  Warning: Could not determine tags for {wheel_path.name}, using generic 'py3-none-any'"
+        )
         return f"{name}-{version}-py3-none-any.whl"
 
 
-def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup: bool = True):
+def fix_whl_files_by_metadata(
+    directory: str = ".", dry_run: bool = True, backup: bool = True
+):
     path = Path(directory)
     whl_files = list(path.glob("*.whl"))
     if not whl_files:
@@ -150,19 +160,25 @@ def batch_fix_with_parallel(directory: str = ".", max_workers: int = 4) -> None:
     print(f"Processing {len(whl_files)} files with {max_workers} workers...")
     results = {}
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(extract_metadata_from_wheel, f): f for f in whl_files}
+        future_to_file = {
+            executor.submit(extract_metadata_from_wheel, f): f for f in whl_files
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
                 metadata = future.result()
                 if metadata:
-                    proper_name = reconstruct_wheel_name(file_path, metadata, file_path.name)
+                    proper_name = reconstruct_wheel_name(
+                        file_path, metadata, file_path.name
+                    )
                     results[file_path.name] = metadata, proper_name
             except Exception as e:
                 print(f"Error processing {file_path.name}: {e}")
     print("\nExtracted information:")
     for old_name, (metadata, proper_name) in results.items():
-        print(f"  {old_name} -> {metadata['name']} {metadata['version']} -> {proper_name}")
+        print(
+            f"  {old_name} -> {metadata['name']} {metadata['version']} -> {proper_name}"
+        )
 
 
 def main() -> None:
@@ -178,7 +194,12 @@ def main() -> None:
         default=".",
         help="Directory containing .whl files (default: current directory)",
     )
-    parser.add_argument("--execute", "-e", action="store_true", help="Actually rename files (dry run by default)")
+    parser.add_argument(
+        "--execute",
+        "-e",
+        action="store_true",
+        help="Actually rename files (dry run by default)",
+    )
     parser.add_argument(
         "--no-backup",
         action="store_true",
@@ -191,7 +212,12 @@ def main() -> None:
         metavar="N",
         help="Use parallel processing with N workers (only for info extraction)",
     )
-    parser.add_argument("--info-only", "-i", action="store_true", help="Only show extracted info without renaming")
+    parser.add_argument(
+        "--info-only",
+        "-i",
+        action="store_true",
+        help="Only show extracted info without renaming",
+    )
     args = parser.parse_args()
     if args.info_only:
         print("Extracting wheel information (no renaming):")
@@ -203,13 +229,19 @@ def main() -> None:
             for whl_file in path.glob("*.whl"):
                 metadata = extract_metadata_from_wheel(whl_file)
                 if metadata:
-                    proper_name = reconstruct_wheel_name(whl_file, metadata, whl_file.name)
+                    proper_name = reconstruct_wheel_name(
+                        whl_file, metadata, whl_file.name
+                    )
                     print(f"\nFile: {whl_file.name}")
                     print(f"  Package: {metadata['name']}")
                     print(f"  Version: {metadata['version']}")
                     print(f"  Should be: {proper_name}")
     else:
-        fix_whl_files_by_metadata(directory=args.directory, dry_run=not args.execute, backup=not args.no_backup)
+        fix_whl_files_by_metadata(
+            directory=args.directory,
+            dry_run=not args.execute,
+            backup=not args.no_backup,
+        )
 
 
 if __name__ == "__main__":

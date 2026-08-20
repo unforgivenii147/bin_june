@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Network State Script
-Displays your public IP, local IP, primary/secondary DNS, and approximate internet speed.
-"""
 
 from __future__ import annotations
 
@@ -89,7 +85,9 @@ def test_speed() -> tuple[float | None, float | None, str | None, str | None]:
     print("    Testing upload speed...")
     try:
         upload_bytes = 1 * 1024 * 1024
-        rand_data = "".join(random.choices(string.ascii_letters + string.digits, k=upload_bytes)).encode()
+        rand_data = "".join(
+            random.choices(string.ascii_letters + string.digits, k=upload_bytes)
+        ).encode()
         boundary = "----------ThIs_Is_tHe_bouNdaRY_$"
         body = (
             f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="test.bin"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode()

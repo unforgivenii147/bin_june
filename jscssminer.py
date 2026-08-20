@@ -42,7 +42,9 @@ def minify_assets_in_directory(cwd: Path | str = ".") -> None:
     print(f"{'=' * 42}")
 
 
-def minify_assets_with_extensions(cwd: Path | str = ".", extensions: list[str] | None = None) -> None:
+def minify_assets_with_extensions(
+    cwd: Path | str = ".", extensions: list[str] | None = None
+) -> None:
     if extensions is None:
         extensions = [".js", ".css"]
     root_dir = Path(cwd)
@@ -104,7 +106,9 @@ def minify_asset(file_path: Path, dry_run: bool = False, backup: bool = False) -
         original_size = len(original_content.encode("utf-8"))
         minified_size = len(minified_content.encode("utf-8"))
         savings = (original_size - minified_size) / original_size * 100
-        print(f"  Minified: {original_size:,} -> {minified_size:,} bytes ({savings:.1f}% reduction)")
+        print(
+            f"  Minified: {original_size:,} -> {minified_size:,} bytes ({savings:.1f}% reduction)"
+        )
         return True
     except Exception as e:
         print(f"Error processing {file_path.name}: {e}")
@@ -139,7 +143,10 @@ def minify_assets_parallel(cwd: Path | str = ".", max_workers: int = 4) -> None:
             return (file_path, False, str(e))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = {executor.submit(process_file, file_path): file_path for file_path in files_to_process}
+        futures = {
+            executor.submit(process_file, file_path): file_path
+            for file_path in files_to_process
+        }
         for future in as_completed(futures):
             file_path, success, error = future.result()
             if success:
@@ -164,17 +171,37 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="\nExamples:\n  python minify_assets.py                    # Minify all .js and .css files in current dir\n  python minify_assets.py --dir /path/to/dir # Minify in specific directory\n  python minify_assets.py --ext .js .css     # Minify specific extensions\n  python minify_assets.py --dry-run          # Preview what would be done\n  python minify_assets.py --backup           # Create backups before minifying\n  python minify_assets.py --parallel         # Use parallel processing\n  python minify_assets.py --file style.css   # Minify a single file\n        ",
     )
-    parser.add_argument("--dir", default=".", help="Directory to process (default: current directory)")
-    parser.add_argument("--ext", nargs="+", help="File extensions to minify (default: .js .css)")
+    parser.add_argument(
+        "--dir", default=".", help="Directory to process (default: current directory)"
+    )
+    parser.add_argument(
+        "--ext", nargs="+", help="File extensions to minify (default: .js .css)"
+    )
     parser.add_argument("--file", help="Minify a single file instead of directory")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without modifying files")
-    parser.add_argument("--backup", action="store_true", help="Create .bak backup files before minifying")
-    parser.add_argument("--parallel", action="store_true", help="Use parallel processing for better performance")
-    parser.add_argument("--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without modifying files",
+    )
+    parser.add_argument(
+        "--backup",
+        action="store_true",
+        help="Create .bak backup files before minifying",
+    )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="Use parallel processing for better performance",
+    )
+    parser.add_argument(
+        "--workers", type=int, default=4, help="Number of parallel workers (default: 4)"
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args()
     if args.file:
-        success = minify_asset(Path(args.file), dry_run=args.dry_run, backup=args.backup)
+        success = minify_asset(
+            Path(args.file), dry_run=args.dry_run, backup=args.backup
+        )
         sys.exit(0 if success else 1)
     if args.parallel:
         minify_assets_parallel(Path(args.dir), max_workers=args.workers)

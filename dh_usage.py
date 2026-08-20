@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Scan ~/bin for Python scripts that import from the custom 'dh' package.
-Count how many times each function from 'dh' is imported and used,
-then save a report to ~/dh_usage.txt.
-"""
 
 from __future__ import annotations
 
@@ -26,9 +21,13 @@ def extract_dh_imports(filepath: Path) -> list[str]:
     imported: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
-            if node.module and (node.module == PACKAGE or node.module.startswith(PACKAGE + ".")):
+            if node.module and (
+                node.module == PACKAGE or node.module.startswith(PACKAGE + ".")
+            ):
                 for alias in node.names:
-                    imported.append(alias.name if alias.asname is None else alias.asname)
+                    imported.append(
+                        alias.name if alias.asname is None else alias.asname
+                    )
     dh_names: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -42,7 +41,9 @@ def extract_dh_imports(filepath: Path) -> list[str]:
             if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
                 if func.value.id in dh_names:
                     imported.append(func.attr)
-            if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Attribute):
+            if isinstance(func, ast.Attribute) and isinstance(
+                func.value, ast.Attribute
+            ):
                 root = func.value
                 while isinstance(root, ast.Attribute):
                     root = root.value
@@ -93,7 +94,9 @@ def main():
         return
     lines: list[str] = []
     lines.append(f"{'=' * 42}")
-    lines.append(f"  dh Usage Report — generated {__import__('datetime').datetime.now():%Y-%m-%d %H:%M}")
+    lines.append(
+        f"  dh Usage Report — generated {__import__('datetime').datetime.now():%Y-%m-%d %H:%M}"
+    )
     lines.append(f"{'=' * 42}")
     lines.append(f"  Scanned: {BIN_DIR}")
     lines.append(f"  Files with dh imports: {len(per_file)}")

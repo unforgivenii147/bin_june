@@ -80,7 +80,9 @@ def main() -> None:
                             print(f"[FAIL] Could not translate: {persian_word}")
                         pbar.update(1)
                         if new_count % SAVE_EVERY == 0:
-                            print(f"[INFO] Saving progress after {new_count} new translations...")
+                            print(
+                                f"[INFO] Saving progress after {new_count} new translations..."
+                            )
                             save_results_atomic(results, OUTPUT_FILE)
                 except Exception as e:
                     print(f"[ERROR] Unexpected error for '{persian_word}': {e}")

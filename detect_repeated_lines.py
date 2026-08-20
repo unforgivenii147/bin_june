@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from os import scandir as os_scandir
 from pathlib import Path
 
 
@@ -44,7 +43,13 @@ def remove_duplicates(lines: list[str], duplicates):
     return lines_copy
 
 
-def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, skip_blanks: bool = True):
+def process_file(
+    file_path,
+    duplicates,
+    dry_run: bool = False,
+    auto_yes=False,
+    skip_blanks: bool = True,
+):
     if not duplicates:
         return False, auto_yes
     print(f"\n{'[DRY RUN] ' if dry_run else ''}📄 {file_path.name}")
@@ -54,7 +59,11 @@ def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, s
     if dry_run:
         return False, auto_yes
     if not auto_yes:
-        response = input(f"\n  Remove duplicates from {file_path.name}? (y/n/a/q): ").strip().lower()
+        response = (
+            input(f"\n  Remove duplicates from {file_path.name}? (y/n/a/q): ")
+            .strip()
+            .lower()
+        )
         if response == "q":
             sys.exit(0)
         elif response == "a":
@@ -86,8 +95,18 @@ def main() -> None:
         description="Find and remove sequential duplicate lines in Python files",
         epilog="Blank lines are ignored by default.",
     )
-    parser.add_argument("--dry-run", "-n", action="store_true", help="Preview changes without modifying files")
-    parser.add_argument("--yes", "-y", action="store_true", help="Automatically answer yes to all prompts")
+    parser.add_argument(
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Preview changes without modifying files",
+    )
+    parser.add_argument(
+        "--yes",
+        "-y",
+        action="store_true",
+        help="Automatically answer yes to all prompts",
+    )
     parser.add_argument(
         "--include-blanks",
         "-b",
@@ -99,7 +118,9 @@ def main() -> None:
     print("-" * 42)
     if args.dry_run:
         print("🔍 DRY RUN MODE - No files will be modified")
-    print(f"📝 {'Ignoring' if skip_blanks else 'Including'} blank lines in duplicate detection")
+    print(
+        f"📝 {'Ignoring' if skip_blanks else 'Including'} blank lines in duplicate detection"
+    )
     print("-" * 42)
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)
@@ -115,7 +136,9 @@ def main() -> None:
     auto_yes = args.yes
     fixed_count = 0
     for file_path, dups in files_with_dups.items():
-        fixed, auto_yes = process_file(file_path, dups, args.dry_run, auto_yes, skip_blanks)
+        fixed, auto_yes = process_file(
+            file_path, dups, args.dry_run, auto_yes, skip_blanks
+        )
         if fixed:
             fixed_count += 1
     print("\n" + "=" * 42)

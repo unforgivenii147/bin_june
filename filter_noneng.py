@@ -46,17 +46,23 @@ def process_file_lines(input_path: Path, move_mode: bool):
             return
         output_path = Path("noneng.txt")
         try:
-            output_path.write_text("\n".join(non_english_lines) + "\n", encoding="utf-8")
+            output_path.write_text(
+                "\n".join(non_english_lines) + "\n", encoding="utf-8"
+            )
             print(f"💾 Extracted lines written safely to: {output_path.resolve()}")
             input_path.write_text("\n".join(english_lines) + "\n", encoding="utf-8")
-            print(f"🔄 Original file updated in-place (non-English elements removed).")
+            print("🔄 Original file updated in-place (non-English elements removed).")
         except Exception as e:
             print(f"❌ Error during file write operations: {e}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Scan text files and isolate non-English strings using Google CLD3.")
-    parser.add_argument("file", type=str, help="The target file path to inspect line by line.")
+    parser = argparse.ArgumentParser(
+        description="Scan text files and isolate non-English strings using Google CLD3."
+    )
+    parser.add_argument(
+        "file", type=str, help="The target file path to inspect line by line."
+    )
     parser.add_argument(
         "-m",
         "--move",

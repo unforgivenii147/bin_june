@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Generate __init__.py files that import all public functions and classes
-from Python modules in the current directory.
-"""
 
 from __future__ import annotations
 
@@ -48,7 +44,7 @@ def generate_init_content(modules: list[Path]) -> str:
             all_exports.extend(public_names)
     if all_exports:
         lines.append("")
-        all_str = ", ".join((repr(name) for name in all_exports))
+        all_str = ", ".join(repr(name) for name in all_exports)
         lines.append(f"__all__ = [{all_str}]")
     if lines:
         lines.append("")

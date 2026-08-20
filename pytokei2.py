@@ -35,7 +35,9 @@ def count_lines_of_code(file_path: Path, lang) -> tuple[int, int, int]:
 def scan_directory(directory: str = "."):
     stats = {
         "total": {"code": 0, "comments": 0, "blank": 0},
-        "languages": {lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS},
+        "languages": {
+            lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS
+        },
     }
     base_path = Path(directory)
     for file_path in base_path.rglob("*"):

@@ -12,7 +12,10 @@ N = int(sys.argv[1]) if len(sys.argv) > 1 else 11
 
 
 def get_sizes() -> list[tuple[Path, int]]:
-    return [(file_path.relative_to(cwd), file_path.stat().st_size) for file_path in get_files(cwd)]
+    return [
+        (file_path.relative_to(cwd), file_path.stat().st_size)
+        for file_path in get_files(cwd)
+    ]
 
 
 def main() -> None:

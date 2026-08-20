@@ -10,8 +10,15 @@ def search_python_repos():
     load_dotenv(Path.home() / ".env")
     token = os.getenv("GITHUB_TOKEN")
     headers = {"Authorization": f"Bearer {token}"}
-    params = {"q": "language:Python", "sort": "updated", "order": "desc", "per_page": 50}
-    response = requests.get("https://api.github.com/search/repositories", headers=headers, params=params)
+    params = {
+        "q": "language:Python",
+        "sort": "updated",
+        "order": "desc",
+        "per_page": 50,
+    }
+    response = requests.get(
+        "https://api.github.com/search/repositories", headers=headers, params=params
+    )
     response.raise_for_status()
     data = response.json()
     output = Path("ghpy.txt")

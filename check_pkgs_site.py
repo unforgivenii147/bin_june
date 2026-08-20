@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Simple package duplicate checker for Termux (Python 3.12+)
-"""
 
 from __future__ import annotations
 
@@ -64,7 +61,9 @@ def main():
     if duplicates:
         print("\nDuplicate packages found:")
         for pkg in sorted(duplicates):
-            print(f"  {pkg}: system={system_pkgs.get(pkg, '?')}, user={user_pkgs.get(pkg, '?')}")
+            print(
+                f"  {pkg}: system={system_pkgs.get(pkg, '?')}, user={user_pkgs.get(pkg, '?')}"
+            )
     else:
         print("\n✅ No duplicate packages found!")
 

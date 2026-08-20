@@ -18,7 +18,9 @@ IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp", ".gif"}
 
 def get_images(path: str | Path | None = None) -> list[Path]:
     path = Path(path or Path.cwd())
-    return sorted(path.rglob("*")) if path.is_dir() else [path] if path.is_file() else []
+    return (
+        sorted(path.rglob("*")) if path.is_dir() else [path] if path.is_file() else []
+    )
 
 
 def extract_text(image_path: Path, tessdata_dir: Path) -> dict:
@@ -54,7 +56,13 @@ def main() -> None:
     images = []
     for path in paths:
         if path.is_dir():
-            images.extend([f for f in path.rglob("*") if f.is_file() and f.suffix.lower() in IMAGE_EXTS])
+            images.extend(
+                [
+                    f
+                    for f in path.rglob("*")
+                    if f.is_file() and f.suffix.lower() in IMAGE_EXTS
+                ]
+            )
         elif path.is_file() and path.suffix.lower() in IMAGE_EXTS:
             images.append(path)
     if not images:

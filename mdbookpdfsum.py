@@ -85,7 +85,9 @@ def get_dom_id(node: Section) -> str:
     return result.replace(" ", "-")
 
 
-def add_outline(html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, node: Section) -> None:
+def add_outline(
+    html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, node: Section
+) -> None:
     if not node.is_root():
         id = get_dom_id(node)
         try:
@@ -101,14 +103,21 @@ def add_outline(html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, nod
         fit = None
         if dest.get("/Type") != "/Fit":
             page = reader.get_destination_page_number(dest)
-            fit = pypdf.generic.Fit(dest.get("/Type"), (dest.get("/Left"), dest.get("/Top"), dest.get("/Zoom")))
-        node.outline_item = writer.add_outline_item(str(node), page, node.parent.outline_item, fit=fit)
+            fit = pypdf.generic.Fit(
+                dest.get("/Type"),
+                (dest.get("/Left"), dest.get("/Top"), dest.get("/Zoom")),
+            )
+        node.outline_item = writer.add_outline_item(
+            str(node), page, node.parent.outline_item, fit=fit
+        )
     for child in node.children:
         add_outline(html_root, reader, writer, child)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="mdbook_pdf_summary", description="Add outline to the PDF file.")
+    parser = argparse.ArgumentParser(
+        prog="mdbook_pdf_summary", description="Add outline to the PDF file."
+    )
     parser.add_argument(
         "--html_path",
         type=str,
@@ -121,7 +130,12 @@ def main() -> None:
         help="path of the `output.pdf` generated `mdbook-pdf`",
         default="output.pdf",
     )
-    parser.add_argument("--summary_path", type=str, help="path of the `SUMMARY.md`", default="src/SUMMARY.md")
+    parser.add_argument(
+        "--summary_path",
+        type=str,
+        help="path of the `SUMMARY.md`",
+        default="src/SUMMARY.md",
+    )
     parser.add_argument(
         "--output_path",
         type=str,

@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-run_script.py - Run a CLI app over all files with a specific extension in current directory
-Usage: python run_script.py <extension> <cli_app> [args...]
-Example: python run_script.py .svg svgo
-         python run_script.py .svg svgo -c config.json -o output/
-"""
 
 from __future__ import annotations
 

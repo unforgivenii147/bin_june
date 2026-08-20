@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of trans_words.py for Python 3.12.
-Chunks text files, detects language, and translates to English, saving in JSON.
-"""
 
 from __future__ import annotations
 
@@ -58,7 +54,9 @@ def detect_language(text: str) -> str | None:
         return None
 
 
-def translate_chunk(chunk_data: tuple[int, int, str], index: int) -> dict[str, Any] | None:
+def translate_chunk(
+    chunk_data: tuple[int, int, str], index: int
+) -> dict[str, Any] | None:
     start_line, end_line, text = chunk_data
     if index > 0:
         time.sleep(1)
@@ -92,7 +90,10 @@ def process_file(file_path: Path) -> None:
     logger.info("Total chunks: %d", len(chunks))
     translations: list[dict[str, Any]] = []
     with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_chunk = {executor.submit(translate_chunk, chunk, idx): idx for idx, chunk in enumerate(chunks)}
+        future_to_chunk = {
+            executor.submit(translate_chunk, chunk, idx): idx
+            for idx, chunk in enumerate(chunks)
+        }
         completed = 0
         for future in as_completed(future_to_chunk):
             if result := future.result():
@@ -102,7 +103,9 @@ def process_file(file_path: Path) -> None:
     output_file = file_path.with_suffix(".json")
     try:
         output_data = {"lines": sorted(translations, key=lambda x: x["start_line"])}
-        output_file.write_text(json.dumps(output_data, ensure_ascii=False, indent=2), encoding="utf-8")
+        output_file.write_text(
+            json.dumps(output_data, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         logger.info("✓ JSON output saved to: %s", output_file.name)
     except Exception as e:
         logger.error("Error saving JSON output for %s: %s", file_path, e)

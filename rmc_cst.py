@@ -1,15 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Strip comments and docstrings from Python files.
-- Uses LibCST for safe, syntax‑aware transformations.
-- Preserves shebang line and module docstring.
-- Removes all other comments and docstrings.
-- Accepts multiple files and directories as input.
-- If no input paths are provided, processes Python files in '.' recursively.
-- Processes files in parallel.
-- Reports the number of comments/docstrings removed per file.
-- Validates the resulting code with ast.parse; does not write invalid code.
-"""
 
 from __future__ import annotations
 
@@ -35,7 +24,9 @@ def find_module_docstring(source: str) -> tuple[int, int] | None:
     if not module.body:
         return None
     first_stmt = module.body[0]
-    if not isinstance(first_stmt, ast.Expr) or not isinstance(getattr(first_stmt, "value", None), ast.Constant):
+    if not isinstance(first_stmt, ast.Expr) or not isinstance(
+        getattr(first_stmt, "value", None), ast.Constant
+    ):
         return None
     value = first_stmt.value
     if not isinstance(value.value, str):
@@ -55,14 +46,18 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
         self.docstrings_removed = 0
 
     def leave_TrailingWhitespace(
-        self, original_node: cst.TrailingWhitespace, updated_node: cst.TrailingWhitespace
+        self,
+        original_node: cst.TrailingWhitespace,
+        updated_node: cst.TrailingWhitespace,
     ) -> cst.TrailingWhitespace:
         if updated_node.comment is not None:
             self.comments_removed += 1
             updated_node = updated_node.with_changes(comment=None)
         return updated_node
 
-    def leave_EmptyLine(self, original_node: cst.EmptyLine, updated_node: cst.EmptyLine) -> cst.EmptyLine:
+    def leave_EmptyLine(
+        self, original_node: cst.EmptyLine, updated_node: cst.EmptyLine
+    ) -> cst.EmptyLine:
         if updated_node.comment is not None:
             self.comments_removed += 1
             updated_node = updated_node.with_changes(comment=None)
@@ -86,7 +81,9 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
         )
 
     def leave_SimpleStatementLine(
-        self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
+        self,
+        original_node: cst.SimpleStatementLine,
+        updated_node: cst.SimpleStatementLine,
     ) -> cst.CSTNode | None:
         if not self._is_docstring_expr(updated_node):
             return updated_node
@@ -113,9 +110,21 @@ def process_file(path: Path) -> tuple[Path, int, int, bool, str | None]:
     try:
         ast.parse(new_code)
     except SyntaxError as e:
-        return (path, transformer.comments_removed, transformer.docstrings_removed, False, str(e))
+        return (
+            path,
+            transformer.comments_removed,
+            transformer.docstrings_removed,
+            False,
+            str(e),
+        )
     path.write_text(new_code, encoding="utf-8")
-    return (path, transformer.comments_removed, transformer.docstrings_removed, True, None)
+    return (
+        path,
+        transformer.comments_removed,
+        transformer.docstrings_removed,
+        True,
+        None,
+    )
 
 
 def iter_python_files_from_paths(paths: Iterable[Path]) -> list[Path]:
@@ -129,19 +138,25 @@ def iter_python_files_from_paths(paths: Iterable[Path]) -> list[Path]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Strip comments and non-module docstrings from Python files.")
+    parser = argparse.ArgumentParser(
+        description="Strip comments and non-module docstrings from Python files."
+    )
     parser.add_argument(
         "paths",
         type=Path,
         nargs="*",
-        help=("Files and/or directories to process. If omitted, '.' is used and searched recursively."),
+        help=(
+            "Files and/or directories to process. If omitted, '.' is used and searched recursively."
+        ),
     )
     parser.add_argument(
         "-j",
         "--jobs",
         type=int,
         default=0,
-        help=("Number of worker processes (default: CPU count). Use 1 to disable parallelism."),
+        help=(
+            "Number of worker processes (default: CPU count). Use 1 to disable parallelism."
+        ),
     )
     return parser.parse_args()
 
@@ -156,9 +171,13 @@ def main() -> None:
     jobs = args.jobs or None
     if jobs == 1:
         for path in files:
-            file_path, comments_removed, docstrings_removed, written, error = process_file(path)
+            file_path, comments_removed, docstrings_removed, written, error = (
+                process_file(path)
+            )
             if written:
-                print(f"{file_path}: removed {comments_removed} comments, {docstrings_removed} docstrings")
+                print(
+                    f"{file_path}: removed {comments_removed} comments, {docstrings_removed} docstrings"
+                )
             else:
                 print(
                     f"{file_path}: INVALID after transform, "
@@ -169,9 +188,13 @@ def main() -> None:
         with ProcessPoolExecutor(max_workers=jobs) as executor:
             futures = {executor.submit(process_file, path): path for path in files}
             for fut in as_completed(futures):
-                file_path, comments_removed, docstrings_removed, written, error = fut.result()
+                file_path, comments_removed, docstrings_removed, written, error = (
+                    fut.result()
+                )
                 if written:
-                    print(f"{file_path}: removed {comments_removed} comments, {docstrings_removed} docstrings")
+                    print(
+                        f"{file_path}: removed {comments_removed} comments, {docstrings_removed} docstrings"
+                    )
                 else:
                     print(
                         f"{file_path}: INVALID after transform, "

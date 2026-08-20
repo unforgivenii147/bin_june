@@ -82,7 +82,9 @@ def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
     ranges: list[tuple[int, int]] = []
     for child in ast.walk(node):
         if (
-            isinstance(child, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+            isinstance(
+                child, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+            )
             and child.body
             and isinstance(child.body[0], ast.Expr)
         ):
@@ -99,7 +101,7 @@ def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
 
 def remove_blank_lines(content: str) -> str:
     content = re.sub(r"\n\n+", "\n", content)
-    return "\n".join((line.rstrip() for line in content.split("\n")))
+    return "\n".join(line.rstrip() for line in content.split("\n"))
 
 
 def process_file(file_path: Path) -> None:

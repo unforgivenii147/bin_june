@@ -1,20 +1,20 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Merge non-binary files from current directory into a single text file."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from random import choice
 from string import ascii_lowercase
-from typing import Optional
 
 CHUNK_SIZE: int = 8192
 BINARY_THRESHOLD: float = 0.3
 DEFAULT_OUTPUT_LEN: int = 10
-TEXT_CHARS: bytearray = bytearray(list(range(32, 127)) + list(range(0x80, 0x100)) + [ord(c) for c in "\n\r\t\b"])
+TEXT_CHARS: bytearray = bytearray(
+    list(range(32, 127)) + list(range(0x80, 0x100)) + [ord(c) for c in "\n\r\t\b"]
+)
 
 
-def get_files(path: Path, ext: Optional[list[str]] = None) -> list[Path]:
+def get_files(path: Path, ext: list[str] | None = None) -> list[Path]:
     files: list[Path] = []
     for root, _dirs, filenames in path.walk(top_down=False):
         for filename in filenames:
@@ -60,7 +60,7 @@ def get_nobinary(path: Path) -> list[Path]:
     return get_files(path)
 
 
-def read_file(path: Path) -> Optional[str]:
+def read_file(path: Path) -> str | None:
     try:
         return path.read_text(encoding="utf-8", errors="ignore")
     except (OSError, UnicodeDecodeError):
@@ -77,7 +77,7 @@ def should_skip_file(file_path: Path, cwd: Path) -> bool:
     return bool(file_path.name.startswith("."))
 
 
-def merge_files() -> Optional[Path]:
+def merge_files() -> Path | None:
     cwd = Path.cwd()
     output_file = cwd / f"{get_random_filename()}.txt"
     files = [f for f in get_nobinary(cwd) if f != output_file]
@@ -105,7 +105,9 @@ def merge_files() -> Optional[Path]:
             output_file.unlink()
             print("ℹ️  No content to merge (all files were empty or skipped).")
             return None
-        print(f"✅ Merged {file_count} files ({total_size:,} bytes) into: {output_file}")
+        print(
+            f"✅ Merged {file_count} files ({total_size:,} bytes) into: {output_file}"
+        )
         return output_file
     except OSError as e:
         print(f"❌ Error writing output file: {e}")

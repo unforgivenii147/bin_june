@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Find files with uppercase extensions in current directory recursively.
-Optionally convert them to lowercase using -a or --autofix flag.
-"""
 
 from __future__ import annotations
 
@@ -27,7 +23,9 @@ def find_uppercase_extensions(directory: Path, autofix: bool = False):
                         file_path.rename(new_path)
                         print(f"✓ Renamed: {file_path.name} → {new_path.name}")
                     except Exception as e:
-                        print(f"✗ Failed to rename {file_path.name}: {e}", file=sys.stderr)
+                        print(
+                            f"✗ Failed to rename {file_path.name}: {e}", file=sys.stderr
+                        )
     return uppercase_files
 
 
@@ -35,7 +33,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Find files with uppercase extensions in current directory recursively"
     )
-    parser.add_argument("-a", "--autofix", action="store_true", help="Convert uppercase extensions to lowercase")
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Convert uppercase extensions to lowercase",
+    )
     args = parser.parse_args()
     search_dir = Path.cwd()
     print(f"Searching for files with uppercase extensions in: {search_dir}")
@@ -45,7 +48,9 @@ def main() -> int:
         if not args.autofix:
             print(f"\nFound {len(uppercase_files)} file(s) with uppercase extensions:")
             for file_path in uppercase_files:
-                print(f"  • {file_path.relative_to(search_dir)} (extension: .{file_path.suffix[1:]})")
+                print(
+                    f"  • {file_path.relative_to(search_dir)} (extension: .{file_path.suffix[1:]})"
+                )
             print("\nRun with -a or --autofix to convert them to lowercase")
         else:
             print(f"\n✓ Processed {len(uppercase_files)} file(s)")

@@ -15,7 +15,11 @@ def has_invalid_escape(s: str) -> bool:
 
 
 def make_raw_string(source: str) -> str:
-    m = re.match(r"^([rubfRUBF]*)?(?P<quote>\"\"\"|\'\'\'|\"|\')(?P<body>.*)(?P=quote)$", source, re.S)
+    m = re.match(
+        r"^([rubfRUBF]*)?(?P<quote>\"\"\"|\'\'\'|\"|\')(?P<body>.*)(?P=quote)$",
+        source,
+        re.DOTALL,
+    )
     if not m:
         return source
     prefix = m.group(1) or ""

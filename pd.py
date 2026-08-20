@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-downloads a pkg from pypi.org
-"""
 
 from __future__ import annotations
 
@@ -14,7 +11,8 @@ from packaging import tags
 
 def is_pure_python(requires_python):
     return requires_python is None or all(
-        tag.interpreter == "py" and tag.abi == "none" and tag.platform == "any" for tag in tags.sys_tags()
+        tag.interpreter == "py" and tag.abi == "none" and tag.platform == "any"
+        for tag in tags.sys_tags()
     )
 
 

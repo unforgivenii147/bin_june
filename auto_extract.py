@@ -25,7 +25,16 @@ SUPPORTED_EXTENSIONS = {
     "zip": zipfile.ZipFile,
     "whl": zipfile.ZipFile,
 }
-TAR_EXTENSIONS = ["tar.gz", "tar.xz", "tar.bz2", "tar.7z", "tar.zst", "tar.br", "tar.lz4", "tar"]
+TAR_EXTENSIONS = [
+    "tar.gz",
+    "tar.xz",
+    "tar.bz2",
+    "tar.7z",
+    "tar.zst",
+    "tar.br",
+    "tar.lz4",
+    "tar",
+]
 
 
 def extract_file(file_path):
@@ -33,13 +42,22 @@ def extract_file(file_path):
     try:
         if file_path.suffix in SUPPORTED_EXTENSIONS:
             if file_path.suffix == ".gz":
-                with gzip.open(file_path, "rb") as f_in, open(file_path.with_suffix(""), "wb") as f_out:
+                with (
+                    gzip.open(file_path, "rb") as f_in,
+                    open(file_path.with_suffix(""), "wb") as f_out,
+                ):
                     f_out.write(f_in.read())
             elif file_path.suffix == ".xz":
-                with lzma.open(file_path, "rb") as f_in, open(file_path.with_suffix(""), "wb") as f_out:
+                with (
+                    lzma.open(file_path, "rb") as f_in,
+                    open(file_path.with_suffix(""), "wb") as f_out,
+                ):
                     f_out.write(f_in.read())
             elif file_path.suffix == ".bz2":
-                with bz2.open(file_path, "rb") as f_in, open(file_path.with_suffix(""), "wb") as f_out:
+                with (
+                    bz2.open(file_path, "rb") as f_in,
+                    open(file_path.with_suffix(""), "wb") as f_out,
+                ):
                     f_out.write(f_in.read())
             elif file_path.suffix == ".7z":
                 with py7zr.SevenZipFile(file_path, mode="r") as archive:
@@ -72,7 +90,11 @@ def extract_file(file_path):
 def main():
     current_dir = pathlib.Path(".")
     archive_files = list(current_dir.rglob("*.*"))
-    archive_files = [f for f in archive_files if f.suffix[1:] in SUPPORTED_EXTENSIONS or f.suffix in TAR_EXTENSIONS]
+    archive_files = [
+        f
+        for f in archive_files
+        if f.suffix[1:] in SUPPORTED_EXTENSIONS or f.suffix in TAR_EXTENSIONS
+    ]
     with mp.Pool(processes=mp.cpu_count()) as pool:
         pool.map(extract_file, archive_files)
 

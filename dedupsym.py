@@ -113,7 +113,10 @@ def dedupe(root: Path, dry_run=False, force=False) -> None:
                 Path(str(p)).symlink_to(str(stored_path.resolve()))
                 print(f"symlinked: {p} -> {stored_path.resolve()}")
             changed = True
-        manifest[str(stored_path)] = {"hash": h, "originals": [str(p) for p in paths_sorted]}
+        manifest[str(stored_path)] = {
+            "hash": h,
+            "originals": [str(p) for p in paths_sorted],
+        }
     if not dry_run and changed:
         save_json(MANIFEST_PATH, manifest)
         save_json(CACHE_PATH, cache)
@@ -178,10 +181,22 @@ def main() -> None:
     ap = argparse.ArgumentParser(
         description="Deduplicate files by moving one copy to ~/dups and symlinking duplicates using xxhash."
     )
-    ap.add_argument("path", nargs="?", default=".", help="Path to scan (default current directory)")
-    ap.add_argument("--dry-run", action="store_true", help="Show actions without making changes")
-    ap.add_argument("--restore", action="store_true", help="Restore files from ~/dups using manifest")
-    ap.add_argument("--force", action="store_true", help="Force overwrite behavior (not used for safety here)")
+    ap.add_argument(
+        "path", nargs="?", default=".", help="Path to scan (default current directory)"
+    )
+    ap.add_argument(
+        "--dry-run", action="store_true", help="Show actions without making changes"
+    )
+    ap.add_argument(
+        "--restore",
+        action="store_true",
+        help="Restore files from ~/dups using manifest",
+    )
+    ap.add_argument(
+        "--force",
+        action="store_true",
+        help="Force overwrite behavior (not used for safety here)",
+    )
     args = ap.parse_args()
     root = Path(args.path).resolve()
     if args.restore:

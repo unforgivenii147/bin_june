@@ -88,8 +88,14 @@ ARGS_PARSER.add_argument(
     + """
 (c) WhoisXML API Inc.""",
 )
-ARGS_PARSER.add_argument("--rcfile", type=str, help="Use this rc file. Will override all default ini locations.")
-ARGS_PARSER.add_argument("--apikey", type=str, help="Directly specify the API key. Overrides any ini file.")
+ARGS_PARSER.add_argument(
+    "--rcfile",
+    type=str,
+    help="Use this rc file. Will override all default ini locations.",
+)
+ARGS_PARSER.add_argument(
+    "--apikey", type=str, help="Directly specify the API key. Overrides any ini file."
+)
 ARGS_PARSER.add_argument(
     "--nocolor",
     action="store_true",
@@ -110,7 +116,11 @@ ARGS_PARSER.add_argument(
     action="store_true",
     help="Print the first 128 characters of raw text fields. The default is to suppress raw texts fully.",
 )
-ARGS_PARSER.add_argument("--keep-empty", action="store_true", help="Keep and display fields with empty and null values")
+ARGS_PARSER.add_argument(
+    "--keep-empty",
+    action="store_true",
+    help="Keep and display fields with empty and null values",
+)
 ARGS_PARSER.add_argument(
     "--history",
     action="store_true",
@@ -178,9 +188,11 @@ if apiKey is None:
 if IDN:
     domain_name = idna.encode(ARGS.domainName).decode("utf-8")
 elif not all(ord(char) < 128 for char in ARGS.domainName):
-    sys.stderr.write("""Please install the "idna" Python package to query non-ASCII unicode domain names.
+    sys.stderr.write(
+        """Please install the "idna" Python package to query non-ASCII unicode domain names.
 Exiting.
-""")
+"""
+    )
     exit(3)
 else:
     domain_name = ARGS.domainName
@@ -193,10 +205,20 @@ if ARGS.history or (
     or ARGS.expired_date_from is not None
     or ARGS.expired_date_to is not None
 ):
-    API = "https://whois-history-api.whoisxmlapi.com/api/v1?" + "apiKey=" + apiKey + "&outputformat=JSON&mode=purchase"
+    API = (
+        "https://whois-history-api.whoisxmlapi.com/api/v1?"
+        + "apiKey="
+        + apiKey
+        + "&outputformat=JSON&mode=purchase"
+    )
     ARGS.history = True
 else:
-    API = "https://www.whoisxmlapi.com/whoisserver/WhoisService?" + "apiKey=" + apiKey + "&outputformat=JSON&ip=1"
+    API = (
+        "https://www.whoisxmlapi.com/whoisserver/WhoisService?"
+        + "apiKey="
+        + apiKey
+        + "&outputformat=JSON&ip=1"
+    )
 URL = API + "&domainName=" + domain_name
 if ARGS.history:
     if ARGS.since_date is not None:
@@ -216,7 +238,9 @@ if ARGS.history:
 try:
     result = requests.get(URL).json()
 except Exception as e:
-    sys.stderr.write("Error invoking API. The API key or the domain name is probably invalid.\n")
+    sys.stderr.write(
+        "Error invoking API. The API key or the domain name is probably invalid.\n"
+    )
     sys.stderr.write(f"Error text: {e!s}\n")
     exit(1)
 if ARGS.history:
@@ -246,20 +270,37 @@ for whoisRecord in result["records"]:
             with contextlib.suppress(BaseException):
                 whoisRecord[textfield] = whoisRecord[textfield][0:64] + "..."
         for subfield in whoisRecord:
-            for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
+            for textfield in [
+                "rawText",
+                "strippedText",
+                "cleanText",
+                "header",
+                "footer",
+            ]:
                 with contextlib.suppress(BaseException):
-                    whoisRecord[subfield][textfield] = whoisRecord[subfield][textfield][0:64] + "..."
+                    whoisRecord[subfield][textfield] = (
+                        whoisRecord[subfield][textfield][0:64] + "..."
+                    )
     elif not ARGS.fullrawtext:
         for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
             with contextlib.suppress(BaseException):
                 whoisRecord.pop(textfield)
         for subfield in whoisRecord:
-            for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
+            for textfield in [
+                "rawText",
+                "strippedText",
+                "cleanText",
+                "header",
+                "footer",
+            ]:
                 with contextlib.suppress(BaseException):
                     whoisRecord[subfield].pop(textfield)
     json_str = json.dumps(whoisRecord, indent=1, sort_keys=False)
     if ARGS.history:
-        print("Historic record no. %d of %d for %s:\n------------\n" % (recordno, recordCount, ARGS.domainName))
+        print(
+            "Historic record no. %d of %d for %s:\n------------\n"
+            % (recordno, recordCount, ARGS.domainName)
+        )
     if ARGS.text:
         raw_str = ""
         dictstr(whoisRecord, 0)

@@ -72,7 +72,9 @@ def save_links(name: str, links) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract and save all URLs from a webpage")
+    parser = argparse.ArgumentParser(
+        description="Extract and save all URLs from a webpage"
+    )
     parser.add_argument("url", nargs="?", help="Target URL")
     args = parser.parse_args()
     url = args.url or input("Enter URL: ").strip()
@@ -100,7 +102,9 @@ def main() -> None:
         save_links("internal.txt", internal)
     if external:
         save_links("external.txt", external)
-    print(f"Total links: {len(links)} (Internal: {len(internal)}, External: {len(external)})")
+    print(
+        f"Total links: {len(links)} (Internal: {len(internal)}, External: {len(external)})"
+    )
 
 
 if __name__ == "__main__":

@@ -16,7 +16,9 @@ def shrink_pdf_mobile(file_path):
         if shutil.which("gswin64c"):
             gs_executable = "gswin64c"
         else:
-            print("Error: Ghostscript ('gs' or 'gswin64c') is not installed or not in your PATH.")
+            print(
+                "Error: Ghostscript ('gs' or 'gswin64c') is not installed or not in your PATH."
+            )
             sys.exit(1)
     orig_size = os.path.getsize(file_path)
     print(f"Original size: {orig_size / 1024 / 1024:.2f} MB")

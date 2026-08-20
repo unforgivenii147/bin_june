@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Snappy Compression/Decompression Tool
-Recursively compresses/decompresses files using Snappy algorithm via cramjam
-"""
 
 from __future__ import annotations
 
@@ -14,19 +10,20 @@ import sys
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 try:
     import cramjam
 except ImportError:
     print("Error: cramjam library required. Install with: pip install cramjam")
     sys.exit(1)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 COMPRESSED_EXT = ".snappy"
 
 
-def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, str]:
+def compress_file(file_path: Path, remove_original: bool = True) -> tuple[bool, str]:
     try:
         compressed_path = file_path.with_suffix(file_path.suffix + COMPRESSED_EXT)
         with open(file_path, "rb") as f:
@@ -48,7 +45,7 @@ def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, 
         return False, str(e)
 
 
-def decompress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, str]:
+def decompress_file(file_path: Path, remove_original: bool = True) -> tuple[bool, str]:
     try:
         if not file_path.suffix == COMPRESSED_EXT:
             return False, f"File {file_path} doesn't have {COMPRESSED_EXT} extension"
@@ -80,7 +77,7 @@ def process_file_worker(args):
         return False, f"Unknown operation: {operation}"
 
 
-def find_files(directory: Path, operation: str, recursive: bool = True) -> List[Path]:
+def find_files(directory: Path, operation: str, recursive: bool = True) -> list[Path]:
     files = []
     if operation == "compress":
         for _ext in ["*"]:
@@ -102,7 +99,7 @@ def find_files(directory: Path, operation: str, recursive: bool = True) -> List[
     return files
 
 
-def create_tar_archive(directory: Path, remove_original: bool = True) -> Optional[Path]:
+def create_tar_archive(directory: Path, remove_original: bool = True) -> Path | None:
     try:
         tar_path = directory.with_suffix(".tar")
         logger.info(f"Creating tar archive: {tar_path}")
@@ -118,7 +115,7 @@ def create_tar_archive(directory: Path, remove_original: bool = True) -> Optiona
         return None
 
 
-def tar_subdirectories(base_dir: Path, remove_original: bool = True) -> List[Path]:
+def tar_subdirectories(base_dir: Path, remove_original: bool = True) -> list[Path]:
     tar_files = []
     for item in base_dir.iterdir():
         if item.is_dir():
@@ -129,8 +126,11 @@ def tar_subdirectories(base_dir: Path, remove_original: bool = True) -> List[Pat
 
 
 def process_files(
-    file_paths: List[Path], operation: str, remove_original: bool = True, max_workers: Optional[int] = None
-) -> Tuple[int, int]:
+    file_paths: list[Path],
+    operation: str,
+    remove_original: bool = True,
+    max_workers: int | None = None,
+) -> tuple[int, int]:
     if not file_paths:
         logger.warning(f"No files found to {operation}")
         return 0, 0
@@ -141,7 +141,9 @@ def process_files(
     failure_count = 0
     args_list = [(fp, operation, remove_original) for fp in file_paths]
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(process_file_worker, args): args[0] for args in args_list}
+        future_to_file = {
+            executor.submit(process_file_worker, args): args[0] for args in args_list
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -172,12 +174,34 @@ Examples:
     parser.add_argument("directory", type=str, help="Directory to process")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-c", "--compress", action="store_true", help="Compress files")
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
-    parser.add_argument("-t", "--tar", action="store_true", help="Tar subdirectories first before compression")
-    parser.add_argument("--keep-original", action="store_true", help="Keep original files (default: remove them)")
-    parser.add_argument("--no-recursive", action="store_true", help="Do not process subdirectories recursively")
-    parser.add_argument("--workers", type=int, default=None, help="Number of worker processes (default: CPU count)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
+    group.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress files"
+    )
+    parser.add_argument(
+        "-t",
+        "--tar",
+        action="store_true",
+        help="Tar subdirectories first before compression",
+    )
+    parser.add_argument(
+        "--keep-original",
+        action="store_true",
+        help="Keep original files (default: remove them)",
+    )
+    parser.add_argument(
+        "--no-recursive",
+        action="store_true",
+        help="Do not process subdirectories recursively",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose logging"
+    )
     args = parser.parse_args()
     if args.verbose:
         logger.setLevel(logging.DEBUG)
@@ -199,7 +223,9 @@ Examples:
         logger.warning(f"No files found to {operation}")
         sys.exit(0)
     logger.info(f"Found {len(files_to_process)} files to {operation}")
-    success_count, failure_count = process_files(files_to_process, operation, remove_original, args.workers)
+    success_count, failure_count = process_files(
+        files_to_process, operation, remove_original, args.workers
+    )
     logger.info(f"Completed {operation} operation")
     logger.info(f"Success: {success_count}, Failed: {failure_count}")
     if failure_count > 0:

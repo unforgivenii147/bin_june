@@ -1,15 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Fix regex patterns in Python files:
-  - Detects re.sub / re.search / re.findall / re.match calls
-  - Converts normal strings with escape sequences to raw strings
-  - Replaces double backslashes '\\' with single backslashes ''
-  - Uses token-based detection with AST validation
-  - Parallel processing with smart file filtering
-  - Creates .bak backups before modification
-Usage:
-  python fix_regex.py [paths] [--workers N] [--no-backup] [--dry-run] [--verbose]
-"""
 
 from __future__ import annotations
 
@@ -24,7 +13,17 @@ from dataclasses import dataclass, field
 from multiprocessing import cpu_count
 from pathlib import Path
 
-RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
+RE_FUNCTIONS = {
+    "compile",
+    "search",
+    "match",
+    "fullmatch",
+    "split",
+    "findall",
+    "finditer",
+    "sub",
+    "subn",
+}
 SKIP_TOKEN_TYPES = {
     tokenize.NL,
     tokenize.COMMENT,
@@ -142,7 +141,10 @@ class RegexFixer:
         "b" in prefix.lower()
         quote_char = token_str[prefix_end]
         quote_len = 1
-        if len(token_str) >= prefix_end + 3 and token_str[prefix_end : prefix_end + 3] == quote_char * 3:
+        if (
+            len(token_str) >= prefix_end + 3
+            and token_str[prefix_end : prefix_end + 3] == quote_char * 3
+        ):
             quote_len = 3
         opening = quote_char * quote_len
         content_start = prefix_end + quote_len
@@ -178,9 +180,10 @@ class RegexFixer:
         for tok in tokens:
             if tok.type in SKIP_TOKEN_TYPES:
                 continue
-            if tok.type in (tokenize.NAME, tokenize.OP, tokenize.STRING):
-                relevant.append(tok)
-            elif tok.type == tokenize.NUMBER:
+            if (
+                tok.type in (tokenize.NAME, tokenize.OP, tokenize.STRING)
+                or tok.type == tokenize.NUMBER
+            ):
                 relevant.append(tok)
         i = 0
         while i < len(relevant) - 4:
@@ -204,7 +207,10 @@ class RegexFixer:
                 if new_str is not None and new_str != str_token.string:
                     modifications.append(
                         StringModification(
-                            start=str_token.start, end=str_token.end, original=str_token.string, modified=new_str
+                            start=str_token.start,
+                            end=str_token.end,
+                            original=str_token.string,
+                            modified=new_str,
                         )
                     )
                 i += 5
@@ -212,14 +218,18 @@ class RegexFixer:
                 i += 1
         return modifications
 
-    def apply_modifications(self, code: str, modifications: list[StringModification]) -> str:
+    def apply_modifications(
+        self, code: str, modifications: list[StringModification]
+    ) -> str:
         if not modifications:
             return code
         lines = code.splitlines(keepends=True)
         line_offsets = [0]
         for line in lines:
             line_offsets.append(line_offsets[-1] + len(line))
-        sorted_mods = sorted(modifications, key=lambda x: (x.start[0], x.start[1]), reverse=True)
+        sorted_mods = sorted(
+            modifications, key=lambda x: (x.start[0], x.start[1]), reverse=True
+        )
         result_parts = []
         last_end = len(code)
         for mod in sorted_mods:
@@ -255,7 +265,11 @@ class RegexFixer:
                 print(f"  {mod.original} -> {mod.modified}")
         new_code = self.apply_modifications(original_code, modifications)
         if not self.validate_code(new_code):
-            return (filepath, False, "Validation failed - syntax error after conversion")
+            return (
+                filepath,
+                False,
+                "Validation failed - syntax error after conversion",
+            )
         if self.dry_run:
             return (filepath, True, f"Would modify {len(modifications)} string(s)")
         if self.create_backup:
@@ -394,11 +408,29 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="\nExamples:\n  # Fix all Python files in current directory\n  python fix_regex.py\n\n  # Fix specific files or directories\n  python fix_regex.py src/ tests/test_regex.py\n\n  # Use 4 parallel workers, disable backups\n  python fix_regex.py --workers 4 --no-backup\n\n  # Preview changes without modifying files\n  python fix_regex.py --dry-run --verbose\n        ",
     )
-    parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("--workers", "-w", type=int, help="Number of parallel workers (default: min(CPU cores, 8))")
-    parser.add_argument("--no-backup", action="store_true", help="Disable backup creation")
-    parser.add_argument("--dry-run", "-n", action="store_true", help="Preview changes without modifying files")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="Files or directories to process (default: current directory)",
+    )
+    parser.add_argument(
+        "--workers",
+        "-w",
+        type=int,
+        help="Number of parallel workers (default: min(CPU cores, 8))",
+    )
+    parser.add_argument(
+        "--no-backup", action="store_true", help="Disable backup creation"
+    )
+    parser.add_argument(
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Preview changes without modifying files",
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output"
+    )
     parser.add_argument("--quiet", "-q", action="store_true", help="Minimize output")
     args = parser.parse_args()
     if args.paths:
@@ -406,7 +438,10 @@ def main():
     else:
         paths = [Path.cwd()]
     fixer = RegexFixer(
-        create_backup=not args.no_backup, dry_run=args.dry_run, verbose=args.verbose, max_workers=args.workers
+        create_backup=not args.no_backup,
+        dry_run=args.dry_run,
+        verbose=args.verbose,
+        max_workers=args.workers,
     )
     if not args.quiet:
         print(f"📁 Collecting Python files from {len(paths)} path(s)...")

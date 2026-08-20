@@ -43,14 +43,14 @@ class PackageDetector:
         has_c_extension = bool(so_files or pyd_files or dll_files)
         is_pure_python = not has_c_extension
         if has_c_extension:
-            self.log(f"Found C extensions: {len(so_files)} .so, {len(pyd_files)} .pyd, {len(dll_files)} .dll")
+            self.log(
+                f"Found C extensions: {len(so_files)} .so, {len(pyd_files)} .pyd, {len(dll_files)} .dll"
+            )
         binary_extensions = {".exe", ".bin", ".dylib", ".so", ".pyd", ".dll"}
         has_binary = any(
-            (
-                file_path.suffix.lower() in binary_extensions
-                for file_path in package_dir.rglob("*")
-                if file_path.is_file()
-            )
+            file_path.suffix.lower() in binary_extensions
+            for file_path in package_dir.rglob("*")
+            if file_path.is_file()
         )
         return (is_pure_python, has_c_extension, has_binary)
 
@@ -73,7 +73,11 @@ class PackageDetector:
 
         system = platform.system().lower()
         machine = platform.machine().lower()
-        platform_map = {"linux": f"linux_{machine}", "darwin": f"macosx_10_9_{machine}", "windows": f"win_{machine}"}
+        platform_map = {
+            "linux": f"linux_{machine}",
+            "darwin": f"macosx_10_9_{machine}",
+            "windows": f"win_{machine}",
+        }
         return platform_map.get(system, f"{system}_{machine}")
 
     @staticmethod
@@ -93,7 +97,9 @@ class PackageDetector:
                 pass
         return metadata
 
-    def analyze_package(self, site_packages: Path, package_name: str) -> PackageInfo | None:
+    def analyze_package(
+        self, site_packages: Path, package_name: str
+    ) -> PackageInfo | None:
         package_dir = site_packages / package_name
         if not package_dir.is_dir():
             self.log(f"Package not found: {package_name}")
@@ -111,7 +117,9 @@ class PackageDetector:
             abi_tag = "none" if is_pure else self.get_abi_tag()
             platform_tag = "any" if is_pure else self.get_platform_tag()
             normalized_name = package_name.lower().replace("-", "_").replace(".", "_")
-            wheel_filename = f"{normalized_name}-{version}-{py_version}-{abi_tag}-{platform_tag}.whl"
+            wheel_filename = (
+                f"{normalized_name}-{version}-{py_version}-{abi_tag}-{platform_tag}.whl"
+            )
             return PackageInfo(
                 name=package_name,
                 version=version,
@@ -165,7 +173,9 @@ class WheelBuilder:
         records.append(f"{dist_info_dir}/RECORD,,")
         return "\n".join(records) + "\n"
 
-    def create_wheel(self, package_info: PackageInfo, source_dir: Path, output_dir: Path) -> tuple[bool, str]:
+    def create_wheel(
+        self, package_info: PackageInfo, source_dir: Path, output_dir: Path
+    ) -> tuple[bool, str]:
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
             wheel_path = output_dir / package_info.wheel_filename
@@ -177,7 +187,9 @@ class WheelBuilder:
                 if not source_dir.is_dir():
                     return (False, f"Source directory not found: {source_dir}")
                 shutil.copytree(source_dir, pkg_dest, dirs_exist_ok=True)
-                normalized_name = package_info.name.lower().replace("-", "_").replace(".", "_")
+                normalized_name = (
+                    package_info.name.lower().replace("-", "_").replace(".", "_")
+                )
                 dist_info_name = f"{normalized_name}-{package_info.version}.dist-info"
                 dist_info_dir = temp_path / dist_info_name
                 dist_info_dir.mkdir(parents=True, exist_ok=True)
@@ -250,24 +262,30 @@ class VenvRepacker:
             for item in self.site_packages.iterdir()
             if item.is_dir()
             and (not item.name.startswith("."))
-            and (not any((item.name.endswith(p) for p in exclude_patterns)))
+            and (not any(item.name.endswith(p) for p in exclude_patterns))
         }
         self.log(f"Found {len(packages)} packages")
         return sorted(packages)
 
     def repack_package(self, package_name: str) -> tuple[bool, str, PackageInfo | None]:
         try:
-            package_info = self.detector.analyze_package(self.site_packages, package_name)
+            package_info = self.detector.analyze_package(
+                self.site_packages, package_name
+            )
             if not package_info:
                 return (False, "Failed to analyze package", None)
             self.log(f"Repacking: {package_name} v{package_info.version}")
-            self.log(f"  Type: {('Pure Python' if package_info.is_pure_python else 'With C extensions')}")
+            self.log(
+                f"  Type: {('Pure Python' if package_info.is_pure_python else 'With C extensions')}"
+            )
             self.log(f"  Wheel: {package_info.wheel_filename}")
             if self.dry_run:
                 self.log("DRY RUN: Would create wheel")
                 return (True, "Dry run - wheel not created", package_info)
             package_dir = self.site_packages / package_name
-            success, message = self.builder.create_wheel(package_info, package_dir, self.output_dir)
+            success, message = self.builder.create_wheel(
+                package_info, package_dir, self.output_dir
+            )
             return (success, message, package_info)
         except Exception as e:
             return (False, f"Error: {e!s}", None)
@@ -309,7 +327,9 @@ class VenvRepacker:
             else:
                 self.stats["failed_packages"] += 1
                 print(f"✗ {message}")
-                self.results.append({"package": package_name, "success": False, "error": message})
+                self.results.append(
+                    {"package": package_name, "success": False, "error": message}
+                )
         return self.stats
 
     def print_stats(self) -> None:
@@ -364,16 +384,35 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="\nExamples:\n  python repack_venv_packages.py\n  python repack_venv_packages.py --site-packages /path/to/site-packages\n  python repack_venv_packages.py --output /path/to/output\n  python repack_venv_packages.py --dry-run\n  python repack_venv_packages.py -v\n  python repack_venv_packages.py --report repack_report.json\n  python repack_venv_packages.py --list-wheels\n        ",
     )
-    parser.add_argument("--site-packages", default=None, help="Path to site-packages directory (default: current dir)")
-    parser.add_argument("--output", default=None, help="Output directory for .whl files (default: ~/tmp/whl)")
+    parser.add_argument(
+        "--site-packages",
+        default=None,
+        help="Path to site-packages directory (default: current dir)",
+    )
+    parser.add_argument(
+        "--output",
+        default=None,
+        help="Output directory for .whl files (default: ~/tmp/whl)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without creating files")
-    parser.add_argument("--report", metavar="FILE", help="Save detailed report to JSON file")
-    parser.add_argument("--list-wheels", action="store_true", help="List generated .whl files")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without creating files",
+    )
+    parser.add_argument(
+        "--report", metavar="FILE", help="Save detailed report to JSON file"
+    )
+    parser.add_argument(
+        "--list-wheels", action="store_true", help="List generated .whl files"
+    )
     args = parser.parse_args()
     try:
         repacker = VenvRepacker(
-            site_packages_dir=args.site_packages, output_dir=args.output, verbose=args.verbose, dry_run=args.dry_run
+            site_packages_dir=args.site_packages,
+            output_dir=args.output,
+            verbose=args.verbose,
+            dry_run=args.dry_run,
         )
         repacker.repack_all()
         repacker.print_stats()

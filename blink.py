@@ -37,4 +37,6 @@ if __name__ == "__main__":
     if RM:
         print(f"\n{bcount} broken link{'s' if bcount > 1 else ''} removed.")
     else:
-        print(f"\n{bcount} broken link{'s' if bcount > 1 else ''} found. Use -r to remove them.")
+        print(
+            f"\n{bcount} broken link{'s' if bcount > 1 else ''} found. Use -r to remove them."
+        )

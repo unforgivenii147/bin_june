@@ -67,8 +67,12 @@ def scan_file(file_path: Path) -> tuple[str, list[dict]]:
                 {
                     "secret_type": secret_name,
                     "line_number": line_num,
-                    "matched_text": match.group(0)[:50] + "..." if len(match.group(0)) > 50 else match.group(0),
-                    "line_content": line_content[:80] + "..." if len(line_content) > 80 else line_content,
+                    "matched_text": match.group(0)[:50] + "..."
+                    if len(match.group(0)) > 50
+                    else match.group(0),
+                    "line_content": line_content[:80] + "..."
+                    if len(line_content) > 80
+                    else line_content,
                 }
             )
     return str(file_path), leaks
@@ -85,7 +89,9 @@ def get_all_files(root_dir: Path = Path(".")) -> list[Path]:
     return files
 
 
-def check_secrets(root_dir: Path = Path("."), max_workers: int | None = None) -> tuple[int, int]:
+def check_secrets(
+    root_dir: Path = Path("."), max_workers: int | None = None
+) -> tuple[int, int]:
     files = get_all_files(root_dir)
     if not files:
         print("No files found to scan.")

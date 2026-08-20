@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Clone GitHub repositories using pure Python (dulwich).
-Skips repos >5MB and removes successfully cloned repos from repos.txt.
-"""
 
 from __future__ import annotations
 
@@ -91,17 +87,41 @@ def remove_from_repos_file(file_path: Path, repos_to_remove: set[str]):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Clone GitHub repositories using pure Python (dulwich)")
-    parser.add_argument(
-        "file", nargs="?", default="repos.txt", help="Path to file containing repositories (default: repos.txt)"
+    parser = argparse.ArgumentParser(
+        description="Clone GitHub repositories using pure Python (dulwich)"
     )
-    parser.add_argument("-o", "--output", default="repos", help="Output directory (default: repos)")
-    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
     parser.add_argument(
-        "--max-size", type=int, default=MAX_SIZE_MB, help=f"Maximum repo size in MB (default: {MAX_SIZE_MB})"
+        "file",
+        nargs="?",
+        default="repos.txt",
+        help="Path to file containing repositories (default: repos.txt)",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be cloned without actually cloning")
-    parser.add_argument("--no-cleanup", action="store_true", help="Don't remove cloned repos from repos.txt")
+    parser.add_argument(
+        "-o", "--output", default="repos", help="Output directory (default: repos)"
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of parallel workers (default: 4)",
+    )
+    parser.add_argument(
+        "--max-size",
+        type=int,
+        default=MAX_SIZE_MB,
+        help=f"Maximum repo size in MB (default: {MAX_SIZE_MB})",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be cloned without actually cloning",
+    )
+    parser.add_argument(
+        "--no-cleanup",
+        action="store_true",
+        help="Don't remove cloned repos from repos.txt",
+    )
     args = parser.parse_args()
     global MAX_SIZE_BYTES
     if args.max_size != MAX_SIZE_MB:
@@ -134,7 +154,9 @@ def main():
     print(f"\nCloning with {args.workers} parallel workers to {output_dir.absolute()}")
     print("-" * 42)
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        future_to_repo = {executor.submit(clone_repo, repo, output_dir): repo for repo in repos}
+        future_to_repo = {
+            executor.submit(clone_repo, repo, output_dir): repo for repo in repos
+        }
         for future in as_completed(future_to_repo):
             repo = future_to_repo[future]
             try:

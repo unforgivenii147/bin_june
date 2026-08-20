@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove docstrings from Python files while preserving module docstrings.
-This script recursively processes Python files and removes docstrings from
-functions, classes, and methods while keeping module-level docstrings intact.
-It uses parallel processing for performance and validates output with ast.parse.
-Optimized for Python 3.12+ on Linux.
-"""
 
 from __future__ import annotations
 
@@ -15,7 +8,9 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +47,9 @@ class DocstringRemover(ast.NodeTransformer):
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
         return self._process_function_like(node)
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AsyncFunctionDef:
+    def visit_AsyncFunctionDef(
+        self, node: ast.AsyncFunctionDef
+    ) -> ast.AsyncFunctionDef:
         return self._process_function_like(node)
 
     def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
@@ -154,7 +151,10 @@ def main():
     successful = 0
     failed = 0
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(process_file, file_path): file_path for file_path in python_files}
+        future_to_file = {
+            executor.submit(process_file, file_path): file_path
+            for file_path in python_files
+        }
         for future in as_completed(future_to_file):
             file_path, success, error = future.result()
             if success:

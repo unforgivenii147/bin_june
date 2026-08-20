@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Text replacer for Python files in current directory.
-Replaces exact text matches in all .py files.
-"""
 
 from __future__ import annotations
 
@@ -29,7 +25,9 @@ def main() -> None:
     if len(sys.argv) != 3:
         print("Usage: python replacer.py <old_text> <new_text>")
         print("\nExample:")
-        print('python replacer.py "    try:\\n    path=Path(path)" "    path=Path(path)\\n    try:"')
+        print(
+            'python replacer.py "    try:\\n    path=Path(path)" "    path=Path(path)\\n    try:"'
+        )
         sys.exit(1)
     old_text = sys.argv[1]
     new_text = sys.argv[2]

@@ -75,13 +75,16 @@ def refactor_single_file(file_path: Path, objects_to_remove: list):
     if lines and lines[0].startswith("#!"):
         insert_idx = 1
     if len(lines) > insert_idx and (
-        lines[insert_idx].strip().startswith('"""') or lines[insert_idx].strip().startswith("'''")
+        lines[insert_idx].strip().startswith('"""')
+        or lines[insert_idx].strip().startswith("'''")
     ):
         insert_idx += 1
     lines.insert(insert_idx, import_statement)
     try:
         file_path.write_text("".join(lines), encoding="utf-8")
-        print(f"✅ Refactored {file_path.name}: Stripped {objects_to_remove} -> added 'dh' import")
+        print(
+            f"✅ Refactored {file_path.name}: Stripped {objects_to_remove} -> added 'dh' import"
+        )
     except Exception as e:
         print(f"❌ Error writing updates back to {file_path.name}: {e}")
 
@@ -100,7 +103,9 @@ def main():
     if not tasks:
         print("No matching files found in the current directory to refactor.")
         return
-    print(f"🚀 Found {len(tasks)} files to clean structural code from. Starting parallel processing...")
+    print(
+        f"🚀 Found {len(tasks)} files to clean structural code from. Starting parallel processing..."
+    )
     with ThreadPoolExecutor() as executor:
         for file_path, objects in tasks:
             executor.submit(refactor_single_file, file_path, objects)

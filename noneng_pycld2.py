@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Find non-English lines in text files recursively using Compact Language Detector 2 (pycld2).
-Uses parallel processing for faster execution.
-"""
 
 from __future__ import annotations
 
@@ -126,7 +122,7 @@ def detect_language(text):
         lang_name, lang_code, percent, _score = details[0]
         lang_code = lang_code.lower() if lang_code else "un"
         return lang_code, lang_name, percent, is_reliable
-    except Exception as e:
+    except Exception:
         return "un", "UNKNOWN", 0, False
 
 
@@ -151,11 +147,19 @@ def process_file(file_path):
         for line_num, line in enumerate(content, 1):
             if not line.strip():
                 continue
-            lang_code, lang_name, confidence, _is_reliable = detect_language(line.strip())
-            if lang_code and lang_code != "en" and confidence >= 50:
-                non_english_lines.append((line_num, line.strip(), lang_code, lang_name, confidence))
-            elif lang_code == "un" and confidence < 50:
-                non_english_lines.append((line_num, line.strip(), lang_code, lang_name, confidence))
+            lang_code, lang_name, confidence, _is_reliable = detect_language(
+                line.strip()
+            )
+            if (
+                lang_code
+                and lang_code != "en"
+                and confidence >= 50
+                or lang_code == "un"
+                and confidence < 50
+            ):
+                non_english_lines.append(
+                    (line_num, line.strip(), lang_code, lang_name, confidence)
+                )
         return file_path, non_english_lines, None
     except Exception as e:
         return file_path, None, f"Error processing file: {e}"
@@ -173,13 +177,31 @@ def find_text_files(root_dir=".", extensions=TEXT_EXTENSIONS):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Find non-English lines in text files using pycld2")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("-o", "--output", default="noneng.txt", help="Output report file (default: noneng.txt)")
-    parser.add_argument(
-        "-w", "--workers", type=int, default=cpu_count(), help=f"Number of parallel workers (default: {cpu_count()})"
+    parser = argparse.ArgumentParser(
+        description="Find non-English lines in text files using pycld2"
     )
-    parser.add_argument("--extensions", nargs="+", help="Additional file extensions to scan")
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="noneng.txt",
+        help="Output report file (default: noneng.txt)",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of parallel workers (default: {cpu_count()})",
+    )
+    parser.add_argument(
+        "--extensions", nargs="+", help="Additional file extensions to scan"
+    )
     parser.add_argument(
         "--min-confidence",
         type=int,
@@ -199,7 +221,9 @@ def main():
     total_non_eng_lines = 0
     print(f"Processing files using {args.workers} workers...")
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        future_to_file = {executor.submit(process_file, file): file for file in text_files}
+        future_to_file = {
+            executor.submit(process_file, file): file for file in text_files
+        }
         completed = 0
         for future in as_completed(future_to_file):
             completed += 1
@@ -233,8 +257,12 @@ def main():
             if lang_counts:
                 f.write("Language Distribution:\n")
                 f.write("-" * 40 + "\n")
-                for lang, count in sorted(lang_counts.items(), key=lambda x: x[1], reverse=True):
-                    f.write(f"  {lang}: {count} lines\n")
+                f.writelines(
+                    f"  {lang}: {count} lines\n"
+                    for lang, count in sorted(
+                        lang_counts.items(), key=lambda x: x[1], reverse=True
+                    )
+                )
                 f.write("\n")
             for file_path, lines in non_english_results:
                 f.write(f"\n{'─' * 42}\n")
@@ -242,7 +270,9 @@ def main():
                 f.write(f"Non-English lines: {len(lines)}\n")
                 f.write(f"{'─' * 42}\n\n")
                 for line_num, line_text, lang_code, lang_name, confidence in lines:
-                    f.write(f"  Line {line_num}: [{lang_name}] ({lang_code}) - Confidence: {confidence}%\n")
+                    f.write(
+                        f"  Line {line_num}: [{lang_name}] ({lang_code}) - Confidence: {confidence}%\n"
+                    )
                     f.write(f"  Content: {line_text}\n\n")
         else:
             f.write("No non-English lines found.\n")
@@ -253,7 +283,7 @@ def main():
             for file_path, error in errors:
                 f.write(f"  {file_path}: {error}\n")
     print(f"\n{'=' * 42}")
-    print(f"Scan complete!")
+    print("Scan complete!")
     print(f"Files scanned: {len(text_files)}")
     print(f"Files with non-English content: {files_with_findings}")
     print(f"Total non-English lines found: {total_non_eng_lines}")

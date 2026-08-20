@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Python Comment Remover with AST Validation
-Removes comments from Python files recursively with parallel processing.
-"""
 
 from __future__ import annotations
 
@@ -149,10 +145,16 @@ class CommentRemover:
             elif path.is_dir():
                 yield from path.rglob("*.py")
                 for file_path in path.rglob("*"):
-                    if file_path.is_file() and file_path.suffix == "" and self.is_python_file(file_path):
+                    if (
+                        file_path.is_file()
+                        and file_path.suffix == ""
+                        and self.is_python_file(file_path)
+                    ):
                         yield file_path
 
-    def process_whl_file(self, whl_path: Path, dry_run: bool = False) -> tuple[int, list[tuple[str, int]], bool]:
+    def process_whl_file(
+        self, whl_path: Path, dry_run: bool = False
+    ) -> tuple[int, list[tuple[str, int]], bool]:
         file_results = []
         total_removed = 0
         success = True
@@ -176,7 +178,9 @@ class CommentRemover:
                     backup_path = whl_path.with_suffix(".whl.bak")
                     if not backup_path.exists():
                         shutil.copy2(whl_path, backup_path)
-                    with zipfile.ZipFile(whl_path, "w", zipfile.ZIP_DEFLATED) as zip_ref:
+                    with zipfile.ZipFile(
+                        whl_path, "w", zipfile.ZIP_DEFLATED
+                    ) as zip_ref:
                         for file_path in temp_path.rglob("*"):
                             if file_path.is_file():
                                 arcname = str(file_path.relative_to(temp_path))
@@ -213,25 +217,40 @@ class CommentRemover:
             elif path.is_dir():
                 python_files.extend(path.rglob("*.py"))
                 for file_path in path.rglob("*"):
-                    if file_path.is_file() and file_path.suffix == "" and self.is_python_file(file_path):
+                    if (
+                        file_path.is_file()
+                        and file_path.suffix == ""
+                        and self.is_python_file(file_path)
+                    ):
                         python_files.append(file_path)
                 if process_wheels:
                     if recursive_wheels:
                         wheel_files.extend(path.rglob("*.whl"))
                     else:
-                        wheel_files.extend([f for f in path.iterdir() if f.is_file() and f.suffix == ".whl"])
+                        wheel_files.extend(
+                            [
+                                f
+                                for f in path.iterdir()
+                                if f.is_file() and f.suffix == ".whl"
+                            ]
+                        )
         self.total_files = len(python_files)
         if python_files:
             print(f"✓ Found {self.total_files} Python file(s)\n")
             print("📝 Processing Python files...\n")
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = {executor.submit(self.process_file, file_path): file_path for file_path in python_files}
+                futures = {
+                    executor.submit(self.process_file, file_path): file_path
+                    for file_path in python_files
+                }
                 for future in as_completed(futures):
                     file_path, comments_removed, success, message = future.result()
                     self.total_comments_removed += comments_removed
                     if success and comments_removed:
                         status = "✓" if comments_removed > 0 else "•"
-                        print(f"{status} {file_path.name:50} | Comments removed: {comments_removed:3}")
+                        print(
+                            f"{status} {file_path.name:50} | Comments removed: {comments_removed:3}"
+                        )
                     else:
                         print(f"✗ {file_path.name:50} | {message}")
                         self.failed_files.append((file_path, message))
@@ -240,10 +259,14 @@ class CommentRemover:
             print("🔧 Processing wheel files...\n")
             for whl_path in wheel_files:
                 print(f"📦 Processing {whl_path.name}...")
-                total_removed, file_results, success = self.process_whl_file(whl_path, dry_run)
+                total_removed, file_results, success = self.process_whl_file(
+                    whl_path, dry_run
+                )
                 if file_results:
                     self.total_comments_removed += total_removed
-                    print(f"  ✓ Removed {total_removed} comments from {len(file_results)} file(s)")
+                    print(
+                        f"  ✓ Removed {total_removed} comments from {len(file_results)} file(s)"
+                    )
                     if len(file_results) <= 10:
                         for rel_path, removed in file_results:
                             print(f"    └─ {rel_path:50} | Comments: {removed}")
@@ -251,7 +274,9 @@ class CommentRemover:
                         for rel_path, removed in file_results[:5]:
                             print(f"    └─ {rel_path:50} | Comments: {removed}")
                         print(f"    └─ ... and {len(file_results) - 5} more file(s)")
-                    self.processed_whl_files.append((whl_path, total_removed, len(file_results)))
+                    self.processed_whl_files.append(
+                        (whl_path, total_removed, len(file_results))
+                    )
                 else:
                     print("  ⚠ No Python files found or no changes made")
                 if not success:
@@ -270,7 +295,9 @@ class CommentRemover:
         if self.processed_whl_files:
             print("\n📦 Processed wheel files:")
             for whl_path, comments, files in self.processed_whl_files:
-                print(f"  • {whl_path.name}: {comments} comments removed from {files} file(s)")
+                print(
+                    f"  • {whl_path.name}: {comments} comments removed from {files} file(s)"
+                )
         if self.failed_files:
             print("\n❌ Failed files:")
             for file_path, error in self.failed_files:
@@ -291,9 +318,19 @@ def main():
         default=[Path.cwd()],
         help="Files or directories to process (default: current directory)",
     )
-    parser.add_argument("--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
-    parser.add_argument("--no-validate", action="store_true", help="Skip AST validation (faster but less safe)")
+    parser.add_argument(
+        "--workers", type=int, default=4, help="Number of parallel workers (default: 4)"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without making changes",
+    )
+    parser.add_argument(
+        "--no-validate",
+        action="store_true",
+        help="Skip AST validation (faster but less safe)",
+    )
     parser.add_argument(
         "--wheels",
         action="store_true",

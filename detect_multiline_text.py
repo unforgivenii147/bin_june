@@ -1,41 +1,30 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Multi-line text removal tool with parallel processing.
-
-Reads a pattern from /sdcard/lic and removes all occurrences of that pattern
-from files in specified directories or current directory recursively.
-"""
 
 import argparse
-import sys
-from pathlib import Path
-from typing import Iterator, List, Tuple, Optional
-from joblib import Parallel, delayed
-import tempfile
-import os
-import shutil
 import hashlib
+import shutil
+import sys
+import tempfile
+from collections.abc import Iterator
 from dataclasses import dataclass
+from pathlib import Path
+
 from dh import TXT_EXT as TEXT_EXTENSIONS
 from dh import get_nobinary
+from joblib import Parallel, delayed
 
-# Constants
 LICENSE_FILE = Path("/sdcard/lic")
 WORKERS = 8
-CHUNK_SIZE = 8192  # 8KB chunks for streaming
-
-# File extensions to process (can be expanded)
+CHUNK_SIZE = 8192
 
 
 @dataclass
 class FileStats:
-    """Statistics for a processed file."""
-
     path: Path
     removed_count: int = 0
     bytes_removed: int = 0
     bytes_processed: int = 0
-    error: Optional[str] = None
+    error: str | None = None
     modified: bool = False
 
     def __str__(self):
@@ -52,7 +41,6 @@ class FileStats:
 
 
 def read_license_pattern() -> str:
-    """Read the license pattern from /sdcard/lic."""
     try:
         if not LICENSE_FILE.exists():
             raise FileNotFoundError(f"License file not found: {LICENSE_FILE}")
@@ -69,8 +57,7 @@ def read_license_pattern() -> str:
         sys.exit(1)
 
 
-def find_text_files(directories: List[Path]) -> Iterator[Path]:
-    """Find text files in the given directories recursively."""
+def find_text_files(directories: list[Path]) -> Iterator[Path]:
     for directory in directories:
         if not directory.exists():
             print(f"Warning: Directory does not exist: {directory}", file=sys.stderr)
@@ -85,61 +72,49 @@ def find_text_files(directories: List[Path]) -> Iterator[Path]:
 
 
 def calculate_pattern_fingerprint(pattern: str) -> str:
-    """Calculate a fingerprint for the pattern for quick matching."""
     return hashlib.sha256(pattern.encode("utf-8")).hexdigest()
 
 
 def process_file(path: Path, pattern: str, pattern_fingerprint: str) -> FileStats:
-    """
-    Process a single file to remove the pattern.
-
-    Uses streaming approach for memory efficiency on large files.
-    """
     stats = FileStats(path=path)
 
     try:
         file_size = path.stat().st_size
         stats.bytes_processed = file_size
 
-        # Quick check if file contains the pattern
         if pattern not in path.read_text(encoding="utf-8", errors="ignore"):
             return stats
 
-        # Use temporary file for atomic replacement
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, suffix=".tmp") as temp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".tmp"
+        ) as temp_file:
             temp_path = Path(temp_file.name)
 
             try:
                 with open(path, "r", encoding="utf-8", errors="ignore") as source:
                     content = source.read()
 
-                    # Count occurrences
                     count = content.count(pattern)
                     if count == 0:
                         return stats
 
-                    # Remove pattern
                     modified_content = content.replace(pattern, "")
 
-                    # Write modified content
                     temp_file.write(modified_content)
                     temp_file.flush()
 
-                    # Calculate stats
                     stats.removed_count = count
                     stats.bytes_removed = len(pattern) * count
                     stats.modified = True
 
-                # Atomic replace
                 shutil.move(str(temp_path), str(path))
 
             except Exception:
-                # Clean up temp file on error
                 if temp_path.exists():
                     temp_path.unlink()
                 raise
 
-    except (IOError, OSError, UnicodeDecodeError) as e:
+    except (OSError, UnicodeDecodeError) as e:
         stats.error = str(e)
     except Exception as e:
         stats.error = f"Unexpected error: {e}"
@@ -162,32 +137,47 @@ Examples:
     )
 
     parser.add_argument(
-        "paths", nargs="*", type=Path, help="Files or directories to process (default: current directory)"
+        "paths",
+        nargs="*",
+        type=Path,
+        help="Files or directories to process (default: current directory)",
     )
 
     parser.add_argument(
-        "-a", "--auto-remove", action="store_true", help="Automatically remove found patterns (without confirmation)"
+        "-a",
+        "--auto-remove",
+        action="store_true",
+        help="Automatically remove found patterns (without confirmation)",
     )
 
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without making changes",
+    )
 
-    parser.add_argument("-j", "--jobs", type=int, default=WORKERS, help=f"Number of parallel jobs (default: {WORKERS})")
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=WORKERS,
+        help=f"Number of parallel jobs (default: {WORKERS})",
+    )
 
     args = parser.parse_args()
 
-    # Read license pattern
     print(f"Reading pattern from {LICENSE_FILE}...")
     pattern = read_license_pattern()
     pattern_fingerprint = calculate_pattern_fingerprint(pattern)
-    print(f"Pattern loaded ({len(pattern)} characters, {len(pattern.splitlines())} lines)")
+    print(
+        f"Pattern loaded ({len(pattern)} characters, {len(pattern.splitlines())} lines)"
+    )
 
-    # Determine paths to process
     if not args.paths:
         paths = [Path.cwd()]
     else:
         paths = args.paths
 
-    # Find all text files
     print("Scanning for files...")
     files = list(find_text_files(paths))
 
@@ -200,14 +190,12 @@ Examples:
     if args.dry_run:
         print("\nDRY RUN - No changes will be made\n")
 
-    # Process files in parallel
     if args.auto_remove or args.dry_run:
         print("Processing files in parallel...")
         stats_list = Parallel(n_jobs=args.jobs, verbose=1)(
             delayed(process_file)(path, pattern, pattern_fingerprint) for path in files
         )
 
-        # Report stats
         print("\n" + "=" * 42)
         print("PROCESSING REPORT")
         print("=" * 42)
@@ -233,7 +221,6 @@ Examples:
 
     else:
         print("\nDry run mode (no changes will be made). Use -a to apply changes.")
-        # Show preview
         print("Files that contain the pattern:")
         preview_stats = Parallel(n_jobs=args.jobs, verbose=0)(
             delayed(

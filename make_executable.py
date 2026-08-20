@@ -10,7 +10,12 @@ TEXT_SUFFIXES = {".py", ".sh", ".bash", ".pl", ".rb", ".pyw", ".txt"}
 
 
 def check_and_make_executable(file_path: Path) -> dict:
-    result = {"path": file_path, "is_shebang": False, "permission_changed": False, "error": None}
+    result = {
+        "path": file_path,
+        "is_shebang": False,
+        "permission_changed": False,
+        "error": None,
+    }
     try:
         if not file_path.is_file():
             return result
@@ -41,12 +46,16 @@ def main():
         print("ℹ️ No files discovered in the target workspace.")
         return
     cpu_cores = os.cpu_count() or 1
-    print(f"⚡ Processing {len(target_files)} files concurrently across {cpu_cores} threads...")
+    print(
+        f"⚡ Processing {len(target_files)} files concurrently across {cpu_cores} threads..."
+    )
     print("-" * 42)
     total_shebangs = 0
     total_updated = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=cpu_cores) as executor:
-        futures = {executor.submit(check_and_make_executable, f): f for f in target_files}
+        futures = {
+            executor.submit(check_and_make_executable, f): f for f in target_files
+        }
         for future in concurrent.futures.as_completed(futures):
             res = future.result()
             if res["error"]:
@@ -60,12 +69,14 @@ def main():
                 else:
                     print(f"✅ [ALREADY EXECUTABLE] {res['path']}")
     print("-" * 42)
-    print(f"📊 Summary:")
+    print("📊 Summary:")
     print(f"   Total shebang files found: {total_shebangs}")
     print(f"   Files updated with +x bit: {total_updated}")
     if os.name != "posix":
         print("\n⚠️ Note: You are running on a non-POSIX system (e.g. Windows).")
-        print("   Shebang files were detected but executable bits cannot be applied here.")
+        print(
+            "   Shebang files were detected but executable bits cannot be applied here."
+        )
 
 
 if __name__ == "__main__":

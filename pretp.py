@@ -10,14 +10,29 @@ from tqdm import tqdm
 
 def format_file(file_path: str) -> str | None:
     try:
-        subprocess.run(["npx", "prettier", "--write", str(file_path)], capture_output=True, text=True, check=True)
+        subprocess.run(
+            ["npx", "prettier", "--write", str(file_path)],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         return None
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         return f"{file_path}: {(e.stderr if hasattr(e, 'stderr') else str(e))}"
 
 
 def main() -> None:
-    target_extensions = (".js", ".css", ".htm", ".html", ".ts", ".jsx", ".tsx", ".xml", ".json")
+    target_extensions = (
+        ".js",
+        ".css",
+        ".htm",
+        ".html",
+        ".ts",
+        ".jsx",
+        ".tsx",
+        ".xml",
+        ".json",
+    )
     exclude_dirs = {".git"}
     exclude_extensions = (".min.js", ".min.css")
     files_to_format = []
@@ -28,7 +43,9 @@ def main() -> None:
             continue
         if any(part in exclude_dirs for part in file_path.parts):
             continue
-        if file_path.suffix in target_extensions or any(file_path.name.endswith(ext) for ext in target_extensions):
+        if file_path.suffix in target_extensions or any(
+            file_path.name.endswith(ext) for ext in target_extensions
+        ):
             if any(file_path.name.endswith(ext) for ext in target_extensions) and (
                 not any(file_path.name.endswith(ext) for ext in exclude_extensions)
             ):

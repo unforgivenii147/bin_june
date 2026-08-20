@@ -96,7 +96,9 @@ def process_markdown_files(directory: str = ".") -> None:
                     output_filename = f"{base_name}_lines_{line_range}{extension}"
                     output_path = OUTPUT_DIR / output_filename
                     output_path.write_text(details["content"].strip(), encoding="utf-8")
-                    print(f"Saved snippet from {path} (Lines {line_range}, Lang: '{language}') to {output_path}")
+                    print(
+                        f"Saved snippet from {path} (Lines {line_range}, Lang: '{language}') to {output_path}"
+                    )
 
 
 if __name__ == "__main__":

@@ -4,14 +4,13 @@ from __future__ import annotations
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Optional
 
 import requests
 
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"
 
 
-def fetch_rss_feed(url: str) -> Optional[str]:
+def fetch_rss_feed(url: str) -> str | None:
     try:
         response = requests.get(url, timeout=55)
         response.raise_for_status()
@@ -49,13 +48,15 @@ def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
     return packages
 
 
-def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None):
+def display_packages(packages: list[dict[str, str]], limit: int | None = None):
     if not packages:
         print("No packages found in the RSS feed.")
         return
     display_packages = packages[:limit] if limit else packages
     print(f"\n{'=' * 42}")
-    print(f"PyPI Latest Packages (Total: {len(packages)}, Showing: {len(display_packages)})")
+    print(
+        f"PyPI Latest Packages (Total: {len(packages)}, Showing: {len(display_packages)})"
+    )
     print(f"Fetched at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'=' * 42}\n")
     for i, pkg in enumerate(display_packages, 1):
@@ -76,7 +77,9 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
 def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.txt"):
     try:
         with open(filename, "w", encoding="utf-8") as f:
-            f.write(f"PyPI Latest Packages - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(
+                f"PyPI Latest Packages - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
             f.write("=" * 42 + "\n\n")
             for i, pkg in enumerate(packages, 1):
                 f.write(f"Package #{i}:\n")
@@ -88,7 +91,7 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
                 f.write(f"  GUID:        {pkg['guid']}\n")
                 f.write("-" * 42 + "\n")
         print(f"\nPackages saved to '{filename}'")
-    except IOError as e:
+    except OSError as e:
         print(f"Error saving to file: {e}", file=sys.stderr)
 
 

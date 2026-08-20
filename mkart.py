@@ -3,9 +3,6 @@ import os
 
 
 def create_english_style_art(word):
-    """
-    Creates artistic block-style rendering of English text with readable letters
-    """
 
     letter_art = {
         "A": [
@@ -662,9 +659,6 @@ def create_english_style_art(word):
 
 
 def create_arabic_style_art(word):
-    """
-    Creates artistic block-style rendering of Arabic text with readable letters
-    """
 
     letter_art = {
         "ا": [
@@ -934,9 +928,6 @@ def create_arabic_style_art(word):
 
 
 def detect_script(text):
-    """
-    Detect if text contains Arabic or English characters
-    """
     arabic_chars = set("ابتثجحخدذرزسشصضطظعغفقكلمنهويءآأإةى")
     for char in text:
         if char in arabic_chars:

@@ -10,7 +10,10 @@ def sync_branch_with_upstream(repo_path: str = ".") -> bool:
     try:
         repo = Repo(repo_path)
         if repo.active_branch.name != "master":
-            print("Warning: Not on master branch. Current branch:", repo.active_branch.name)
+            print(
+                "Warning: Not on master branch. Current branch:",
+                repo.active_branch.name,
+            )
             response = input("Continue anyway? (y/n): ")
             if response.lower() != "y":
                 return False
@@ -44,7 +47,10 @@ def sync_branch_with_upstream(repo_path: str = ".") -> bool:
             repo.git.rebase("--abort")
             return False
         print(f"Pushing to origin/{current_branch.name} with force-with-lease...")
-        origin.push(refspec=f"{current_branch.name}:{current_branch.name}", force_with_lease=True)
+        origin.push(
+            refspec=f"{current_branch.name}:{current_branch.name}",
+            force_with_lease=True,
+        )
         print("Successfully synced branch!")
         return True
     except Exception as e:
@@ -68,12 +74,16 @@ def sync_with_plumbing(repo_path: str = ".") -> bool:
         current_commit = repo.head.commit
         upstream_commit = upstream_ref.commit
         if current_commit != upstream_commit:
-            print(f"Rebasing {current_commit.hexsha[:8]} onto {upstream_commit.hexsha[:8]}")
+            print(
+                f"Rebasing {current_commit.hexsha[:8]} onto {upstream_commit.hexsha[:8]}"
+            )
             temp_branch = repo.create_head("temp_rebase", current_commit)
             temp_branch.checkout()
             try:
                 repo.head.reset(upstream_commit, index=True, working_tree=True)
-                repo.git.cherry_pick(f"{current_commit.hexsha}..{upstream_commit.hexsha}")
+                repo.git.cherry_pick(
+                    f"{current_commit.hexsha}..{upstream_commit.hexsha}"
+                )
                 repo.git.cherry_pick("--continue")
                 repo.head.reference = repo.head.commit
             except Exception as e:

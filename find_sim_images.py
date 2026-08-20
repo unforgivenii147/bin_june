@@ -8,9 +8,12 @@ from PIL import Image
 
 
 def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
+
     def is_image(filename):
         f = filename.lower()
-        return f.endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg")) or ".jpg" in f
+        return (
+            f.endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg")) or ".jpg" in f
+        )
 
     image_filenames = []
     for userpath in userpaths:
@@ -33,7 +36,8 @@ if __name__ == "__main__":
     import sys
 
     def usage():
-        sys.stderr.write(f"""SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]
+        sys.stderr.write(
+            f"""SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]
 Identifies similar images in the directory.
 Method:
   ahash:          Average hash
@@ -44,7 +48,8 @@ Method:
   colorhash:      HSV color hash
   crop-resistant: Crop-resistant hash
 (C) Johannes Buchner, 2013-2017
-""")
+"""
+        )
         sys.exit(1)
 
     hashmethod = sys.argv[1] if len(sys.argv) > 1 else usage()

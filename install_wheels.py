@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Install Python wheels with platform-aware installation strategy.
-Pure Python wheels -> user site-packages
-Platform-specific wheels -> system site-packages
-"""
 
 from __future__ import annotations
 
@@ -102,7 +97,10 @@ def main():
     failed = []
     max_workers = min(4, len(wheel_files))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_wheel = {executor.submit(install_wheel, wheel, is_pure): wheel for wheel, is_pure in install_tasks}
+        future_to_wheel = {
+            executor.submit(install_wheel, wheel, is_pure): wheel
+            for wheel, is_pure in install_tasks
+        }
         for future in as_completed(future_to_wheel):
             wheel = future_to_wheel[future]
             try:

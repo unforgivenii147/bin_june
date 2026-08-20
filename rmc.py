@@ -5,12 +5,14 @@ import argparse
 import ast
 import os
 import sys
+from collections.abc import Iterator
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from pathlib import Path
-from typing import Iterator
 
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
+from dh import has_doc
+
 
 PY_EXTS = {".py"}
 
@@ -343,8 +345,28 @@ def submit_until_full(
     return exhausted
 
 
+def check_remained_doc():
+    cwd = Path.cwd()
+
+    def _walker(root_dir):
+        for r, _, files in root_dir.walk():
+            rp = Path(r)
+            for f in files:
+                path = rp / f
+                if path.is_symlink() or ".git" in path.parts:
+                    continue
+                if path.is_file() and path.suffix == ".py":
+                    yield path
+
+    for filepath in _walker(cwd):
+        if has_doc(filepath):
+            print(f"{filepath.name} stile has doc")
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Remove Python comments and docstrings in-place.")
+    parser = argparse.ArgumentParser(
+        description="Remove Python comments and docstrings in-place."
+    )
     parser.add_argument(
         "paths",
         nargs="*",
@@ -420,10 +442,6 @@ def main() -> int:
                     max_pending,
                 )
 
-    if total_files == 0:
-        print("No Python files to process.", file=sys.stderr)
-        return 1
-
     print(
         f"\nSummary: {changed_files}/{total_files} file(s) changed, "
         f"{total_removed} comment(s)/docstring(s) removed, "
@@ -431,6 +449,7 @@ def main() -> int:
     )
 
     return 1 if errors else 0
+    check_remained_doc()
 
 
 if __name__ == "__main__":

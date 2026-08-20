@@ -8,7 +8,9 @@ from pathlib import Path
 
 def run_git_command(args: list[str]) -> str:
     try:
-        result = subprocess.run(["git"] + args, capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["git"] + args, capture_output=True, text=True, check=True
+        )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         print(f"❌ Git error executing {' '.join(e.cmd)}:\n{e.stderr.strip()}")
@@ -17,17 +19,26 @@ def run_git_command(args: list[str]) -> str:
 
 def main():
     repo_root = Path(".")
-    if not (repo_root / ".git").exists() and not run_git_command(["rev-parse", "--is-inside-work-tree"]) == "true":
+    if (
+        not (repo_root / ".git").exists()
+        and not run_git_command(["rev-parse", "--is-inside-work-tree"]) == "true"
+    ):
         print("❌ Error: Current directory is not a Git repository root.")
         sys.exit(1)
     try:
         run_git_command(["log", "-1"])
     except SystemExit:
-        print("❌ Error: No previous commit found to squash into. Create an initial commit first.")
+        print(
+            "❌ Error: No previous commit found to squash into. Create an initial commit first."
+        )
         sys.exit(1)
     print("🔍 Searching repository history for deleted files...")
-    log_output = run_git_command(["log", "--diff-filter=D", "--name-only", "--pretty=format:"])
-    historically_deleted = {line.strip() for line in log_output.splitlines() if line.strip()}
+    log_output = run_git_command(
+        ["log", "--diff-filter=D", "--name-only", "--pretty=format:"]
+    )
+    historically_deleted = {
+        line.strip() for line in log_output.splitlines() if line.strip()
+    }
     if not historically_deleted:
         print("ℹ️  No deleted files found in the git commit log.")
         return
@@ -42,7 +53,9 @@ def main():
     if not locally_removed_files:
         print("🎉 No pending file deletions match historical records.")
         return
-    print(f"⚠️  Found {len(locally_removed_files)} deleted file(s) to squash into the last commit:")
+    print(
+        f"⚠️  Found {len(locally_removed_files)} deleted file(s) to squash into the last commit:"
+    )
     for path in locally_removed_files:
         print(f"   -> {path}")
     print("\n🛠️  Staging file deletions...")

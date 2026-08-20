@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Alternative version using deep-translator for in-place translation.
-Requires: deep-translator
-Optimized for Python 3.12.
-"""
 
 from __future__ import annotations
 
@@ -34,7 +29,9 @@ def is_english(text: str, threshold: float = 0.6) -> bool:
     return ascii_alpha_count / len(alpha_chars) > threshold
 
 
-def translate_text(text: str, translator: GoogleTranslator, max_retries: int = 3) -> str:
+def translate_text(
+    text: str, translator: GoogleTranslator, max_retries: int = 3
+) -> str:
     if not text.strip() or is_english(text):
         return text
     for attempt in range(max_retries):
@@ -46,7 +43,9 @@ def translate_text(text: str, translator: GoogleTranslator, max_retries: int = 3
             if attempt < max_retries - 1:
                 time.sleep(1)
             else:
-                logger.error("  Translation failed after %d attempts: %s", max_retries, e)
+                logger.error(
+                    "  Translation failed after %d attempts: %s", max_retries, e
+                )
     return text
 
 
@@ -83,7 +82,9 @@ def worker(file_path: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Translate non-English lines in-place.")
+    parser = argparse.ArgumentParser(
+        description="Translate non-English lines in-place."
+    )
     parser.add_argument("files", nargs="+", help="Files or directories to process")
     parser.add_argument(
         "--extensions",
@@ -92,7 +93,10 @@ def main() -> None:
         help="Extensions to process",
     )
     parser.add_argument(
-        "--workers", type=int, default=mp.cpu_count(), help=f"Number of workers (default: {mp.cpu_count()})"
+        "--workers",
+        type=int,
+        default=mp.cpu_count(),
+        help=f"Number of workers (default: {mp.cpu_count()})",
     )
     parser.add_argument("--exclude", nargs="+", default=[], help="Paths to exclude")
     args = parser.parse_args()
@@ -115,7 +119,9 @@ def main() -> None:
     if not files_to_process:
         logger.info("No files to process.")
         return
-    logger.info("Found %d files. Using %d workers...", len(files_to_process), args.workers)
+    logger.info(
+        "Found %d files. Using %d workers...", len(files_to_process), args.workers
+    )
     if args.workers == 1:
         for fp in files_to_process:
             worker(fp)

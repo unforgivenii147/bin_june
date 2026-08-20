@@ -80,7 +80,9 @@ def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]
-    files = [Path(f) for f in args] if args else get_files(cwd, ext=[".metadata", ".md"])
+    files = (
+        [Path(f) for f in args] if args else get_files(cwd, ext=[".metadata", ".md"])
+    )
     metafiles = list(cwd.rglob("METADATA"))
     if metafiles:
         files.extend(metafiles)

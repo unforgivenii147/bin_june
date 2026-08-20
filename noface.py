@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Folderize images based on face detection using multiprocessing (Termux version).
-Images without human faces are moved to 'noface' folder.
-Images with faces stay in their original location.
-"""
 
 from __future__ import annotations
 
@@ -19,7 +14,10 @@ from tqdm import tqdm
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler(Path.home() / "face_detection.log"), logging.StreamHandler()],
+    handlers=[
+        logging.FileHandler(Path.home() / "face_detection.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 try:

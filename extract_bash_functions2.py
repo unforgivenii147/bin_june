@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract functions from shell scripts (.sh files and extensionless bash scripts) recursively.
-Uses generator-style filesystem walking for memory-efficient processing.
-Optimized for Termux environment.
-"""
 
 from __future__ import annotations
 
@@ -12,10 +7,12 @@ import contextlib
 import os
 import re
 import sys
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, List, Optional, Tuple
 
-IS_TERMUX = os.environ.get("TERMUX_VERSION") is not None or "com.termux" in os.environ.get("PREFIX", "")
+IS_TERMUX = os.environ.get(
+    "TERMUX_VERSION"
+) is not None or "com.termux" in os.environ.get("PREFIX", "")
 EXCLUDED = {
     ".py",
     ".h",
@@ -65,11 +62,19 @@ class ShellScriptFinder:
                 f.seek(0)
                 first_line = f.readline().decode("utf-8", errors="ignore").strip()
                 if first_line.startswith("#!"):
-                    shell_patterns = ["bash", "sh", "dash", "ksh", "zsh", "ash", "shell"]
+                    shell_patterns = [
+                        "bash",
+                        "sh",
+                        "dash",
+                        "ksh",
+                        "zsh",
+                        "ash",
+                        "shell",
+                    ]
                     shebang_lower = first_line.lower()
-                    if any((shell in shebang_lower for shell in shell_patterns)):
+                    if any(shell in shebang_lower for shell in shell_patterns):
                         return True
-        except (IOError, OSError, UnicodeDecodeError):
+        except (OSError, UnicodeDecodeError):
             return False
         return False
 
@@ -93,7 +98,7 @@ class ShellScriptFinder:
         except OSError as e:
             print(f"Warning: OS error accessing {directory}: {e}", file=sys.stderr)
 
-    def find_scripts(self, paths: List[Path]) -> Generator[Path, None, None]:
+    def find_scripts(self, paths: list[Path]) -> Generator[Path, None, None]:
         for path in paths:
             if not path.exists():
                 print(f"Warning: {path} does not exist, skipping...", file=sys.stderr)
@@ -105,14 +110,19 @@ class ShellScriptFinder:
             elif path.is_dir():
                 yield from self.walk_directory(path)
             else:
-                print(f"Warning: {path} is not a file or directory, skipping...", file=sys.stderr)
+                print(
+                    f"Warning: {path} is not a file or directory, skipping...",
+                    file=sys.stderr,
+                )
 
 
 class FunctionExtractor:
     def __init__(self):
         self.function_count = 0
 
-    def extract_functions(self, sh_file: Path) -> Generator[Tuple[str, str], None, None]:
+    def extract_functions(
+        self, sh_file: Path
+    ) -> Generator[tuple[str, str], None, None]:
         try:
             with open(sh_file, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()
@@ -120,7 +130,9 @@ class FunctionExtractor:
             print(f"Error reading {sh_file}: {e}", file=sys.stderr)
             return
         lines = content.split("\n")
-        function_start_pattern = re.compile("^\\s*(?:function\\s+)?(\\w[\\w\\-]*)\\s*(?:\\(\\))?\\s*\\{")
+        function_start_pattern = re.compile(
+            "^\\s*(?:function\\s+)?(\\w[\\w\\-]*)\\s*(?:\\(\\))?\\s*\\{"
+        )
         i = 0
         while i < len(lines):
             line = lines[i]
@@ -155,7 +167,9 @@ class FunctionWriter:
         self.use_extension = use_extension
         self.written_count = 0
 
-    def write_function(self, func_name: str, func_content: str, source_file: Path) -> Optional[Path]:
+    def write_function(
+        self, func_name: str, func_content: str, source_file: Path
+    ) -> Path | None:
         safe_func_name = re.sub("[^\\w\\-]", "_", func_name)
         try:
             rel_path = source_file.relative_to(Path.cwd())
@@ -178,25 +192,31 @@ class FunctionWriter:
             self.written_count += 1
             return output_file
         except Exception as e:
-            print(f"Error writing function '{func_name}' to {output_file}: {e}", file=sys.stderr)
+            print(
+                f"Error writing function '{func_name}' to {output_file}: {e}",
+                file=sys.stderr,
+            )
             return None
 
 
 def process_paths(
-    input_paths: List[Path],
+    input_paths: list[Path],
     output_dir: Path,
     include_extensionless: bool = True,
     use_extension: bool = True,
     skip_hidden: bool = False,
     verbose: bool = False,
-) -> Tuple[int, int]:
+) -> tuple[int, int]:
     finder = ShellScriptFinder(include_extensionless, skip_hidden)
     extractor = FunctionExtractor()
     writer = FunctionWriter(output_dir, use_extension)
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
     except PermissionError:
-        print(f"Error: Cannot create output directory '{output_dir}'. Check permissions.", file=sys.stderr)
+        print(
+            f"Error: Cannot create output directory '{output_dir}'. Check permissions.",
+            file=sys.stderr,
+        )
         return (0, 0)
     files_processed = 0
     print("Processing files using generator pattern...")
@@ -231,26 +251,40 @@ def main():
         help="Output directory for extracted functions (default: extracted_functions)",
     )
     parser.add_argument(
-        "--sh-only", action="store_true", help="Only process files with .sh extension (ignore extensionless scripts)"
+        "--sh-only",
+        action="store_true",
+        help="Only process files with .sh extension (ignore extensionless scripts)",
     )
-    parser.add_argument("--no-extension", action="store_true", help="Output functions without .sh extension")
     parser.add_argument(
-        "--skip-hidden", action="store_true", help="Skip hidden files and directories (starting with .)"
+        "--no-extension",
+        action="store_true",
+        help="Output functions without .sh extension",
     )
-    parser.add_argument("--verbose", action="store_true", help="Show verbose output including each processed file")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Only find and list scripts without extracting functions"
+        "--skip-hidden",
+        action="store_true",
+        help="Skip hidden files and directories (starting with .)",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show verbose output including each processed file",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Only find and list scripts without extracting functions",
     )
     args = parser.parse_args()
     if IS_TERMUX:
-        print(f"Running in Termux environment (optimized for mobile)")
+        print("Running in Termux environment (optimized for mobile)")
     if args.inputs:
         input_paths = args.inputs
     else:
         input_paths = [Path(".")]
     include_extensionless = not args.sh_only
     if args.dry_run:
-        print(f"Searching for shell scripts...")
+        print("Searching for shell scripts...")
         finder = ShellScriptFinder(include_extensionless, args.skip_hidden)
         scripts = list(finder.find_scripts(input_paths))
         print(f"\nFound {len(scripts)} shell script(s):")
@@ -258,7 +292,7 @@ def main():
             print(f"  {script}")
         print(f"\nWould extract functions to: {args.output.absolute()}")
         return 0
-    print(f"Searching for shell scripts...")
+    print("Searching for shell scripts...")
     files_processed, functions_extracted = process_paths(
         input_paths=input_paths,
         output_dir=args.output,
@@ -267,7 +301,7 @@ def main():
         skip_hidden=args.skip_hidden,
         verbose=args.verbose,
     )
-    print(f"\nDone!")
+    print("\nDone!")
     print(f"  Files processed: {files_processed}")
     print(f"  Functions extracted: {functions_extracted}")
     print(f"  Output directory: {args.output.absolute()}")

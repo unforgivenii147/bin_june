@@ -18,7 +18,7 @@ def main() -> None:
     if not files:
         print(f"No .{ext} files found in current directory")
         sys.exit(0)
-    total_size = sum((f.stat().st_size for f in files))
+    total_size = sum(f.stat().st_size for f in files)
     count = len(files)
     print(f"Total number of .{ext} files: {count}")
     print(f"Total size of .{ext} files: {fsz(total_size)}")

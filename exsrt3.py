@@ -66,7 +66,9 @@ def main() -> None:
             out_path = Path(out_filename)
             extracted_files.append(str(out_path))
     except:
-        print(f"Extracting stream index {index} (Lang: {lang}, Forced: {forced}, Codec: {codec_name}) -> {out_path}")
+        print(
+            f"Extracting stream index {index} (Lang: {lang}, Forced: {forced}, Codec: {codec_name}) -> {out_path}"
+        )
 
 
 if __name__ == "__main__":

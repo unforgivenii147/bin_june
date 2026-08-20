@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Recursively extract embedded base64 data URIs from .css, .js, and .html files
-in the current directory, save the decoded assets to an `assets/` folder,
-and replace the URIs with relative links.
-Each asset is named after the SHA‑256 hash of the full data URI.
-Duplicate assets are only saved once.
-"""
 
 from __future__ import annotations
 

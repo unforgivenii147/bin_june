@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Process directory and set execute permissions on executable files."""
 
 from __future__ import annotations
 
@@ -63,7 +62,11 @@ def process_file(path: Path, cwd: Path) -> str | None:
 
 
 def process_directory(cwd: Path, workers: int = 4) -> None:
-    files = [p for p in cwd.rglob("*") if p.is_file() and ".git" not in p.parts and not p.is_symlink()]
+    files = [
+        p
+        for p in cwd.rglob("*")
+        if p.is_file() and ".git" not in p.parts and not p.is_symlink()
+    ]
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = {executor.submit(process_file, f, cwd): f for f in files}
         for future in as_completed(futures):

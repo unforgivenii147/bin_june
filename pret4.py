@@ -13,16 +13,27 @@ EXCLUDE_PATTERNS = {".py", ".ipynb"}
 
 
 def should_format(file_path: Path) -> bool:
-    return file_path.suffix in EXTENSIONS and (not any((file_path.name.endswith(p) for p in EXCLUDE_PATTERNS)))
+    return file_path.suffix in EXTENSIONS and (
+        not any(file_path.name.endswith(p) for p in EXCLUDE_PATTERNS)
+    )
 
 
 def get_files_to_format(cwd: str = ".") -> list[Path]:
-    return [p for p in Path(cwd).resolve().rglob("*") if p.is_file() and "error" not in p.parts and should_format(p)]
+    return [
+        p
+        for p in Path(cwd).resolve().rglob("*")
+        if p.is_file() and "error" not in p.parts and should_format(p)
+    ]
 
 
 def format_file(file_path: Path) -> tuple[Path, bool, str | None]:
     try:
-        result = subprocess.run(["prettier", "--write", str(file_path)], capture_output=True, text=True, timeout=300)
+        result = subprocess.run(
+            ["prettier", "--write", str(file_path)],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
         if result.returncode == 0:
             return (file_path, True, None)
         return (file_path, False, result.stderr or "Unknown error")

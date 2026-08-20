@@ -1,13 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract entities (classes, functions, constants) from Python files recursively.
-Features:
-- Recursive directory traversal using pathlib
-- Parallel processing with multiprocessing
-- Progress tracking with tqdm
-- Saves unique entities to separate files
-- Extracts and saves imports
-"""
 
 from __future__ import annotations
 
@@ -21,7 +12,9 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -51,7 +44,11 @@ class EntityExtractor(ast.NodeVisitor):
         self._in_class = False
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        self.classes.append(Entity(name=node.name, file_path=str(self.file_path), line_number=node.lineno))
+        self.classes.append(
+            Entity(
+                name=node.name, file_path=str(self.file_path), line_number=node.lineno
+            )
+        )
         old_in_class = self._in_class
         self._in_class = True
         self.generic_visit(node)
@@ -59,12 +56,24 @@ class EntityExtractor(ast.NodeVisitor):
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         if not self._in_class:
-            self.functions.append(Entity(name=node.name, file_path=str(self.file_path), line_number=node.lineno))
+            self.functions.append(
+                Entity(
+                    name=node.name,
+                    file_path=str(self.file_path),
+                    line_number=node.lineno,
+                )
+            )
         self.generic_visit(node)
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         if not self._in_class:
-            self.functions.append(Entity(name=node.name, file_path=str(self.file_path), line_number=node.lineno))
+            self.functions.append(
+                Entity(
+                    name=node.name,
+                    file_path=str(self.file_path),
+                    line_number=node.lineno,
+                )
+            )
         self.generic_visit(node)
 
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -107,7 +116,9 @@ def extract_from_file(file_path: Path) -> ExtractionResult:
         )
     except (SyntaxError, UnicodeDecodeError) as e:
         logger.warning(f"Failed to parse {file_path}: {e}")
-        return ExtractionResult(file_path=file_path, classes=[], functions=[], constants=[], imports=set())
+        return ExtractionResult(
+            file_path=file_path, classes=[], functions=[], constants=[], imports=set()
+        )
 
 
 def find_python_files(root_dir: Path) -> list[Path]:
@@ -127,12 +138,13 @@ def save_entities(
             file_name = Path(file_path).stem + ".txt"
             output_file = entity_dir / file_name
             with open(output_file, "w", encoding="utf-8") as f:
-                for entity in sorted(entities, key=lambda e: e.name):
-                    f.write(f"{entity.name} (line {entity.line_number})\n")
+                f.writelines(
+                    f"{entity.name} (line {entity.line_number})\n"
+                    for entity in sorted(entities, key=lambda e: e.name)
+                )
     unique_file = entity_dir / "unique.txt"
     with open(unique_file, "w", encoding="utf-8") as f:
-        for name in sorted(unique_entities):
-            f.write(f"{name}\n")
+        f.writelines(f"{name}\n" for name in sorted(unique_entities))
     logger.info(f"Saved {len(unique_entities)} unique {entity_type}")
 
 
@@ -144,12 +156,13 @@ def save_imports(output_dir: Path, imports_by_dir: dict[str, set[str]]) -> None:
             file_name = f"imports-{dir_name}.txt"
             output_file = imports_dir / file_name
             with open(output_file, "w", encoding="utf-8") as f:
-                for imp in sorted(imports):
-                    f.write(f"{imp}\n")
+                f.writelines(f"{imp}\n" for imp in sorted(imports))
     logger.info(f"Saved imports for {len(imports_by_dir)} directories")
 
 
-def main(root_dir: str = ".", output_dir: str = "output", num_workers: int | None = None) -> None:
+def main(
+    root_dir: str = ".", output_dir: str = "output", num_workers: int | None = None
+) -> None:
     root_path = Path(root_dir)
     output_path = Path(output_dir)
     if not root_path.exists():
@@ -193,9 +206,15 @@ def main(root_dir: str = ".", output_dir: str = "output", num_workers: int | Non
     entities_by_file = {key: dict(val) for key, val in entities_by_file.items()}
     logger.info(f"Saving results to {output_path}...")
     output_path.mkdir(parents=True, exist_ok=True)
-    save_entities(output_path, "class", entities_by_file.get("classes", {}), unique_classes)
-    save_entities(output_path, "func", entities_by_file.get("functions", {}), unique_functions)
-    save_entities(output_path, "const", entities_by_file.get("constants", {}), unique_constants)
+    save_entities(
+        output_path, "class", entities_by_file.get("classes", {}), unique_classes
+    )
+    save_entities(
+        output_path, "func", entities_by_file.get("functions", {}), unique_functions
+    )
+    save_entities(
+        output_path, "const", entities_by_file.get("constants", {}), unique_constants
+    )
     save_imports(output_path, imports_by_dir)
     logger.info("=" * 42)
     logger.info("Extraction Summary:")
@@ -210,9 +229,23 @@ def main(root_dir: str = ".", output_dir: str = "output", num_workers: int | Non
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Extract entities from Python files recursively")
-    parser.add_argument("-r", "--root", default=".", help="Root directory to scan (default: current directory)")
-    parser.add_argument("-o", "--output", default="output", help="Output directory (default: output)")
-    parser.add_argument("-w", "--workers", type=int, help="Number of parallel workers (default: CPU count)")
+    parser = argparse.ArgumentParser(
+        description="Extract entities from Python files recursively"
+    )
+    parser.add_argument(
+        "-r",
+        "--root",
+        default=".",
+        help="Root directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-o", "--output", default="output", help="Output directory (default: output)"
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        help="Number of parallel workers (default: CPU count)",
+    )
     args = parser.parse_args()
     main(args.root, args.output, args.workers)

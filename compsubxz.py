@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Compress/decompress subdirectories using tar + lzma with parallel processing.
-Usage: script.py -c [paths...]
-       script.py -d [paths...]
-"""
 
 from __future__ import annotations
 
@@ -133,7 +128,10 @@ def decompress_archive(archive_path):
     archive_path = Path(archive_path)
     try:
         archive_size = archive_path.stat().st_size
-        with lzma.open(archive_path, "rb") as lzma_in, tarfile.open(fileobj=lzma_in, mode="r|") as tar:
+        with (
+            lzma.open(archive_path, "rb") as lzma_in,
+            tarfile.open(fileobj=lzma_in, mode="r|") as tar,
+        ):
             extracted_size = 0
             for member in tar:
                 if member is None:
@@ -142,7 +140,10 @@ def decompress_archive(archive_path):
                 break
         extracted_root_name = archive_path.stem
         target_dir = archive_path.parent / extracted_root_name
-        with lzma.open(archive_path, "rb") as lzma_in, tarfile.open(fileobj=lzma_in, mode="r|") as tar:
+        with (
+            lzma.open(archive_path, "rb") as lzma_in,
+            tarfile.open(fileobj=lzma_in, mode="r|") as tar,
+        ):
             safe_extract_stream(tar, target_dir)
         archive_path.unlink()
         extracted_size = 0
@@ -177,23 +178,43 @@ def fsz(size_bytes):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Compress/decompress subdirectories with tar+lzma")
+    parser = argparse.ArgumentParser(
+        description="Compress/decompress subdirectories with tar+lzma"
+    )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-c", "--compress", action="store_true", help="Compress directories to .tar.lzma")
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress .tar.lzma back to directories")
-    parser.add_argument("paths", nargs="*", default=None, help="Files/dirs to process (default: .)")
-    parser.add_argument("--preset", type=int, default=9, help="lzma preset (default: 9)")
-    parser.add_argument("--no-recursive", action="store_true", help="Disable recursive scan for inputs")
-    parser.add_argument("--workers", type=int, default=0, help="Max parallel workers (0=auto)")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress directories to .tar.lzma",
+    )
+    group.add_argument(
+        "-d",
+        "--decompress",
+        action="store_true",
+        help="Decompress .tar.lzma back to directories",
+    )
+    parser.add_argument(
+        "paths", nargs="*", default=None, help="Files/dirs to process (default: .)"
+    )
+    parser.add_argument(
+        "--preset", type=int, default=9, help="lzma preset (default: 9)"
+    )
+    parser.add_argument(
+        "--no-recursive", action="store_true", help="Disable recursive scan for inputs"
+    )
+    parser.add_argument(
+        "--workers", type=int, default=0, help="Max parallel workers (0=auto)"
+    )
     args = parser.parse_args()
     paths = args.paths if args.paths else ["."]
     preset = int(args.preset)
-    if preset < 0:
-        preset = 0
-    if preset > 9:
-        preset = 9
+    preset = max(preset, 0)
+    preset = min(preset, 9)
     if args.compress:
-        worker_count = args.workers if args.workers and args.workers > 0 else (os.cpu_count() or 1)
+        worker_count = (
+            args.workers if args.workers and args.workers > 0 else (os.cpu_count() or 1)
+        )
         recursive = not args.no_recursive
         subdirs = iter_target_dirs(paths, recursive=recursive)
         subdirs = [d for d in subdirs if d.is_dir()]
@@ -207,7 +228,9 @@ def main():
         successful = 0
         failed = 0
         with ProcessPoolExecutor(max_workers=worker_count) as executor:
-            futures = {executor.submit(compress_directory, d, preset): d for d in subdirs}
+            futures = {
+                executor.submit(compress_directory, d, preset): d for d in subdirs
+            }
             for fut in as_completed(futures):
                 d = futures[fut]
                 try:
@@ -226,18 +249,24 @@ def main():
                     )
                 else:
                     failed += 1
-                    print(f"✗ {result.get('name', Path(d).name)}: Failed - {result.get('error')}")
+                    print(
+                        f"✗ {result.get('name', Path(d).name)}: Failed - {result.get('error')}"
+                    )
         print(f"\n{'=' * 42}")
         print(f"Compression complete: {successful} successful, {failed} failed")
         if successful > 0:
             total_freed = total_original - total_compressed
-            compression_ratio = (1 - total_compressed / total_original) * 100 if total_original else 0.0
+            compression_ratio = (
+                (1 - total_compressed / total_original) * 100 if total_original else 0.0
+            )
             print(f"Total original size:   {fsz(total_original)}")
             print(f"Total compressed size: {fsz(total_compressed)}")
             print(f"Total space freed:     {fsz(total_freed)}")
             print(f"Compression ratio:     {compression_ratio:.1f}%")
     elif args.decompress:
-        worker_count = args.workers if args.workers and args.workers > 0 else (os.cpu_count() or 1)
+        worker_count = (
+            args.workers if args.workers and args.workers > 0 else (os.cpu_count() or 1)
+        )
         archives = iter_target_archives(paths)
         archives = [a for a in archives if a.is_file()]
         if not archives:
@@ -273,7 +302,9 @@ def main():
                     )
                 else:
                     failed += 1
-                    print(f"✗ {result.get('name', Path(a).name)}: Failed - {result.get('error')}")
+                    print(
+                        f"✗ {result.get('name', Path(a).name)}: Failed - {result.get('error')}"
+                    )
         print(f"\n{'=' * 42}")
         print(f"Decompression complete: {successful} successful, {failed} failed")
         if successful > 0:

@@ -14,7 +14,11 @@ SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 
 class GoogleDriveSyncer:
-    def __init__(self, credentials_file: str = "credentials.json", token_file: str = "token.pickle") -> None:
+    def __init__(
+        self,
+        credentials_file: str = "credentials.json",
+        token_file: str = "token.pickle",
+    ) -> None:
         self.credentials_file = credentials_file
         self.token_file = token_file
         self.service = self.authenticate()
@@ -32,7 +36,9 @@ class GoogleDriveSyncer:
                     raise FileNotFoundError(
                         f"Credentials file '{self.credentials_file}' not found. Download it from Google Cloud Console."
                     )
-                flow = InstalledAppFlow.from_client_secrets_file(self.credentials_file, SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    self.credentials_file, SCOPES
+                )
                 creds = flow.run_local_server(port=0)
             with open(self.token_file, "wb") as token:
                 pickle.dump(creds, token)
@@ -79,7 +85,9 @@ class GoogleDriveSyncer:
             print(f"✗ Failed to download {file_name}: {error}")
             return False
 
-    def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root") -> None:
+    def sync_folder(
+        self, drive_folder_id: str, local_folder_path, folder_name: str = "root"
+    ) -> None:
         print(f"\n📁 Syncing folder: {folder_name}")
         os.makedirs(local_folder_path, exist_ok=True)
         items = self.get_all_files(drive_folder_id)
@@ -97,7 +105,9 @@ class GoogleDriveSyncer:
                     local_mtime = os.path.getmtime(local_item_path)
                     from datetime import datetime
 
-                    remote_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
+                    remote_time = datetime.fromisoformat(
+                        remote_modified.replace("Z", "+00:00")
+                    ).timestamp()
                     if local_mtime >= remote_time:
                         should_download = False
                         print(f"⏭ Skipping (up to date): {item_name}")
@@ -106,7 +116,9 @@ class GoogleDriveSyncer:
                     if remote_modified:
                         from datetime import datetime
 
-                        mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
+                        mod_time = datetime.fromisoformat(
+                            remote_modified.replace("Z", "+00:00")
+                        ).timestamp()
                         os.utime(local_item_path, (mod_time, mod_time))
 
     def sync_by_folder_name(self, folder_name, local_base_path) -> None:
@@ -114,7 +126,10 @@ class GoogleDriveSyncer:
         items = self.get_all_files("root")
         target_folder = None
         for item in items:
-            if item["name"] == folder_name and item["mimeType"] == "application/vnd.google-apps.folder":
+            if (
+                item["name"] == folder_name
+                and item["mimeType"] == "application/vnd.google-apps.folder"
+            ):
                 target_folder = item
                 break
         if target_folder:

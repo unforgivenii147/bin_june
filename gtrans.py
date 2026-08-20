@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Translate mixed-language files containing Tamil, Chinese, and English text.
-Handles auto-detection of language and provides resilient translation with retry logic.
-Optimized for Python 3.12.
-"""
 
 from __future__ import annotations
 
@@ -28,14 +23,19 @@ try:
 except ImportError:
     HAS_DEEP_TRANSLATOR = False
 if not (HAS_GOOGLETRANS or HAS_DEEP_TRANSLATOR):
-    print("Please install either googletrans (4.0.0rc1) or deep-translator.", file=sys.stderr)
+    print(
+        "Please install either googletrans (4.0.0rc1) or deep-translator.",
+        file=sys.stderr,
+    )
     sys.exit(1)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 RETRY_ATTEMPTS: Final[int] = 3
 RETRY_DELAY: Final[float] = 0.5
 TAMIL_PATTERN: Final[re.Pattern] = re.compile(r"[\u0B80-\u0BFF]+")
-CHINESE_PATTERN: Final[re.Pattern] = re.compile(r"[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]+")
+CHINESE_PATTERN: Final[re.Pattern] = re.compile(
+    r"[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]+"
+)
 ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"^[A-Za-z0-9\s\.,;:!?\'\"()\-—]+$")
 
 
@@ -43,7 +43,11 @@ class ResilientTranslator:
     def __init__(self, target_lang: str = "en"):
         self.target_lang = target_lang
         self.google_translator = Translator() if HAS_GOOGLETRANS else None
-        self.deep_translator = GoogleTranslator(source="auto", target=target_lang) if HAS_DEEP_TRANSLATOR else None
+        self.deep_translator = (
+            GoogleTranslator(source="auto", target=target_lang)
+            if HAS_DEEP_TRANSLATOR
+            else None
+        )
 
     def translate(self, text: str) -> str:
         if not text.strip():
@@ -58,7 +62,9 @@ class ResilientTranslator:
                     detected = self.google_translator.detect(text)
                     if detected.lang == self.target_lang:
                         return text
-                    result = self.google_translator.translate(text, dest=self.target_lang)
+                    result = self.google_translator.translate(
+                        text, dest=self.target_lang
+                    )
                     if result:
                         return result.text
             except Exception as e:
@@ -114,7 +120,9 @@ def process_file(input_file: Path, output_file: Path | None = None) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Translate Tamil/Chinese text to English.")
+    parser = argparse.ArgumentParser(
+        description="Translate Tamil/Chinese text to English."
+    )
     parser.add_argument("input_file", type=Path, help="Input file path")
     parser.add_argument("-o", "--output", type=Path, help="Output file path")
     args = parser.parse_args()

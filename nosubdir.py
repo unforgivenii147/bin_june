@@ -13,7 +13,9 @@ def check_directory(dir_path, max_size_kb=None):
         has_subdirs = any(item.is_dir() for item in contents)
         if has_subdirs:
             return None
-        py_files = [item for item in contents if item.is_file() and item.suffix == ".py"]
+        py_files = [
+            item for item in contents if item.is_file() and item.suffix == ".py"
+        ]
         if not py_files:
             return None
         if max_size_kb is not None:
@@ -29,9 +31,15 @@ def check_directory(dir_path, max_size_kb=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Find top-level directories without subdirs that contain .py files")
+    parser = argparse.ArgumentParser(
+        description="Find top-level directories without subdirs that contain .py files"
+    )
     parser.add_argument(
-        "-s", "--size", type=float, help="Maximum directory size in KB (e.g., -s 100 for 100KB)", default=None
+        "-s",
+        "--size",
+        type=float,
+        help="Maximum directory size in KB (e.g., -s 100 for 100KB)",
+        default=None,
     )
     args = parser.parse_args()
     current_dir = pathlib.Path(".")

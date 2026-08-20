@@ -6,8 +6,12 @@ from pathlib import Path
 from dh import get_dirs, get_files, safe_delete
 
 
-def compress_folder_to_tar(folder_path: Path, output_base_name: str, format: str = "tar") -> bool:
-    print(f"Simulating: Compressing folder '{folder_path}' to '{output_base_name}.tar'...")
+def compress_folder_to_tar(
+    folder_path: Path, output_base_name: str, format: str = "tar"
+) -> bool:
+    print(
+        f"Simulating: Compressing folder '{folder_path}' to '{output_base_name}.tar'..."
+    )
     (folder_path.parent / f"{output_base_name}.tar").touch()
     print(f"Simulating: Created '{output_base_name}.tar'")
     return True
@@ -42,9 +46,13 @@ def main() -> None:
                 print(f"Successfully created tar for '{d_path.name}'.")
                 delete_success = safe_delete(d_path)
                 if not delete_success:
-                    print(f"Warning: Failed to delete original directory '{d_path.name}' after compression.")
+                    print(
+                        f"Warning: Failed to delete original directory '{d_path.name}' after compression."
+                    )
             else:
-                print(f"Error: Failed to compress directory '{d_path.name}'. Original directory will NOT be deleted.")
+                print(
+                    f"Error: Failed to compress directory '{d_path.name}'. Original directory will NOT be deleted."
+                )
     print("--- Directory Compression Complete ---")
     tar_files_to_process = get_files(cwd)
     print("\n--- Starting .tar File Compression ---")
@@ -56,7 +64,9 @@ def main() -> None:
                 print(f"Successfully created XZ archive for '{tar_file_path.name}'.")
                 delete_success = safe_delete(tar_file_path)
                 if not delete_success:
-                    print(f"Warning: Failed to delete original tar file '{tar_file_path.name}' after XZ compression.")
+                    print(
+                        f"Warning: Failed to delete original tar file '{tar_file_path.name}' after XZ compression."
+                    )
             else:
                 print(
                     f"Error: Failed to compress '{tar_file_path.name}' with XZ. Original tar file will NOT be deleted."

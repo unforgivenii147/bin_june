@@ -55,7 +55,9 @@ def format_with_ruff(file_path: Path):
 
 def main() -> None:
     cwd = Path()
-    python_files = [item for item in cwd.iterdir() if item.is_file() and is_python_file(item)]
+    python_files = [
+        item for item in cwd.iterdir() if item.is_file() and is_python_file(item)
+    ]
     if not python_files:
         return
     for _f in python_files:

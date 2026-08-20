@@ -32,7 +32,9 @@ def save_asset(content: bytes, mime_type: str, file_hint="asset") -> Path:
     return path
 
 
-def extract_base64_data(data_url: AttributeValueList | str | None, file_hint: str = "asset") -> Path | None:
+def extract_base64_data(
+    data_url: AttributeValueList | str | None, file_hint: str = "asset"
+) -> Path | None:
     m = re.match(r"data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
         return None
@@ -41,7 +43,9 @@ def extract_base64_data(data_url: AttributeValueList | str | None, file_hint: st
     return save_asset(content, mime_type, file_hint)
 
 
-def download_external_url(url: AttributeValueList | str | None, file_hint: str = "remote") -> Path | None:
+def download_external_url(
+    url: AttributeValueList | str | None, file_hint: str = "remote"
+) -> Path | None:
     try:
         print("Downloading:", url)
         r = requests.get(url, timeout=TIMEOUT)
@@ -63,7 +67,9 @@ def process_file(path: Path) -> None:
             continue
         css = style_tag.string
         path = save_asset(css.encode("utf-8"), "text/css", f"{file_prefix}_style{i}")
-        style_tag.replace_with(f'<link rel="stylesheet" href="{path.relative_to(OUTPUT_DIR)}">')
+        style_tag.replace_with(
+            f'<link rel="stylesheet" href="{path.relative_to(OUTPUT_DIR)}">'
+        )
     for i, script in enumerate(soup.find_all("script")):
         if script.get("src"):
             src = script.get("src")
@@ -73,7 +79,9 @@ def process_file(path: Path) -> None:
                     script["src"] = str(path.relative_to(OUTPUT_DIR))
             continue
         js = script.string or ""
-        path = save_asset(js.encode("utf-8"), "application/javascript", f"{file_prefix}_script{i}")
+        path = save_asset(
+            js.encode("utf-8"), "application/javascript", f"{file_prefix}_script{i}"
+        )
         script.replace_with(f'<script src="{path.relative_to(OUTPUT_DIR)}"></script>')
     for img in soup.find_all("img"):
         src = img.get("src", "")
@@ -93,10 +101,14 @@ def process_file(path: Path) -> None:
             data_url = m.group(1)
             path = extract_base64_data(data_url, f"{file_prefix}_bg")
             if path:
-                tag["style"] = style.replace(data_url, str(path.relative_to(OUTPUT_DIR)))
+                tag["style"] = style.replace(
+                    data_url, str(path.relative_to(OUTPUT_DIR))
+                )
     for i, svg in enumerate(soup.find_all("svg")):
         svg_str = str(svg)
-        path = save_asset(svg_str.encode("utf-8"), "image/svg+xml", f"{file_prefix}_svg{i}")
+        path = save_asset(
+            svg_str.encode("utf-8"), "image/svg+xml", f"{file_prefix}_svg{i}"
+        )
         new_tag = soup.new_tag("img")
         new_tag["src"] = str(path.relative_to(OUTPUT_DIR))
         svg.replace_with(new_tag)

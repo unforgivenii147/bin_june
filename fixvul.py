@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Comment out SKIP_DIRS lines from vulture output.
-Usage: python comment_skip_dirs.py <vulture_output_file>
-"""
 
 from __future__ import annotations
 
@@ -17,7 +13,9 @@ def parse_vulture_output(filepath):
         with open(filepath, "r") as f:
             for line in f:
                 line = line.strip()
-                match = re.match(r'^(.+?):(\d+):\s+unused variable\s+[\'"]SKIP_DIRS[\'"]', line)
+                match = re.match(
+                    r'^(.+?):(\d+):\s+unused variable\s+[\'"]SKIP_DIRS[\'"]', line
+                )
                 if match:
                     filename = match.group(1)
                     line_num = int(match.group(2))
@@ -78,7 +76,9 @@ def main():
                         fixed += 1
                         modified = True
                     else:
-                        print(f"⏭ {filename}:{line_num} (already commented or no SKIP_DIRS)")
+                        print(
+                            f"⏭ {filename}:{line_num} (already commented or no SKIP_DIRS)"
+                        )
                         skipped += 1
             if modified:
                 with open(filepath, "w") as f:

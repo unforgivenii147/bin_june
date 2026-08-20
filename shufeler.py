@@ -13,7 +13,10 @@ MMAP_THRESHOLD_BYTES = 1 * 1024 * 1024
 
 def get_line_offsets(file_path: Path):
     offsets = []
-    with file_path.open("rb") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+    with (
+        file_path.open("rb") as f,
+        mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm,
+    ):
         offset = 0
         while True:
             offsets.append(offset)
@@ -79,7 +82,9 @@ def enhanced_shuffle_large_file(input_file_path: Path, output_file_path: Path) -
             output_path.open("wb") as outfile,
         ):
             for i, offset in enumerate(line_offsets):
-                next_offset_idx = line_offsets.index(offset) + 1 if offset in line_offsets else -1
+                next_offset_idx = (
+                    line_offsets.index(offset) + 1 if offset in line_offsets else -1
+                )
                 if next_offset_idx < len(line_offsets):
                     end_of_line_offset = line_offsets[next_offset_idx] - 1
                     if end_of_line_offset < offset:
@@ -87,7 +92,11 @@ def enhanced_shuffle_large_file(input_file_path: Path, output_file_path: Path) -
                 else:
                     end_of_line_offset = file_size
                 actual_end_of_line = mm.find(b"\n", offset)
-                line_data = mm[offset:file_size] if actual_end_of_line == -1 else mm[offset : actual_end_of_line + 1]
+                line_data = (
+                    mm[offset:file_size]
+                    if actual_end_of_line == -1
+                    else mm[offset : actual_end_of_line + 1]
+                )
                 outfile.write(line_data)
                 if (i + 1) % 100000 == 0:
                     print(f"  {i + 1}/{original_line_count} lines written...", end="\r")
@@ -165,7 +174,9 @@ def weighted_shuffle(lst: list[str]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Randomize lines in a file, optimized for large files.")
+    parser = argparse.ArgumentParser(
+        description="Randomize lines in a file, optimized for large files."
+    )
     parser.add_argument("input_file", help="Input file to shuffle")
     args = parser.parse_args()
     input_path = Path(args.input_file)
@@ -176,7 +187,9 @@ def main() -> None:
     output_path = input_path
     success = False
     if file_size > MMAP_THRESHOLD_BYTES:
-        print(f"File size ({file_size / (1024 * 1024):.2f} MB) exceeds {1} MB. Using mmap strategy.")
+        print(
+            f"File size ({file_size / (1024 * 1024):.2f} MB) exceeds {1} MB. Using mmap strategy."
+        )
         success = enhanced_shuffle_large_file(input_path, output_path)
     else:
         N = secrets.randbelow(10)

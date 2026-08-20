@@ -27,7 +27,9 @@ def decompress_file(path: Path) -> bool:
         out_path.write_bytes(decompressed_data)
         original_size = path.stat().st_size
         decompressed_size = out_path.stat().st_size
-        print(f"  ✓ Decompressed {path.name}: {fsz(original_size)} → {fsz(decompressed_size)}")
+        print(
+            f"  ✓ Decompressed {path.name}: {fsz(original_size)} → {fsz(decompressed_size)}"
+        )
         path.unlink()
         return True
     except Exception as e:
@@ -60,9 +62,15 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
             in_path.open("rb") as fin,
             mmap.mmap(fin.fileno(), length=0, access=mmap.ACCESS_READ) as mm,
         ):
-            chunks = (mm[i * 32768 : min((i + 1) * 32768, file_size)] for i in range(chunk_count))
+            chunks = (
+                mm[i * 32768 : min((i + 1) * 32768, file_size)]
+                for i in range(chunk_count)
+            )
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-                futures = {executor.submit(compress_chunk, chunk): i for i, chunk in enumerate(chunks)}
+                futures = {
+                    executor.submit(compress_chunk, chunk): i
+                    for i, chunk in enumerate(chunks)
+                }
                 results = [None] * chunk_count
                 for future in as_completed(futures):
                     idx = futures[future]
@@ -119,7 +127,9 @@ def compress_tar_to_gz(tar_path: Path, gz_path: Path) -> bool:
             if gz_size < tar_size:
                 tar_path.unlink()
                 reduction = (tar_size - gz_size) / tar_size * 100
-                print(f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(gz_size)})")
+                print(
+                    f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(gz_size)})"
+                )
                 return True
             else:
                 print("  ✗ Archive compression didn't save space, keeping .tar")
@@ -137,7 +147,9 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
     gz_path = Path(output_base_name + ".tar.gz")
     try:
         print("  Creating tar archive...")
-        success = await loop.run_in_executor(None, create_tar_archive, folder_path, tar_path)
+        success = await loop.run_in_executor(
+            None, create_tar_archive, folder_path, tar_path
+        )
         if not success or not tar_path.exists():
             print("  Failed to create tar archive")
             return False
@@ -178,7 +190,9 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
             if compressed_size < original_size:
                 path.unlink()
                 reduction = (original_size - compressed_size) / original_size * 100
-                print(f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})")
+                print(
+                    f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})"
+                )
                 return True, original_size, compressed_size
             else:
                 print(f"  ✗ {path.name}: No space saved, removing compressed file")
@@ -193,7 +207,11 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
 
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
-        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
+        return [
+            p
+            for p in directory.glob("*")
+            if p.is_file() and not p.is_symlink() and should_compress(p)
+        ]
     else:
         return [p for p in directory.glob("*.gz") if p.is_file() and not p.is_symlink()]
 
@@ -206,7 +224,16 @@ def should_compress(path: Path) -> bool:
     try:
         if not path.is_file() or path.is_symlink():
             return False
-        compressed_extensions = (".gz", ".bz2", ".xz", ".br", ".zst", ".7z", ".zip", ".rar")
+        compressed_extensions = (
+            ".gz",
+            ".bz2",
+            ".xz",
+            ".br",
+            ".zst",
+            ".7z",
+            ".zip",
+            ".rar",
+        )
         if path.suffix in compressed_extensions:
             return False
         size = path.stat().st_size
@@ -235,11 +262,15 @@ async def process_compress(files: list[Path] | None = None) -> None:
             print(f"\n  Processing {relative_path}...")
             archive_path = str(dir_path.parent / dir_path.name)
             if await compress_folder_async(dir_path, archive_path):
-                print(f"  ✓ Successfully compressed {relative_path} to {dir_path.name}.tar.gz")
+                print(
+                    f"  ✓ Successfully compressed {relative_path} to {dir_path.name}.tar.gz"
+                )
             else:
                 print(f"  ✗ Failed to compress {relative_path}")
     files_to_compress = [p for p in files] if files else get_files(cwd, mode="compress")
-    print(f"\n📄 Compressing {len(files_to_compress)} files with gzip max compression...")
+    print(
+        f"\n📄 Compressing {len(files_to_compress)} files with gzip max compression..."
+    )
     total_original = 0
     total_compressed = 0
     successful = 0
@@ -265,7 +296,11 @@ async def process_compress(files: list[Path] | None = None) -> None:
 
 async def process_decompress(files: list[Path] | None = None) -> None:
     cwd = Path.cwd()
-    archives = [p for p in files] if files else [p for p in cwd.glob("*.tar.gz") if p.is_file()]
+    archives = (
+        [p for p in files]
+        if files
+        else [p for p in cwd.glob("*.tar.gz") if p.is_file()]
+    )
     if archives:
         print(f"\n📦 Decompressing {len(archives)} archives...")
         for archive in sorted(archives):
@@ -280,7 +315,9 @@ async def process_decompress(files: list[Path] | None = None) -> None:
                 extract_dir = archive.stem
                 print(f"    Extracting tar to {extract_dir}/...")
                 loop = asyncio.get_running_loop()
-                success = await loop.run_in_executor(None, extract_tar_archive, tar_path, Path(extract_dir))
+                success = await loop.run_in_executor(
+                    None, extract_tar_archive, tar_path, Path(extract_dir)
+                )
                 if success:
                     tar_path.unlink()
                     archive.unlink()
@@ -295,7 +332,9 @@ async def process_decompress(files: list[Path] | None = None) -> None:
     if not files_to_decompress:
         print("\n📄 No .gz files to decompress")
         return
-    files_to_decompress = [p for p in files_to_decompress if p.suffixes != [".tar", ".gz"]]
+    files_to_decompress = [
+        p for p in files_to_decompress if p.suffixes != [".tar", ".gz"]
+    ]
     if not files_to_decompress:
         return
     print(f"\n📄 Decompressing {len(files_to_decompress)} gzip files...")

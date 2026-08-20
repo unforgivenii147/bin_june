@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Script to download English subtitles for an MKV movie using Subliminal.
-"""
 
 from __future__ import annotations
 
@@ -14,7 +11,9 @@ from subliminal import download_best_subtitles, save_subtitles
 from subliminal.providers import ProviderError
 from subliminal.video import scan_video
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -44,7 +43,9 @@ def get_english_subtitles(mkv_path, output_dir=None):
     logger.info("Searching for English subtitles...")
     try:
         subtitles = download_best_subtitles(
-            [video], {language}, providers=["opensubtitles", "podnapisi", "addic7ed", "tvsubtitles"]
+            [video],
+            {language},
+            providers=["opensubtitles", "podnapisi", "addic7ed", "tvsubtitles"],
         )
         video_subtitles = subtitles.get(video, {})
         if not video_subtitles:
@@ -64,9 +65,13 @@ def get_english_subtitles(mkv_path, output_dir=None):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python subtitle_downloader.py <path_to_mkv_file> [output_directory]")
+        print(
+            "Usage: python subtitle_downloader.py <path_to_mkv_file> [output_directory]"
+        )
         print("Example: python subtitle_downloader.py movie.mkv")
-        print("Example: python subtitle_downloader.py /path/to/movie.mkv /path/to/subtitles/")
+        print(
+            "Example: python subtitle_downloader.py /path/to/movie.mkv /path/to/subtitles/"
+        )
         sys.exit(1)
     mkv_path = sys.argv[1]
     output_dir = sys.argv[2] if len(sys.argv) > 2 else None

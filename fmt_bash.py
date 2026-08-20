@@ -100,7 +100,11 @@ def process_file(path_str: str) -> tuple[bool, str]:
 
 def main() -> None:
     cwd = Path.cwd()
-    files = [p for p in get_files(cwd) if (not p.suffix and has_shell_shebang(p)) or p.suffix == ".sh"]
+    files = [
+        p
+        for p in get_files(cwd)
+        if (not p.suffix and has_shell_shebang(p)) or p.suffix == ".sh"
+    ]
     non_binary_files = [p for p in files if not is_binary(p)]
     if not non_binary_files:
         print("No shell files found to format.")

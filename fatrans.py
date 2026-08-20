@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Offline Persian ↔ English translator.
-Optimized for Python 3.12.
-"""
 
 from __future__ import annotations
 
@@ -52,7 +48,9 @@ def translate(word: str, fa_en: dict[str, str], en_fa: dict[str, str]) -> str | 
     return fa_en.get(word) or en_fa.get(word)
 
 
-def fuzzy_search(word: str, all_words: set[str], limit: int = 5, cutoff: float = 0.6) -> list[str]:
+def fuzzy_search(
+    word: str, all_words: set[str], limit: int = 5, cutoff: float = 0.6
+) -> list[str]:
     return get_close_matches(word, all_words, n=limit, cutoff=cutoff)
 
 
@@ -111,7 +109,9 @@ def main() -> None:
         else:
             matches = fuzzy_search(word, all_words)
             if matches:
-                print(f"Not found. Did you mean: {', '.join(matches)}?", file=sys.stderr)
+                print(
+                    f"Not found. Did you mean: {', '.join(matches)}?", file=sys.stderr
+                )
             else:
                 print("Not found", file=sys.stderr)
             sys.exit(1)

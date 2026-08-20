@@ -53,7 +53,10 @@ def write_tar_bytes_with_decoder_to_file(src: Path, dst: Path, codec: str) -> No
                     break
                 f_out.write(chunk)
     elif codec == "xz":
-        with lzma.open(src, "rb", format=lzma.FORMAT_XZ) as f_in, dst.open("wb") as f_out:
+        with (
+            lzma.open(src, "rb", format=lzma.FORMAT_XZ) as f_in,
+            dst.open("wb") as f_out,
+        ):
             while True:
                 chunk = f_in.read(CHUNK)
                 if not chunk:
@@ -61,7 +64,11 @@ def write_tar_bytes_with_decoder_to_file(src: Path, dst: Path, codec: str) -> No
                 f_out.write(chunk)
     elif codec == "zst":
         dctx = zstd.ZstdDecompressor()
-        with src.open("rb") as f_in, dctx.stream_reader(f_in) as zreader, dst.open("wb") as f_out:
+        with (
+            src.open("rb") as f_in,
+            dctx.stream_reader(f_in) as zreader,
+            dst.open("wb") as f_out,
+        ):
             while True:
                 chunk = zreader.read(CHUNK)
                 if not chunk:
@@ -128,7 +135,11 @@ def write_compressed_tar_bytes_from_tar(src_tar: Path, dst: Path, codec: str) ->
                 f_out.write(tail)
     elif codec == "zst":
         cctx = zstd.ZstdCompressor(level=22)
-        with src_tar.open("rb") as f_in, dst.open("wb") as f_out, cctx.stream_writer(f_out) as zw:
+        with (
+            src_tar.open("rb") as f_in,
+            dst.open("wb") as f_out,
+            cctx.stream_writer(f_out) as zw,
+        ):
             while True:
                 chunk = f_in.read(CHUNK)
                 if not chunk:
@@ -261,7 +272,9 @@ def main() -> None:
     delta = final_bytes - initial_bytes
     ok_count = sum((1 for _, ok, _ in results if ok))
     fail_count = len(results) - ok_count
-    print(f"Converted inputs: {len(tar_inputs)}; OK: {ok_count}; Failed/Skipped: {fail_count}")
+    print(
+        f"Converted inputs: {len(tar_inputs)}; OK: {ok_count}; Failed/Skipped: {fail_count}"
+    )
     for name, ok, msg in sorted(results, key=lambda x: x[0]):
         status = "OK" if ok else "FAIL"
         print(f"[{status}] {name}: {msg}")

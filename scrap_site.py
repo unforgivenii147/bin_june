@@ -30,10 +30,8 @@ def is_valid_movie(filename: str, size_mb: float | None) -> bool:
 
 
 def extract_movie_links(soup: BeautifulSoup, page_url: str) -> list[str]:
-    """Extract movie links from both table rows and the div with copy button"""
     movie_links = []
 
-    # Method 1: Extract from table rows (existing functionality)
     rows = soup.find_all("tr")
     for row in rows:
         cols = row.find_all("td")
@@ -58,7 +56,6 @@ def extract_movie_links(soup: BeautifulSoup, page_url: str) -> list[str]:
                 print(f"  ✓ Found in table: {full_url} ({size_mb} MB)")
                 movie_links.append(full_url)
 
-    # Method 2: Extract from div with class="copy-btn" and textarea
     textareas = soup.find_all("textarea", class_="value")
     for textarea in textareas:
         content = textarea.text.strip()
@@ -66,17 +63,24 @@ def extract_movie_links(soup: BeautifulSoup, page_url: str) -> list[str]:
             print(f"  📋 Found textarea with {len(content.splitlines())} links")
             for line in content.splitlines():
                 line = line.strip()
-                if line.endswith(".mkv") and ("480p" in line.lower() or "720p" in line.lower()):
+                if line.endswith(".mkv") and (
+                    "480p" in line.lower() or "720p" in line.lower()
+                ):
                     print(f"  ✓ Found in textarea: {line}")
                     movie_links.append(line)
 
-    # Method 3: Extract from p tags with center alignment
-    p_tags = soup.find_all("p", style=lambda value: value and "text-align: center" in value)
+    p_tags = soup.find_all(
+        "p", style=lambda value: value and "text-align: center" in value
+    )
     for p_tag in p_tags:
         links = p_tag.find_all("a", href=True)
         for link in links:
             href = link.get("href")
-            if href and href.endswith(".mkv") and ("480p" in href.lower() or "720p" in href.lower()):
+            if (
+                href
+                and href.endswith(".mkv")
+                and ("480p" in href.lower() or "720p" in href.lower())
+            ):
                 print(f"  ✓ Found in p tag: {href}")
                 movie_links.append(href)
 
@@ -101,10 +105,8 @@ def crawl(url: str) -> None:
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # Extract all movie links from the page
     movie_links = extract_movie_links(soup, url)
 
-    # Add unique links to found_movies
     for link in movie_links:
         if link not in found_movies:
             found_movies.append(link)
@@ -121,16 +123,14 @@ if __name__ == "__main__":
     crawl(BASE_URL)
 
     print("\n" + "=" * 50)
-    print(f"✅ Crawling complete!")
+    print("✅ Crawling complete!")
     print(f"📈 Total unique movies found: {len(found_movies)}")
 
-    # Save to file
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.writelines(movie + "\n" for movie in found_movies)
 
     print(f"💾 Movies saved to: {OUTPUT_FILE}")
 
-    # Print all found movies
     if found_movies:
         print("\n📋 All found movies:")
         for i, movie in enumerate(found_movies, 1):

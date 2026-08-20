@@ -43,12 +43,15 @@ def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
     try:
         with requests.Session() as session:
             response = session.get(
-                url, headers={"User-Agent": "Mozilla/5.0"}, timeout=timeout, stream=True, allow_redirects=True
+                url,
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=timeout,
+                stream=True,
+                allow_redirects=True,
             )
             response.raise_for_status()
             with open(filepath, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
+                f.writelines(response.iter_content(chunk_size=8192))
         print(f"✅ Downloaded (requests): {filepath.name}")
         return True
     except Exception as e:
@@ -68,7 +71,10 @@ def main():
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
             url = stripped.split()[0]
-            filename = url.split("/")[-1].split("?")[0] or f"download_{len(download_tasks) + 1}"
+            filename = (
+                url.split("/")[-1].split("?")[0]
+                or f"download_{len(download_tasks) + 1}"
+            )
             filepath = Path("downloads") / filename
             download_tasks.append((url, filepath))
             url_to_line[url] = line
@@ -79,7 +85,10 @@ def main():
     successful_urls = set()
     max_workers = min(12, len(download_tasks))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_url = {executor.submit(download_file, url, path): url for url, path in download_tasks}
+        future_to_url = {
+            executor.submit(download_file, url, path): url
+            for url, path in download_tasks
+        }
         for future in as_completed(future_to_url):
             url = future_to_url[future]
             try:
@@ -99,7 +108,7 @@ def main():
         remaining_lines.append(line)
     urls_file.write_text("\n".join(remaining_lines) + "\n", encoding="utf-8")
     print("\n" + "=" * 42)
-    print(f"Download session completed!")
+    print("Download session completed!")
     print(f"✅ Successfully downloaded : {removed_count} files")
     print(f"❌ Remaining in urls.txt   : {len(download_tasks) - removed_count} files")
     print("-" * 42)

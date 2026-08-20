@@ -1,15 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Comment out lines reported by vulture as containing unused variables.
-Usage:
-  python comment_unused_vars.py vulture_output.txt
-  cat vulture_output.txt | python comment_unused_vars.py
-  python comment_unused_vars.py vulture_output.txt --apply --backup
-Notes:
-- This comments out the entire reported line by inserting '# ' after any existing indentation.
-- It is conservative: default is a dry-run. Use --apply to write files.
-- Backups are saved as filename.bak when --backup is passed.
-"""
 
 from __future__ import annotations
 
@@ -20,7 +9,9 @@ import re
 import sys
 from collections import defaultdict
 
-VULTURE_RE = re.compile(r"^(?P<path>.*?):(?P<lineno>\d+):\s*unused variable '(?P<var>[^']+)'", re.IGNORECASE)
+VULTURE_RE = re.compile(
+    r"^(?P<path>.*?):(?P<lineno>\d+):\s*unused variable '(?P<var>[^']+)'", re.IGNORECASE
+)
 
 
 def parse_vulture_output(lines: list[str]) -> dict[str, set[int]]:
@@ -36,14 +27,18 @@ def parse_vulture_output(lines: list[str]) -> dict[str, set[int]]:
     return mapping
 
 
-def comment_lines_in_file(path: str, line_numbers: set[int]) -> tuple[list[str], list[str]]:
+def comment_lines_in_file(
+    path: str, line_numbers: set[int]
+) -> tuple[list[str], list[str]]:
     with open(path, "r", encoding="utf-8") as f:
         original = f.readlines()
     modified = original.copy()
     max_line = len(original)
     for ln in sorted(line_numbers):
         if ln < 1 or ln > max_line:
-            print(f"  [!] {path}:{ln} out of range (file has {max_line} lines), skipping")
+            print(
+                f"  [!] {path}:{ln} out of range (file has {max_line} lines), skipping"
+            )
             continue
         idx = ln - 1
         line = original[idx]
@@ -60,12 +55,16 @@ def comment_lines_in_file(path: str, line_numbers: set[int]) -> tuple[list[str],
     return (original, modified)
 
 
-def show_diff_and_maybe_write(path: str, original: list[str], modified: list[str], apply: bool, backup: bool) -> None:
+def show_diff_and_maybe_write(
+    path: str, original: list[str], modified: list[str], apply: bool, backup: bool
+) -> None:
     if original == modified:
         print(f"No changes needed for {path}")
         return
-    diff = difflib.unified_diff(original, modified, fromfile=path, tofile=path, lineterm="")
-    print("".join((line + "\n" for line in diff)))
+    diff = difflib.unified_diff(
+        original, modified, fromfile=path, tofile=path, lineterm=""
+    )
+    print("".join(line + "\n" for line in diff))
     if apply:
         try:
             with open(path, "w", encoding="utf-8") as f:
@@ -76,23 +75,38 @@ def show_diff_and_maybe_write(path: str, original: list[str], modified: list[str
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description="Comment out lines reported by vulture as unused variables.")
-    ap.add_argument("vulture_output", nargs="?", help="Path to vulture output file. If omitted, reads stdin.")
+    ap = argparse.ArgumentParser(
+        description="Comment out lines reported by vulture as unused variables."
+    )
+    ap.add_argument(
+        "vulture_output",
+        nargs="?",
+        help="Path to vulture output file. If omitted, reads stdin.",
+    )
     ap.add_argument(
         "--apply",
         default=True,
         action="store_true",
         help="Actually write changes to files. Default: dry-run (show diffs).",
     )
-    ap.add_argument("--backup", action="store_true", help="When used with --apply, create .bak backups of files.")
-    ap.add_argument("--show-summary", action="store_true", help="Show summary at the end.")
+    ap.add_argument(
+        "--backup",
+        action="store_true",
+        help="When used with --apply, create .bak backups of files.",
+    )
+    ap.add_argument(
+        "--show-summary", action="store_true", help="Show summary at the end."
+    )
     args = ap.parse_args(argv)
     if args.vulture_output:
         try:
             with open(args.vulture_output, "r", encoding="utf-8") as f:
                 vout = f.readlines()
         except Exception as e:
-            print(f"Failed to read vulture output file '{args.vulture_output}': {e}", file=sys.stderr)
+            print(
+                f"Failed to read vulture output file '{args.vulture_output}': {e}",
+                file=sys.stderr,
+            )
             return 2
     else:
         vout = sys.stdin.readlines()
@@ -114,7 +128,9 @@ def main(argv: list[str]) -> int:
         files_processed += 1
     if args.show_summary:
         print()
-        print(f"Summary: files processed: {files_processed}, files modified: {files_modified}")
+        print(
+            f"Summary: files processed: {files_processed}, files modified: {files_modified}"
+        )
         if not args.apply:
             print("Dry-run mode — no files were changed. Use --apply to write changes.")
     return 0

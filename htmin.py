@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""HTML minifier wrapper using html-minifier-terser with parallel processing."""
 
 import subprocess
 import sys
@@ -7,7 +6,6 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -16,11 +14,15 @@ class MinifyResult:
     original_size: int
     minified_size: int
     duration: float
-    error: Optional[str] = None
+    error: str | None = None
 
     @property
     def compression_ratio(self) -> float:
-        return (1 - self.minified_size / self.original_size) * 100 if self.original_size else 0
+        return (
+            (1 - self.minified_size / self.original_size) * 100
+            if self.original_size
+            else 0
+        )
 
     def report(self, cwd: Path) -> str:
         rel = self.file_path.relative_to(cwd)
@@ -61,19 +63,37 @@ def _minify_file(file_path: Path) -> MinifyResult:
         result = subprocess.run(args, capture_output=True, text=True, timeout=30)
         if result.returncode != 0:
             error_msg = result.stderr.strip() or f"Exit code {result.returncode}"
-            return MinifyResult(file_path, original_size, original_size, time.perf_counter() - start, error_msg)
+            return MinifyResult(
+                file_path,
+                original_size,
+                original_size,
+                time.perf_counter() - start,
+                error_msg,
+            )
         minified_size = file_path.stat().st_size
-        return MinifyResult(file_path, original_size, minified_size, time.perf_counter() - start)
+        return MinifyResult(
+            file_path, original_size, minified_size, time.perf_counter() - start
+        )
     except FileNotFoundError:
         return MinifyResult(
-            file_path, original_size, original_size, time.perf_counter() - start, "html-minifier-terser not found"
+            file_path,
+            original_size,
+            original_size,
+            time.perf_counter() - start,
+            "html-minifier-terser not found",
         )
     except subprocess.TimeoutExpired:
         return MinifyResult(
-            file_path, original_size, original_size, time.perf_counter() - start, "Timeout (30s exceeded)"
+            file_path,
+            original_size,
+            original_size,
+            time.perf_counter() - start,
+            "Timeout (30s exceeded)",
         )
     except Exception as e:
-        return MinifyResult(file_path, original_size, original_size, time.perf_counter() - start, str(e))
+        return MinifyResult(
+            file_path, original_size, original_size, time.perf_counter() - start, str(e)
+        )
 
 
 def discover_html_files(paths: list[Path]) -> list[Path]:
@@ -107,7 +127,9 @@ def minify_batch(input_paths: list[Path], max_workers: int = None) -> int:
     total_original = sum(r.original_size for r in results)
     total_minified = sum(r.minified_size for r in results)
     total_saved = total_original - total_minified
-    avg_compression = (1 - total_minified / total_original) * 100 if total_original else 0
+    avg_compression = (
+        (1 - total_minified / total_original) * 100 if total_original else 0
+    )
     errors = sum(1 for r in results if r.error)
     total_time = sum(r.duration for r in results)
     print(f"Files: {len(html_files)} ({errors} error{'s' if errors != 1 else ''})")

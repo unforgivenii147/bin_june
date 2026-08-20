@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Folder compressor/decompressor using LZ4 with multiprocessing
-Usage:
-    python script.py
-    python script.py -c
-    python script.py -d
-"""
 
 from __future__ import annotations
 
@@ -58,7 +51,9 @@ def compress_folder(folder_path):
         shutil.rmtree(folder)
         ratio = original_size / compressed_size if compressed_size > 0 else 0
         space_freed = original_size - compressed_size
-        compression_percent = (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+        compression_percent = (
+            (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+        )
         return {
             "folder": folder.name,
             "original_size": original_size,
@@ -102,7 +97,9 @@ def print_compression_report(results):
     print("\n" + "=" * 42)
     print("COMPRESSION REPORT")
     print("-" * 42)
-    print(f"{'Folder':<20} {'Original':<12} {'Compressed':<12} {'Freed':<12} {'Ratio':<10} {'Saved %':<10}")
+    print(
+        f"{'Folder':<20} {'Original':<12} {'Compressed':<12} {'Freed':<12} {'Ratio':<10} {'Saved %':<10}"
+    )
     print("-" * 42)
     total_original = 0
     total_compressed = 0
@@ -125,7 +122,9 @@ def print_compression_report(results):
             print(f"  {r['folder']}: {r['error']}")
         print("-" * 42)
     print(f"\nTotal space freed: {fsz(total_freed)}")
-    print(f"Average compression ratio: {(total_original / total_compressed if total_compressed > 0 else 0):.2f}x")
+    print(
+        f"Average compression ratio: {(total_original / total_compressed if total_compressed > 0 else 0):.2f}x"
+    )
 
 
 def main():
@@ -134,8 +133,12 @@ def main():
         epilog="Default action: compress subfolders in current directory",
     )
     group = parser.add_mutually_exclusive_group(required=False)
-    group.add_argument("-c", "--compress", action="store_true", help="Compress subfolders")
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress .tar.lz4 files")
+    group.add_argument(
+        "-c", "--compress", action="store_true", help="Compress subfolders"
+    )
+    group.add_argument(
+        "-d", "--decompress", action="store_true", help="Decompress .tar.lz4 files"
+    )
     args = parser.parse_args()
     current_dir = Path.cwd()
     if not args.compress and (not args.decompress):
@@ -145,7 +148,11 @@ def main():
         process_func = compress_folder
         action = "Compressing"
     else:
-        items = [f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".lz4" and f.stem.endswith(".tar")]
+        items = [
+            f
+            for f in current_dir.iterdir()
+            if f.is_file() and f.suffix == ".lz4" and f.stem.endswith(".tar")
+        ]
         process_func = decompress_file
         action = "Decompressing"
     if not items:

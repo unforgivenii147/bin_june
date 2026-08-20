@@ -26,7 +26,9 @@ class Bidirectionaldictionary:
             for persian, english in data.items():
                 self.persian_to_english[persian] = english
                 self.english_to_persian[english.lower()] = persian
-            print(f"✅ Loaded {len(self.persian_to_english)} entries from {self.json_file}")
+            print(
+                f"✅ Loaded {len(self.persian_to_english)} entries from {self.json_file}"
+            )
         except json.JSONDecodeError as e:
             print(f"❌ Error: Invalid JSON format in {self.json_file}")
             print(f"   {e}")
@@ -147,8 +149,10 @@ class Bidirectionaldictionary:
         try:
             with open(filename, "w", encoding="utf-8") as file:
                 file.write("Persian,English\n")
-                for persian, english in sorted(self.persian_to_english.items()):
-                    file.write(f"{persian},{english}\n")
+                file.writelines(
+                    f"{persian},{english}\n"
+                    for persian, english in sorted(self.persian_to_english.items())
+                )
             print(f"✅ Exported to {filename}")
         except Exception as e:
             print(f"❌ Error exporting to CSV: {e}")

@@ -18,7 +18,9 @@ for file in [func_file, classes_file, const_file, init_file]:
 
 
 def is_constant(node: AST) -> bool:
-    return isinstance(node, ast.Assign) and all(isinstance(t, ast.Name) for t in node.targets)
+    return isinstance(node, ast.Assign) and all(
+        isinstance(t, ast.Name) for t in node.targets
+    )
 
 
 def write_to_file(file_path: Path, content) -> None:

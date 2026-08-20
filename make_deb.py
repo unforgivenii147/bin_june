@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Create .deb files from installed Termux packages."""
 
 from __future__ import annotations
 
@@ -46,7 +45,9 @@ def should_exclude(pkg_name: str) -> bool:
 
 def get_installed_packages() -> list[str]:
     try:
-        result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["apt", "list", "--installed"], capture_output=True, text=True, check=True
+        )
         packages = []
         for line in result.stdout.split("\n"):
             if "/" in line and "installed" in line:
@@ -67,7 +68,12 @@ def create_deb_for_package(pkg_name: str) -> bool:
             logger.info(f"✓ {pkg_name}.deb already exists, skipping...")
             return True
         logger.info(f"⟳ Creating .deb for {pkg_name}...")
-        result = subprocess.run(["apt", "download", pkg_name], capture_output=True, text=True, cwd=str(DEB_DIR))
+        result = subprocess.run(
+            ["apt", "download", pkg_name],
+            capture_output=True,
+            text=True,
+            cwd=str(DEB_DIR),
+        )
         if result.returncode != 0:
             logger.error(f"✗ Failed to download {pkg_name}: {result.stderr.strip()}")
             return False
@@ -91,7 +97,9 @@ def process_packages(packages: list[str], max_workers: int = 4) -> tuple[int, in
         return 0, 0
     logger.info(f"Processing {len(packages)} packages with {max_workers} workers...")
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_pkg = {executor.submit(create_deb_for_package, pkg): pkg for pkg in packages}
+        future_to_pkg = {
+            executor.submit(create_deb_for_package, pkg): pkg for pkg in packages
+        }
         for future in as_completed(future_to_pkg):
             pkg = future_to_pkg[future]
             try:

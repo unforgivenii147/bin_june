@@ -18,7 +18,9 @@ def summarize_nltk(text, num_sentences=5):
         sent_words = word_tokenize(sent.lower())
         score = sum(word_freq.get(w, 0) for w in sent_words if w.isalnum())
         sentence_scores[i] = score / max(1, len(sent_words))
-    top_indices = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_sentences]
+    top_indices = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[
+        :num_sentences
+    ]
     summary = " ".join([sentences[i] for i in sorted(top_indices)])
     return summary
 

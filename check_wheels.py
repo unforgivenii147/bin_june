@@ -25,7 +25,9 @@ def inspect_and_move_wheels(root_dir="."):
                 for name in namelist:
                     if name.endswith("/"):
                         continue
-                    if "/" not in name and name.endswith((".py", ".pyc", ".pyd", ".so", ".dll")):
+                    if "/" not in name and name.endswith(
+                        (".py", ".pyc", ".pyd", ".so", ".dll")
+                    ):
                         loose_root_files.append(name)
                 if loose_root_files:
                     bad_wheels_count += 1
@@ -35,7 +37,10 @@ def inspect_and_move_wheels(root_dir="."):
                     target_dir.mkdir(exist_ok=True)
                     dest_path = target_dir / whl_path.name
                     if dest_path.exists():
-                        dest_path = target_dir / f"{whl_path.stem}_duplicate_{bad_wheels_count}{whl_path.suffix}"
+                        dest_path = (
+                            target_dir
+                            / f"{whl_path.stem}_duplicate_{bad_wheels_count}{whl_path.suffix}"
+                        )
                     shutil.move(str(whl_path), str(dest_path))
                     print(f"   ➡️ Moved to: {dest_path.relative_to(root_path)}")
                     print("-" * 42)
@@ -43,10 +48,8 @@ def inspect_and_move_wheels(root_dir="."):
             print(f"⚠️  Error: {whl_path.name} is a corrupt or invalid zip/wheel file.")
         except Exception as e:
             print(f"⚠️  Error processing {whl_path.name}: {e}")
-    print(
-        f"""
-Scan complete. Moved {bad_wheels_count} misconfigured wheel(s) to './suspicious/' out of {len(wheel_files)} total checked."""
-    )
+    print(f"""
+Scan complete. Moved {bad_wheels_count} misconfigured wheel(s) to './suspicious/' out of {len(wheel_files)} total checked.""")
 
 
 if __name__ == "__main__":

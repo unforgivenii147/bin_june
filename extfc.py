@@ -61,10 +61,14 @@ def extract_docstring(src: bytes, node) -> str | None:
     return None
 
 
-def format_definition_with_metadata(def_text: str, file_name: str, line_num: int, docstring: str | None = None) -> str:
+def format_definition_with_metadata(
+    def_text: str, file_name: str, line_num: int, docstring: str | None = None
+) -> str:
     lines = [f"# From: {file_name}:{line_num}"]
     if docstring:
-        lines.append(f"# Docstring: {docstring[:50]}{'...' if len(docstring) > 50 else ''}")
+        lines.append(
+            f"# Docstring: {docstring[:50]}{'...' if len(docstring) > 50 else ''}"
+        )
     lines.append(def_text)
     return "\n".join(lines)
 
@@ -93,7 +97,9 @@ for py in cwd.rglob("*.py"):
             for i, def_text in enumerate(definitions, 1):
                 folder_definitions[relative_folder].append(def_text)
                 if i < len(definitions):
-                    folder_definitions[relative_folder].append("\n" + "#" + "-" * 58 + "\n")
+                    folder_definitions[relative_folder].append(
+                        "\n" + "#" + "-" * 58 + "\n"
+                    )
             processed_files_count += 1
             total_definitions += len(definitions)
     except Exception as e:
@@ -106,12 +112,16 @@ for folder, defs_list in folder_definitions.items():
     content = "\n".join(defs_list)
     header = "#!/usr/bin/env python\n"
     out_file.write_text(header + content)
-    folder_def_count = len([d for d in defs_list if d.strip() and not d.startswith("#") and not d.startswith("\n#")])
+    folder_def_count = len(
+        [
+            d
+            for d in defs_list
+            if d.strip() and not d.startswith("#") and not d.startswith("\n#")
+        ]
+    )
     print(
         f"✅ saved: {out_file} ({folder_def_count} definitions from {len([f for f in defs_list if 'File:' in f])} files)"
     )
-print(
-    f"""
-✨ Done! Processed {processed_files_count} files with {total_definitions} total definitions in {len(folder_definitions)} folder(s)"""
-)
+print(f"""
+✨ Done! Processed {processed_files_count} files with {total_definitions} total definitions in {len(folder_definitions)} folder(s)""")
 print(f"📁 Folders: {', '.join(sorted(folders_found))}")

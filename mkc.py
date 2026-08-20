@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Compile C/C++ source files using clang/clang++."""
 
 from __future__ import annotations
 
@@ -29,7 +28,7 @@ def compile_file(source_path: str) -> None:
         subprocess.run(strip_cmd, check=True, capture_output=True)
         print(f"Stripped {output}")
     except subprocess.CalledProcessError as e:
-        print(f"Error: Compilation failed", file=sys.stderr)
+        print("Error: Compilation failed", file=sys.stderr)
         if e.stderr:
             print(e.stderr, file=sys.stderr)
         sys.exit(1)

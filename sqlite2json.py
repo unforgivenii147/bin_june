@@ -26,7 +26,9 @@ def row_to_dict(row):
             except UnicodeDecodeError:
                 try:
                     result[k] = {
-                        "__blob_base64": base64.b64encode(str(row[k]).encode("utf-8", errors="replace")).decode("ascii")
+                        "__blob_base64": base64.b64encode(
+                            str(row[k]).encode("utf-8", errors="replace")
+                        ).decode("ascii")
                     }
                 except:
                     result[k] = {"__decode_error": "Could not process value"}
@@ -52,14 +54,20 @@ def fetch_table_data(args):
         except UnicodeDecodeError:
             conn.close()
             conn = sqlite3.connect(db_path)
-            conn.text_factory = lambda x: x.decode("utf-8", errors="replace") if isinstance(x, bytes) else x
+            conn.text_factory = lambda x: (
+                x.decode("utf-8", errors="replace") if isinstance(x, bytes) else x
+            )
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             try:
                 cur.execute(f'SELECT * FROM "{table_name}";')
                 rows = [row_to_dict(row) for row in cur.fetchall()]
                 conn.close()
-                return (table_name, rows, f"UTF-8 decoding errors replaced in '{table_name}'")
+                return (
+                    table_name,
+                    rows,
+                    f"UTF-8 decoding errors replaced in '{table_name}'",
+                )
             except Exception:
                 conn.close()
                 conn = sqlite3.connect(db_path)
@@ -73,7 +81,11 @@ def fetch_table_data(args):
                         for k in row:
                             val = row[k]
                             if isinstance(val, bytes):
-                                row_dict[k] = {"__blob_base64": base64.b64encode(val).decode("ascii")}
+                                row_dict[k] = {
+                                    "__blob_base64": base64.b64encode(val).decode(
+                                        "ascii"
+                                    )
+                                }
                             elif isinstance(val, str):
                                 try:
                                     val.encode("utf-8")
@@ -81,19 +93,29 @@ def fetch_table_data(args):
                                 except UnicodeEncodeError:
                                     row_dict[k] = {
                                         "__blob_base64": (
-                                            base64.b64encode(val.encode("utf-8", errors="surrogateescape")).decode(
-                                                "ascii"
-                                            )
+                                            base64.b64encode(
+                                                val.encode(
+                                                    "utf-8", errors="surrogateescape"
+                                                )
+                                            ).decode("ascii")
                                         )
                                     }
                             else:
                                 row_dict[k] = val
                         rows.append(row_dict)
                     conn.close()
-                    return (table_name, rows, f"Table '{table_name}' had encoding issues; binary data base64-encoded")
+                    return (
+                        table_name,
+                        rows,
+                        f"Table '{table_name}' had encoding issues; binary data base64-encoded",
+                    )
                 except Exception as e3:
                     conn.close()
-                    return (table_name, [], f"Error processing table '{table_name}': {e3!s}")
+                    return (
+                        table_name,
+                        [],
+                        f"Error processing table '{table_name}': {e3!s}",
+                    )
     except Exception as e:
         return (table_name, [], f"Error processing table '{table_name}': {e!s}")
 
@@ -110,7 +132,9 @@ def main():
     try:
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
+        cur.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';"
+        )
         tables = [r[0] for r in cur.fetchall()]
         conn.close()
     except Exception as e:

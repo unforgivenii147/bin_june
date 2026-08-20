@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of transjap.py for Python 3.12.
-Translates Japanese comments and docstrings in Python files to English.
-"""
 
 from __future__ import annotations
 
@@ -88,7 +84,9 @@ def translate_comments_in_content(content: str) -> tuple[str, bool]:
 def translate_file(file_path: Path) -> bool:
     try:
         content = file_path.read_text(encoding="utf-8")
-        content_after_comments, comments_modified = translate_comments_in_content(content)
+        content_after_comments, comments_modified = translate_comments_in_content(
+            content
+        )
         try:
             tree = ast.parse(content_after_comments)
             transformer = CommentDocstringTransformer()
@@ -97,11 +95,15 @@ def translate_file(file_path: Path) -> bool:
             if comments_modified or docstrings_modified:
                 new_content = ast.unparse(new_tree)
                 if JAPANESE_PATTERN.search(new_content):
-                    new_content = JAPANESE_PATTERN.sub(lambda m: translate_text(m.group(0)), new_content)
+                    new_content = JAPANESE_PATTERN.sub(
+                        lambda m: translate_text(m.group(0)), new_content
+                    )
                 file_path.write_text(new_content, encoding="utf-8")
                 return True
         except SyntaxError as e:
-            logger.error("Syntax error in %s: %s. Skipping AST translation.", file_path, e)
+            logger.error(
+                "Syntax error in %s: %s. Skipping AST translation.", file_path, e
+            )
             if comments_modified:
                 file_path.write_text(content_after_comments, encoding="utf-8")
                 return True
@@ -119,7 +121,11 @@ def main() -> None:
         logger.error("Error: Path '%s' does not exist", start_path)
         sys.exit(1)
     logger.info("Scanning for Python files in: %s", start_path)
-    py_files = [f for f in start_path.rglob("*.py") if not any(part in SKIP_DIRS for part in f.parts)]
+    py_files = [
+        f
+        for f in start_path.rglob("*.py")
+        if not any(part in SKIP_DIRS for part in f.parts)
+    ]
     if not py_files:
         logger.info("No Python files found.")
         return

@@ -11,7 +11,9 @@ from tqdm import tqdm
 
 
 class ImageSimilarityOrganizer:
-    def __init__(self, root_dir: str, similarity_threshold: float = 0.95, hash_size: int = 8):
+    def __init__(
+        self, root_dir: str, similarity_threshold: float = 0.95, hash_size: int = 8
+    ):
         self.root_dir = Path(root_dir)
         self.similarity_threshold = similarity_threshold
         self.hash_size = hash_size
@@ -31,7 +33,9 @@ class ImageSimilarityOrganizer:
         return sorted(image_files)
 
     @staticmethod
-    def compute_perceptual_hash(image_path: Path, hash_size: int = 8) -> tuple[Path, np.ndarray]:
+    def compute_perceptual_hash(
+        image_path: Path, hash_size: int = 8
+    ) -> tuple[Path, np.ndarray]:
         try:
             img = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
             if img is None:
@@ -50,7 +54,9 @@ class ImageSimilarityOrganizer:
         with Pool(processes=cpu_count()) as pool:
             from functools import partial
 
-            compute_func = partial(self.compute_perceptual_hash, hash_size=self.hash_size)
+            compute_func = partial(
+                self.compute_perceptual_hash, hash_size=self.hash_size
+            )
             results = list(
                 tqdm(
                     pool.imap_unordered(compute_func, image_paths),
@@ -69,15 +75,21 @@ class ImageSimilarityOrganizer:
     def hamming_distance(hash1: np.ndarray, hash2: np.ndarray) -> int:
         return np.sum(hash1 != hash2)
 
-    def find_similar_images(self, hashes: dict[Path, np.ndarray]) -> dict[int, list[Path]]:
-        print(f"\n[GROUP] Grouping similar images (threshold: {self.similarity_threshold})...")
+    def find_similar_images(
+        self, hashes: dict[Path, np.ndarray]
+    ) -> dict[int, list[Path]]:
+        print(
+            f"\n[GROUP] Grouping similar images (threshold: {self.similarity_threshold})..."
+        )
         image_list = list(hashes.keys())
         groups = {}
         group_id = 0
         assigned = set()
         max_distance = int((1 - self.similarity_threshold) * len(hashes[image_list[0]]))
         print(f"[GROUP] Max allowed hamming distance: {max_distance}")
-        for i, img_path in enumerate(tqdm(image_list, desc="Grouping images", unit="img")):
+        for i, img_path in enumerate(
+            tqdm(image_list, desc="Grouping images", unit="img")
+        ):
             if img_path in assigned:
                 continue
             groups[group_id] = [img_path]
@@ -96,7 +108,9 @@ class ImageSimilarityOrganizer:
 
     def organize_images(self, groups: dict[int, list[Path]]) -> None:
         print("\n[ORGANIZE] Creating folders and organizing images...")
-        for group_id, image_paths in tqdm(groups.items(), desc="Organizing", unit="group"):
+        for group_id, image_paths in tqdm(
+            groups.items(), desc="Organizing", unit="group"
+        ):
             if len(image_paths) == 1:
                 continue
             group_folder = self.root_dir / f"similar_group_{group_id:04d}"

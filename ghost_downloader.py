@@ -10,13 +10,13 @@ import requests
 from tqdm import tqdm
 
 DEFAULT_CHUNKS = 8
-DEFAULT_USER_AGENT = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-)
+DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Ghost-CLI: A lightweight multi-threaded concurrent download manager.")
+    parser = argparse.ArgumentParser(
+        description="Ghost-CLI: A lightweight multi-threaded concurrent download manager."
+    )
     parser.add_argument("url", help="The direct file HTTP/HTTPS URL to download")
     parser.add_argument("-o", "--output", help="Output file path or filename")
     parser.add_argument(
@@ -52,9 +52,15 @@ def main():
     args = parse_args()
     url = args.url
     num_chunks = args.chunks
-    headers = {"User-Agent": args.user_agent, "Accept": "*/*", "Connection": "keep-alive"}
+    headers = {
+        "User-Agent": args.user_agent,
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+    }
     try:
-        head_response = requests.head(url, headers=headers, allow_redirects=True, timeout=15)
+        head_response = requests.head(
+            url, headers=headers, allow_redirects=True, timeout=15
+        )
         head_response.raise_for_status()
     except requests.RequestException as e:
         print(f"[-] Error reaching target URL: {e}")
@@ -66,13 +72,21 @@ def main():
     else:
         filename = url.split("/")[-1].split("?")[0] or "downloaded_file"
     if total_size == 0:
-        print("[-] Warning: Web Server did not return a content length. Falling back to single-stream download.")
+        print(
+            "[-] Warning: Web Server did not return a content length. Falling back to single-stream download."
+        )
         num_chunks = 1
     if accept_ranges != "bytes" and num_chunks > 1:
-        print("[-] Target server does not support byte-range slicing. Falling back to single-stream download.")
+        print(
+            "[-] Target server does not support byte-range slicing. Falling back to single-stream download."
+        )
         num_chunks = 1
     print(f"[*] Target File: {filename}")
-    print(f"[*] File Size: {total_size / (1024 * 1024):.2f} MB" if total_size else "[*] File Size: Unknown")
+    print(
+        f"[*] File Size: {total_size / (1024 * 1024):.2f} MB"
+        if total_size
+        else "[*] File Size: Unknown"
+    )
     print(f"[*] Thread Slices: {num_chunks}")
     if num_chunks == 1:
         with (
@@ -93,8 +107,16 @@ def main():
         with ThreadPoolExecutor(max_workers=num_chunks) as executor:
             for i in range(num_chunks):
                 start_byte = i * chunk_size
-                end_byte = total_size - 1 if i == num_chunks - 1 else start_byte + chunk_size - 1
-                futures.append(executor.submit(download_chunk, url, start_byte, end_byte, i, headers, filename))
+                end_byte = (
+                    total_size - 1
+                    if i == num_chunks - 1
+                    else start_byte + chunk_size - 1
+                )
+                futures.append(
+                    executor.submit(
+                        download_chunk, url, start_byte, end_byte, i, headers, filename
+                    )
+                )
             for future in as_completed(futures):
                 try:
                     part_file, start_byte = future.result()

@@ -47,7 +47,7 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
@@ -77,9 +77,12 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                             stack.append(entry)
                     elif entry.is_file(follow_symlinks=False):
                         p = Path(entry.path)
-                        if p.suffix == ".py":
-                            pyfiles.append(p)
-                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
+                        if (
+                            p.suffix == ".py"
+                            or not p.suffix
+                            and (not p.name.startswith("."))
+                            and is_python_file(p)
+                        ):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
@@ -99,7 +102,9 @@ def remove_comments_and_docstrings(source_code: str) -> str:
         _end_lineno, end_col = tok[3]
         if start_lineno > last_lineno:
             last_col = 0
-        if toktype == tokenize.COMMENT or (toktype == tokenize.STRING and prev_toktype == tokenize.INDENT):
+        if toktype == tokenize.COMMENT or (
+            toktype == tokenize.STRING and prev_toktype == tokenize.INDENT
+        ):
             pass
         else:
             if start_col > last_col:
@@ -135,7 +140,9 @@ def process_file(path) -> None:
             return name
         return shorten_variable_name(name)
 
-    content_no_multiline_strings = re.sub("'''.*?'''|\\\"\\\"\\\".*?\\\"\\\"\\\"", "", content, flags=re.DOTALL)
+    content_no_multiline_strings = re.sub(
+        "'''.*?'''|\\\"\\\"\\\".*?\\\"\\\"\\\"", "", content, flags=re.DOTALL
+    )
     content_no_comments_single = re.sub("#.*", "", content_no_multiline_strings)
     lines = content_no_comments_single.splitlines()
     non_empty_lines = [line.strip() for line in lines if line.strip()]

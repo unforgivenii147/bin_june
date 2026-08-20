@@ -1,22 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-fix_extension_mismatch.py
-Recursively scan a directory (default: current directory) and fix files whose
-file extension doesn't match a detected file type signature or MIME type.
-Usage:
-  python fix_extension_mismatch.py [PATH] [--workers N] [--commit] [--dry-run] [--verbose]
-Examples:
-  python fix_extension_mismatch.py
-  python fix_extension_mismatch.py /path/to/dir
-  python fix_extension_mismatch.py /path/to/dir --commit --workers 8
-  python fix_extension_mismatch.py . --commit --verbose
-Notes:
-  - The script prefers python-magic for accurate MIME-type detection. Install with:
-    pip install python-magic (Linux/macOS)
-    pip install python-magic-bin (Windows)
-  - Falls back to signature-based detection if python-magic is unavailable.
-  - Always run with --dry-run first (the default).
-"""
 
 from __future__ import annotations
 
@@ -57,19 +39,29 @@ SIGNATURES = [
     (lambda b: b.startswith(b"Rar!\x1a\x07\x00"), ".rar", "RAR archive"),
     (lambda b: len(b) > 262 and b[257:262] == b"ustar", ".tar", "TAR archive"),
     (
-        lambda b: b.startswith(b"ID3") or (len(b) >= 2 and (b[0] == 255 and b[1] & 224 == 224)),
+        lambda b: (
+            b.startswith(b"ID3")
+            or (len(b) >= 2 and (b[0] == 255 and b[1] & 224 == 224))
+        ),
         ".mp3",
         "MP3 audio",
     ),
     (lambda b: len(b) > 8 and b[4:8] == b"ftyp", ".mp4", "MP4/ISO-BMFF"),
     (lambda b: b.startswith(b"\x1aE\xdf\xa3"), ".mkv", "Matroska (MKV/WebM)"),
-    (lambda b: b.startswith(b"RIFF") and len(b) > 8 and b[8:12] == b"WAVE", ".wav", "WAV audio"),
+    (
+        lambda b: b.startswith(b"RIFF") and len(b) > 8 and b[8:12] == b"WAVE",
+        ".wav",
+        "WAV audio",
+    ),
     (lambda b: b.startswith(b"OggS"), ".ogg", "OGG container"),
     (lambda b: b.startswith(b"fLaC"), ".flac", "FLAC audio"),
     (
         lambda b: (
             b.lstrip().startswith(b"<")
-            and (b.lstrip()[:10].lower().startswith(b"<!doctype") or b.lstrip()[:6].lower().startswith(b"<html"))
+            and (
+                b.lstrip()[:10].lower().startswith(b"<!doctype")
+                or b.lstrip()[:6].lower().startswith(b"<html")
+            )
         ),
         ".html",
         "HTML document",
@@ -331,12 +323,16 @@ def process_file(args) -> dict:
     return result
 
 
-def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = True) -> list[Path]:
+def gather_files(
+    root: Path, follow_symlinks: bool = False, skip_hidden: bool = True
+) -> list[Path]:
     files: list[Path] = []
     for p in root.rglob("*"):
         try:
             if p.is_file():
-                if skip_hidden and any(part.startswith(".") for part in p.relative_to(root).parts):
+                if skip_hidden and any(
+                    part.startswith(".") for part in p.relative_to(root).parts
+                ):
                     continue
                 files.append(p)
         except Exception:
@@ -377,7 +373,9 @@ def print_header():
         f"  Detection: python-magic {'✓ available' if MAGIC_AVAILABLE else '✗ not available (using fallback signatures)'}"
     )
     if not MAGIC_AVAILABLE:
-        print("    Install with: pip install python-magic (Linux/macOS) or python-magic-bin (Windows)")
+        print(
+            "    Install with: pip install python-magic (Linux/macOS) or python-magic-bin (Windows)"
+        )
     print()
 
 
@@ -386,7 +384,9 @@ def main():
         prog="fix_extension_mismatch.py",
         description="Fix extension mismatches using file signatures or MIME types",
     )
-    ap.add_argument("path", nargs="?", default=".", help="Root path to scan (default: .)")
+    ap.add_argument(
+        "path", nargs="?", default=".", help="Root path to scan (default: .)"
+    )
     ap.add_argument(
         "--workers",
         "-j",
@@ -400,7 +400,9 @@ def main():
         help="Perform renames. Without this flag the script runs in dry-run mode.",
     )
     ap.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    ap.add_argument("--follow-symlinks", action="store_true", help="Follow symlinks when scanning")
+    ap.add_argument(
+        "--follow-symlinks", action="store_true", help="Follow symlinks when scanning"
+    )
     ap.add_argument(
         "--no-skip-hidden",
         action="store_true",
@@ -412,11 +414,15 @@ def main():
     if not root.exists():
         print(f"Error: path {root} does not exist", file=sys.stderr)
         sys.exit(2)
-    files = gather_files(root, follow_symlinks=args.follow_symlinks, skip_hidden=not args.no_skip_hidden)
+    files = gather_files(
+        root, follow_symlinks=args.follow_symlinks, skip_hidden=not args.no_skip_hidden
+    )
     if not files:
         print("No files found to scan.")
         return
-    print(f"Scanning {len(files)} files under {root} using {args.workers} workers. Commit mode: {args.commit}")
+    print(
+        f"Scanning {len(files)} files under {root} using {args.workers} workers. Commit mode: {args.commit}"
+    )
     worker_args = [(str(p), args.commit, args.verbose) for p in files]
     results: list[dict] = []
     try:
@@ -427,7 +433,9 @@ def main():
                     p = res["path"]
                     act = res["action"]
                     if act in ("would-rename", "renamed"):
-                        print(f"{act}: {p} -> {res.get('target')} ({res.get('detected')})")
+                        print(
+                            f"{act}: {p} -> {res.get('target')} ({res.get('detected')})"
+                        )
                     elif act == "ok":
                         print(f"ok: {p} (already matched)")
                     else:

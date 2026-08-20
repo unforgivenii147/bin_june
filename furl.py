@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract URLs from files in current directory recursively.
-Separates git links into a separate file and shows progress.
-Uses pathlib and parallel processing for efficiency.
-"""
 
 from __future__ import annotations
 
@@ -56,8 +51,21 @@ def extract_urls_from_file(file_path: Path) -> tuple[set[str], set[str]]:
 
 def main():
     current_dir = Path.cwd()
-    exclude_dirs = {".git", "__pycache__", ".venv", "venv", "node_modules", ".env", "dist", "build"}
-    all_files = [f for f in current_dir.rglob("*") if f.is_file() and not any(part in exclude_dirs for part in f.parts)]
+    exclude_dirs = {
+        ".git",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "node_modules",
+        ".env",
+        "dist",
+        "build",
+    }
+    all_files = [
+        f
+        for f in current_dir.rglob("*")
+        if f.is_file() and not any(part in exclude_dirs for part in f.parts)
+    ]
     if not all_files:
         print("No files found to process.")
         return
@@ -66,7 +74,10 @@ def main():
     all_git_urls = set()
     max_workers = 4
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {executor.submit(extract_urls_from_file, file_path): file_path for file_path in all_files}
+        future_to_file = {
+            executor.submit(extract_urls_from_file, file_path): file_path
+            for file_path in all_files
+        }
         with tqdm(total=len(all_files), desc="Processing files", unit="file") as pbar:
             for future in as_completed(future_to_file):
                 regular_urls, git_urls = future.result()
@@ -77,12 +88,10 @@ def main():
     all_git_urls = sorted(all_git_urls)
     urls_file = current_dir / "urls.txt"
     with open(urls_file, "w", encoding="utf-8") as f:
-        for url in all_regular_urls:
-            f.write(url + "\n")
+        f.writelines(url + "\n" for url in all_regular_urls)
     gitlinks_file = current_dir / "gitlinks.txt"
     with open(gitlinks_file, "w", encoding="utf-8") as f:
-        for url in all_git_urls:
-            f.write(url + "\n")
+        f.writelines(url + "\n" for url in all_git_urls)
     print("\n✓ Extraction complete!")
     print(f"  Regular URLs: {len(all_regular_urls)} → {urls_file.name}")
     print(f"  Git URLs: {len(all_git_urls)} → {gitlinks_file.name}")

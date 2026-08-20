@@ -9,7 +9,11 @@ from loguru import logger
 
 
 def get_all_files(root: Path) -> list[Path]:
-    return [p for p in root.rglob("*") if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"]
+    return [
+        p
+        for p in root.rglob("*")
+        if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"
+    ]
 
 
 def safe_rename(src: Path, dest_dir: Path) -> Path:
@@ -27,6 +31,7 @@ def safe_rename(src: Path, dest_dir: Path) -> Path:
 
 
 def fsz_range(min_s: int, max_s: int) -> str:
+
     def fmt(n: int) -> str:
         if n < 1000:
             return f"{n}B"
@@ -77,7 +82,9 @@ def main() -> None:
         dir_path.mkdir(exist_ok=True)
         created_dirs.append((dir_name, len(d["files"]), d["size"]))
         existing_dir_names.add(dir_name)
-        print(f"Created dir '{dir_name}' → {len(d['files'])} files, {d['size']:,} bytes")
+        print(
+            f"Created dir '{dir_name}' → {len(d['files'])} files, {d['size']:,} bytes"
+        )
         for f in d["files"]:
             dest = safe_rename(f, dir_path)
             shutil.move(str(f), str(dest))

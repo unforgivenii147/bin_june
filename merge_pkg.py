@@ -23,7 +23,9 @@ def parse_module(module: Module):
     source = module.filepath.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(module.filepath))
     for node in tree.body:
-        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets):
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets
+        ):
             module.dunder_all = node
             module.assignments.append(node)
             continue
@@ -56,7 +58,9 @@ def resolve_imports(modules: dict, root_pkg_name: str) -> list:
                         base_parts = parts[:-1]
                     base_pkg = ".".join(base_parts)
                     if imp.module:
-                        abs_module = f"{base_pkg}.{imp.module}" if base_pkg else imp.module
+                        abs_module = (
+                            f"{base_pkg}.{imp.module}" if base_pkg else imp.module
+                        )
                     else:
                         abs_module = base_pkg
                     imp.module = abs_module
@@ -65,9 +69,9 @@ def resolve_imports(modules: dict, root_pkg_name: str) -> list:
                         new_imports = []
                         for alias in imp.names:
                             new_imports.append(
-                                ast.parse(f"import {root_pkg_name}.{alias.name} as {alias.asname or alias.name}").body[
-                                    0
-                                ]
+                                ast.parse(
+                                    f"import {root_pkg_name}.{alias.name} as {alias.asname or alias.name}"
+                                ).body[0]
                             )
                         final_imports.extend(new_imports)
                         continue
@@ -117,8 +121,7 @@ def merge_package(project_dir: str, output_file: str):
             continue
         rel_path = py_file.relative_to(project_path.parent)
         mod_name = ".".join(rel_path.with_suffix("").parts)
-        if mod_name.endswith(".__init__"):
-            mod_name = mod_name[:-9]
+        mod_name = mod_name.removesuffix(".__init__")
         mod = Module(mod_name, py_file)
         parse_module(mod)
         modules[mod_name] = mod

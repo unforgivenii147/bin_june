@@ -8,7 +8,9 @@ from pathlib import Path
 
 def run_git_command(args: list[str]) -> str:
     try:
-        result = subprocess.run(["git"] + args, capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["git"] + args, capture_output=True, text=True, check=True
+        )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         print(f"❌ Git error executing {' '.join(e.cmd)}:\n{e.stderr.strip()}")
@@ -17,12 +19,19 @@ def run_git_command(args: list[str]) -> str:
 
 def main():
     repo_root = Path(".")
-    if not (repo_root / ".git").exists() and not run_git_command(["rev-parse", "--is-inside-work-tree"]) == "true":
+    if (
+        not (repo_root / ".git").exists()
+        and not run_git_command(["rev-parse", "--is-inside-work-tree"]) == "true"
+    ):
         print("❌ Error: Current directory is not a Git repository root.")
         sys.exit(1)
     print("🔍 Searching repository history for deleted files...")
-    log_output = run_git_command(["log", "--diff-filter=D", "--name-only", "--pretty=format:"])
-    historically_deleted = {line.strip() for line in log_output.splitlines() if line.strip()}
+    log_output = run_git_command(
+        ["log", "--diff-filter=D", "--name-only", "--pretty=format:"]
+    )
+    historically_deleted = {
+        line.strip() for line in log_output.splitlines() if line.strip()
+    }
     if not historically_deleted:
         print("ℹ️  No deleted files found in the git commit log log.")
         return

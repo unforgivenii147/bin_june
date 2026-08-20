@@ -119,13 +119,19 @@ def process_path(path: Path) -> dict:
             return result
         if path.is_dir():
             result["dirs_changed"] += 1
-            result["messages"].append(f"[DIR]  {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)}")
+            result["messages"].append(
+                f"[DIR]  {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)}"
+            )
         elif is_in_executable_dir(path) and (not is_executable(current_mode)):
             result["files_made_exec"] += 1
-            result["messages"].append(f"[EXEC] {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)} ({reason})")
+            result["messages"].append(
+                f"[EXEC] {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)} ({reason})"
+            )
         else:
             result["files_changed"] += 1
-            result["messages"].append(f"[FILE] {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)}")
+            result["messages"].append(
+                f"[FILE] {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)}"
+            )
     except Exception as e:
         result["other_errors"] += 1
         result["errors"] += 1
@@ -140,7 +146,9 @@ def collect_paths(cwd: str) -> list[Path]:
         sys.exit(1)
     paths: list[Path] = []
     try:
-        for current_dir, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
+        for current_dir, dirnames, filenames in os.walk(
+            str(root), topdown=True, followlinks=False
+        ):
             dirnames[:] = [d for d in dirnames if d not in SKIP_NAMES]
             cd = Path(current_dir)
             paths.append(cd)
@@ -241,14 +249,18 @@ def normalize_permissions(cwd: str = ".", verbose: bool = False) -> None:
     try:
         with Pool(processes=workers) as pool:
             chunksize = max(1000, total // (workers * 10))
-            results_list = pool.imap_unordered(process_path, all_paths, chunksize=chunksize)
+            results_list = pool.imap_unordered(
+                process_path, all_paths, chunksize=chunksize
+            )
             all_results: list[dict] = []
             processed = 0
             for result in results_list:
                 all_results.append(result)
                 processed += 1
                 if processed % 500 == 0 or processed == total:
-                    print(f"  Progress: {processed:,}/{total:,} ({100 * processed / total:.1f}%)")
+                    print(
+                        f"  Progress: {processed:,}/{total:,} ({100 * processed / total:.1f}%)"
+                    )
     except KeyboardInterrupt:
         print("\n⚠️  Interrupted by user!")
         pool.terminate()
@@ -274,8 +286,12 @@ def main():
         default=".",
         help="Path to start normalization (default: current directory)",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print detailed changes")
-    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress progress output")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Print detailed changes"
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress progress output"
+    )
     args = parser.parse_args()
     try:
         normalize_permissions(args.path, verbose=args.verbose)

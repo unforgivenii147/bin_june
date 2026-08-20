@@ -46,7 +46,9 @@ def process_url(url: str) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Show download size of a URL or URLs from a file")
+    parser = argparse.ArgumentParser(
+        description="Show download size of a URL or URLs from a file"
+    )
     parser.add_argument("input", help="Download URL or file containing URLs")
     args = parser.parse_args()
     input_path = Path(args.input)

@@ -66,7 +66,9 @@ def parse_magic_file(filepath: str, encoding="latin-1"):
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python magic_to_json.py <magic_file> [output.json]", file=sys.stderr)
+        print(
+            "Usage: python magic_to_json.py <magic_file> [output.json]", file=sys.stderr
+        )
         sys.exit(1)
     input_file = sys.argv[1]
     output_file = sys.argv[2] if len(sys.argv) > 2 else None

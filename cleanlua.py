@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Strip comments from Lua files recursively using parallel processing.
-Supports multiple input directories and provides prettier-style output.
-"""
 
 from __future__ import annotations
 
@@ -118,7 +114,9 @@ def process_lua_file(file_path: Path) -> FileStats | None:
     try:
         original_content = file_path.read_text(encoding="utf-8")
         original_size = len(original_content.encode("utf-8"))
-        stripped_content, lines_removed, comments_removed = strip_lua_comments(original_content)
+        stripped_content, lines_removed, comments_removed = strip_lua_comments(
+            original_content
+        )
         if stripped_content != original_content:
             file_path.write_text(stripped_content, encoding="utf-8")
             new_size = len(stripped_content.encode("utf-8"))
@@ -172,7 +170,10 @@ def main():
     processed = 0
     errors = 0
     with ProcessPoolExecutor() as executor:
-        future_to_file = {executor.submit(process_lua_file, file_path): file_path for file_path in lua_files}
+        future_to_file = {
+            executor.submit(process_lua_file, file_path): file_path
+            for file_path in lua_files
+        }
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -180,11 +181,21 @@ def main():
                 if stats:
                     stats_list.append(stats)
                     processed += 1
-                    status = "modified" if stats.original_size != stats.new_size else "unchanged"
-                    reduction = f"-{stats.size_reduction:.1f}%" if stats.size_reduction > 0 else "0%"
+                    status = (
+                        "modified"
+                        if stats.original_size != stats.new_size
+                        else "unchanged"
+                    )
+                    reduction = (
+                        f"-{stats.size_reduction:.1f}%"
+                        if stats.size_reduction > 0
+                        else "0%"
+                    )
                     print(f"  {status:9} {reduction:>8}  {stats.relpath}")
                     if stats.comments_removed > 0:
-                        print(f"           {'':9} {'':>8}  ↳ {stats.comments_removed} comment(s) removed")
+                        print(
+                            f"           {'':9} {'':>8}  ↳ {stats.comments_removed} comment(s) removed"
+                        )
                 else:
                     errors += 1
             except Exception as e:
@@ -192,15 +203,19 @@ def main():
                 print(f"           {'':9} {'':>8}  ↳ {e}")
                 errors += 1
     print("-" * 42)
-    total_original = sum((s.original_size for s in stats_list))
-    total_new = sum((s.new_size for s in stats_list))
+    total_original = sum(s.original_size for s in stats_list)
+    total_new = sum(s.new_size for s in stats_list)
     total_saved = total_original - total_new
-    total_reduction = (1 - total_new / total_original) * 100 if total_original > 0 else 0
-    total_comments = sum((s.comments_removed for s in stats_list))
-    total_lines = sum((s.lines_removed for s in stats_list))
-    modified_files = sum((1 for s in stats_list if s.original_size != s.new_size))
+    total_reduction = (
+        (1 - total_new / total_original) * 100 if total_original > 0 else 0
+    )
+    total_comments = sum(s.comments_removed for s in stats_list)
+    total_lines = sum(s.lines_removed for s in stats_list)
+    modified_files = sum(1 for s in stats_list if s.original_size != s.new_size)
     print("\n📊 Summary:")
-    print(f"   Files processed:  {processed} ({modified_files} modified, {processed - modified_files} unchanged)")
+    print(
+        f"   Files processed:  {processed} ({modified_files} modified, {processed - modified_files} unchanged)"
+    )
     if errors:
         print(f"   Errors:           {errors}")
     print(f"   Comments removed: {total_comments}")

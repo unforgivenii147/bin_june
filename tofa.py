@@ -94,7 +94,9 @@ def translate_file(input_file: str, source_lang: str = "auto") -> str:
     pbar = tqdm(total=total_chunks, desc="Translating", unit="chunk")
     try:
         for i, chunk in enumerate(chunks):
-            print(f"\n[INFO] Translating chunk {i + 1}/{total_chunks} ({len(chunk)} chars)...")
+            print(
+                f"\n[INFO] Translating chunk {i + 1}/{total_chunks} ({len(chunk)} chars)..."
+            )
             try:
                 translated_chunk, detected_lang = translate_chunk(chunk, source_lang)
                 translated_chunks.append(translated_chunk)
@@ -117,7 +119,9 @@ def main() -> None:
         print(f"  {sys.argv[0]} document.txt")
         print(f"  {sys.argv[0]} file.txt de")
         print(f"  {sys.argv[0]}document.txt en")
-        print("\nSupported languages:  auto, en ,fa , fr, de, es, it, pt, ru, zh, ja, ko, ar, etc.")
+        print(
+            "\nSupported languages:  auto, en ,fa , fr, de, es, it, pt, ru, zh, ja, ko, ar, etc."
+        )
         sys.exit(1)
     input_file = sys.argv[1]
     source_lang = sys.argv[2] if len(sys.argv) > 2 else "auto"

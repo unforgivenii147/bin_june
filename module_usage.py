@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Scan ~/bin for Python scripts and count imports from:
-  - Standard library modules
-  - Third-party packages (installed via pip)
-  - Custom 'dh' package
-Save a comprehensive report to ~/dh_usage.txt
-"""
 
 from __future__ import annotations
 
@@ -139,7 +132,9 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
             if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
                 if func.value.id in dh_names:
                     imports[PACKAGE].append(func.attr)
-            if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Attribute):
+            if isinstance(func, ast.Attribute) and isinstance(
+                func.value, ast.Attribute
+            ):
                 root = func.value
                 while isinstance(root, ast.Attribute):
                     root = root.value
@@ -148,7 +143,9 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
     return dict(imports)
 
 
-def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict[str, int]]:
+def count_calls(
+    filepath: Path, imports: dict[str, list[str]]
+) -> dict[str, dict[str, int]]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
     except (SyntaxError, UnicodeDecodeError):
@@ -172,7 +169,9 @@ def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict
     return dict(call_counts)
 
 
-def generate_report(per_file_data: list[tuple[str, dict[str, dict[str, int]]]], stdlib_set: set[str]) -> str:
+def generate_report(
+    per_file_data: list[tuple[str, dict[str, dict[str, int]]]], stdlib_set: set[str]
+) -> str:
     lines: list[str] = []
     now = __import__("datetime").datetime.now()
     stdlib_counts: Counter = Counter()
@@ -242,7 +241,9 @@ def generate_report(per_file_data: list[tuple[str, dict[str, dict[str, int]]]], 
     lines.append(f"\n{'─' * 42}")
     lines.append("  SECTION 4: PER-FILE BREAKDOWN")
     lines.append(f"{'─' * 42}")
-    for fname, module_calls in sorted(per_file_data, key=lambda x: -sum(sum(c.values()) for c in x[1].values())):
+    for fname, module_calls in sorted(
+        per_file_data, key=lambda x: -sum(sum(c.values()) for c in x[1].values())
+    ):
         total_calls = sum(sum(c.values()) for c in module_calls.values())
         lines.append(f"\n  📄 {fname}  ({total_calls} total calls)")
         stdlib_in_file = {}

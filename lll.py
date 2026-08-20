@@ -22,7 +22,7 @@ EXCLUDED = {".mypy_cache", ".ruff_cache", ".git", "__pycache__"}
 if __name__ == "__main__":
     cwd = Path.cwd()
     for path in sorted(cwd.rglob("*"), key=lambda e: e.stat().st_mtime, reverse=True):
-        if any((pat in path.parts for pat in EXCLUDED)):
+        if any(pat in path.parts for pat in EXCLUDED):
             continue
         mtime = datetime.datetime.fromtimestamp(path.stat().st_mtime).strftime("%H:%M")
         if path.is_dir():

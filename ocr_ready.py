@@ -30,7 +30,9 @@ def deskew(image):
         h, w = image.shape[:2]
         center = (w // 2, h // 2)
         M = cv2.getRotationMatrix2D(center, angle, 1.0)
-        return cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+        return cv2.warpAffine(
+            image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE
+        )
     else:
         return image
 
@@ -44,7 +46,9 @@ def preprocess_image_cv2(img_path: Path):
     gray = cv2.fastNlMeansDenoising(gray, None, 30, 7, 21)
     clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8))
     gray = clahe.apply(gray)
-    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
+    thresh = cv2.adaptiveThreshold(
+        gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2
+    )
     kernel = np.ones((1, 1), np.uint8)
     cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     return deskew(cleaned)
@@ -88,7 +92,13 @@ def save_processed_image(img, img_path: Path):
 
 
 def process_single_image(image_path: Path) -> dict:
-    result = {"path": str(image_path), "success": False, "error": None, "size_before": 0, "size_after": 0}
+    result = {
+        "path": str(image_path),
+        "success": False,
+        "error": None,
+        "size_before": 0,
+        "size_after": 0,
+    }
     try:
         result["size_before"] = image_path.stat().st_size
         processed = preprocess_image(image_path)
@@ -134,7 +144,9 @@ def process() -> None:
     total_before = 0
     total_after = 0
     with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
-        future_to_path = {executor.submit(process_single_image, path): path for path in image_files}
+        future_to_path = {
+            executor.submit(process_single_image, path): path for path in image_files
+        }
         for future in as_completed(future_to_path):
             path = future_to_path[future]
             try:
@@ -148,19 +160,25 @@ def process() -> None:
                     error_count += 1
                     status = "❌"
                 relative = path.relative_to(BASE_DIR)
-                print(f"{status} [{processed_count + error_count}/{total_images}] {relative}")
+                print(
+                    f"{status} [{processed_count + error_count}/{total_images}] {relative}"
+                )
                 if result.get("error"):
                     print(f"   ⚠️ Error: {result['error']}")
             except Exception as e:
                 error_count += 1
-                print(f"❌ [{processed_count + error_count}/{total_images}] {path.name}: {e}")
+                print(
+                    f"❌ [{processed_count + error_count}/{total_images}] {path.name}: {e}"
+                )
     print("\n" + "=" * 42)
     print("📊 Processing Summary:")
     print(f"   ✅ Successfully processed: {processed_count} images")
     print(f"   ❌ Errors: {error_count} images")
     print(f"   📁 Total images: {total_images}")
     if processed_count > 0:
-        size_reduction = (total_before - total_after) / total_before * 100 if total_before > 0 else 0
+        size_reduction = (
+            (total_before - total_after) / total_before * 100 if total_before > 0 else 0
+        )
         print(f"   📦 Total size before: {total_before / (1024 * 1024):.2f} MB")
         print(f"   📦 Total size after: {total_after / (1024 * 1024):.2f} MB")
         print(f"   📉 Size reduction: {size_reduction:.1f}%")

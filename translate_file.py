@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of translate_file.py for Python 3.12.
-Translates lines containing foreign characters using parallel process pool.
-"""
 
 from __future__ import annotations
 

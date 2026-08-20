@@ -41,8 +41,14 @@ def rename_files(directory: str) -> None:
     unique_names_to_translate = list({p.name for p in paths if not is_english(p.name)})
     translation_map = {}
     with ThreadPoolExecutor(8) as executor:
-        futures = [executor.submit(translate_name, name) for name in unique_names_to_translate]
-        for future in tqdm(as_completed(futures), total=len(unique_names_to_translate), desc="Translating filenames"):
+        futures = [
+            executor.submit(translate_name, name) for name in unique_names_to_translate
+        ]
+        for future in tqdm(
+            as_completed(futures),
+            total=len(unique_names_to_translate),
+            desc="Translating filenames",
+        ):
             original, translated = future.result()
             translation_map[original] = translated
     for path in sorted(paths, key=lambda x: len(x.parts), reverse=True):

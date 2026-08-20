@@ -15,7 +15,9 @@ AES_BLOCK_SIZE = 128
 
 
 def random_key(length: int = 32) -> str:
-    return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+    return "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(length)
+    )
 
 
 def encrypt_file(file_path: Path, key: str) -> None:

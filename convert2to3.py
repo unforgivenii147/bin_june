@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Apply all available 2to3 fixes to Python files using multiprocessing.
-Uses lib2to3 module directly without subprocess.
-Requires Python 3.12+
-"""
 
 from __future__ import annotations
 
@@ -108,7 +103,9 @@ def apply_2to3_fixes(file_path: str) -> tuple[str, bool, str]:
                 original_lines = original_content.splitlines()
                 refactored_lines = refactored.splitlines()
                 changes = 0
-                for i, (orig, new) in enumerate(zip(original_lines, refactored_lines, strict=False)):
+                for i, (orig, new) in enumerate(
+                    zip(original_lines, refactored_lines, strict=False)
+                ):
                     if orig != new:
                         changes += 1
                         diff_lines.append(f"  Line {i + 1}: {orig[:50]} -> {new[:50]}")
@@ -132,7 +129,9 @@ def apply_2to3_fixes(file_path: str) -> tuple[str, bool, str]:
         return file_path, False, f"Unexpected error: {e!s}"
 
 
-def find_python_files(paths: list[str], extensions: list[str] | None = None) -> list[str]:
+def find_python_files(
+    paths: list[str], extensions: list[str] | None = None
+) -> list[str]:
     if extensions is None:
         extensions = [".py"]
     python_files = []
@@ -156,7 +155,10 @@ def process_files_parallel(file_paths: list[str]) -> tuple[list[str], list[str]]
     print(f"Processing {len(file_paths)} files using {4} workers...")
     print("-" * 42)
     with ProcessPoolExecutor(max_workers=4) as executor:
-        future_to_file = {executor.submit(apply_2to3_fixes, file_path): file_path for file_path in file_paths}
+        future_to_file = {
+            executor.submit(apply_2to3_fixes, file_path): file_path
+            for file_path in file_paths
+        }
         for i, future in enumerate(as_completed(future_to_file), 1):
             file_path = future_to_file[future]
             try:
@@ -189,12 +191,16 @@ def dry_run_file(file_path: str) -> tuple[str, str, bool]:
                 original_lines = original_content.splitlines()
                 refactored_lines = refactored.splitlines()
                 diff = []
-                for _i, (orig, new) in enumerate(zip(original_lines, refactored_lines, strict=False)):
+                for _i, (orig, new) in enumerate(
+                    zip(original_lines, refactored_lines, strict=False)
+                ):
                     if orig != new:
                         diff.append(f"  - {orig[:80]}")
                         diff.append(f"  + {new[:80]}")
                 if len(original_lines) != len(refactored_lines):
-                    diff.append(f"  (Line count changed: {len(original_lines)} -> {len(refactored_lines)})")
+                    diff.append(
+                        f"  (Line count changed: {len(original_lines)} -> {len(refactored_lines)})"
+                    )
                 return file_path, "\n".join(diff[:20]), True
             else:
                 return file_path, "No changes needed", False
@@ -211,7 +217,10 @@ def perform_dry_run(file_paths: list[str]) -> None:
     print("-" * 42)
     files_with_changes = 0
     with ProcessPoolExecutor(max_workers=4) as executor:
-        future_to_file = {executor.submit(dry_run_file, file_path): file_path for file_path in file_paths}
+        future_to_file = {
+            executor.submit(dry_run_file, file_path): file_path
+            for file_path in file_paths
+        }
         for future in as_completed(future_to_file):
             file_path, output, has_changes = future.result()
             if has_changes:
@@ -223,7 +232,9 @@ def perform_dry_run(file_paths: list[str]) -> None:
             else:
                 print(f"✓ {Path(file_path).name}: {output}")
     print(f"\n{'=' * 42}")
-    print(f"Dry run complete: {files_with_changes} of {len(file_paths)} files would be changed")
+    print(
+        f"Dry run complete: {files_with_changes} of {len(file_paths)} files would be changed"
+    )
 
 
 def main() -> int:
@@ -231,7 +242,12 @@ def main() -> int:
         description="Apply all available 2to3 fixes to Python files using lib2to3 and multiprocessing"
     )
     parser.add_argument("paths", nargs="+", help="Files or directories to process")
-    parser.add_argument("-d", "--dry-run", action="store_true", help="Preview changes without applying them")
+    parser.add_argument(
+        "-d",
+        "--dry-run",
+        action="store_true",
+        help="Preview changes without applying them",
+    )
     parser.add_argument(
         "-e",
         "--extensions",

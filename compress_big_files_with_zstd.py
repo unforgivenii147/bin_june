@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Compress files larger than a threshold in current directory recursively.
-Usage: python compress_large_files.py <threshold_in_bytes>
-Example: python compress_large_files.py 1048576
-"""
 
 from __future__ import annotations
 
@@ -80,7 +75,9 @@ class ProgressDisplay:
             print(f"  Compressed size: {comp_mb:.2f} MB")
             print(f"  Savings: {savings:.1f}%")
             print(f"  Time: {elapsed:.1f} seconds")
-            print(f"  Average speed: {self.total_size / (1024 * 1024) / elapsed:.1f} MB/s")
+            print(
+                f"  Average speed: {self.total_size / (1024 * 1024) / elapsed:.1f} MB/s"
+            )
 
 
 def should_compress_file(file_path, threshold):
@@ -135,7 +132,9 @@ def compress_file(file_path, progress, level=3):
     except Exception as e:
         if temp_path.exists():
             temp_path.unlink()
-        progress.update(file_path, original_size, original_size, f"error: {str(e)[:20]}")
+        progress.update(
+            file_path, original_size, original_size, f"error: {str(e)[:20]}"
+        )
         return False, file_path, None, original_size
 
 
@@ -175,7 +174,9 @@ def main():
     progress = ProgressDisplay()
     progress.set_total_files(len(files_to_compress))
     with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(compress_file, f, progress): f for f in files_to_compress}
+        futures = {
+            executor.submit(compress_file, f, progress): f for f in files_to_compress
+        }
         for future in as_completed(futures):
             try:
                 future.result()

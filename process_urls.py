@@ -43,7 +43,9 @@ def get_canonical_root(normalized_url: str) -> str:
                 return f"https://{host}/"
             return f"https://{host}/{path_segments[0]}"
     except ValueError:
-        print(f"Warning: Could not parse URL for root: {normalized_url}", file=sys.stderr)
+        print(
+            f"Warning: Could not parse URL for root: {normalized_url}", file=sys.stderr
+        )
         return normalized_url
 
 
@@ -100,7 +102,9 @@ def main() -> None:
         lines = input_file_path.read_text(encoding="utf-8").splitlines()
         pruned_urls = prune_subaddresses(lines)
         input_file_path.write_text("\n".join(pruned_urls) + "\n", encoding="utf-8")
-        print(f"Successfully pruned URLs in '{input_file_path}'. {len(lines) - len(pruned_urls)} URLs removed.")
+        print(
+            f"Successfully pruned URLs in '{input_file_path}'. {len(lines) - len(pruned_urls)} URLs removed."
+        )
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
         sys.exit(1)

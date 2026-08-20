@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Rename files in current directory based on their shebang line.
-Optimized for Termux environment.
-"""
 
 from __future__ import annotations
 
@@ -95,7 +91,9 @@ def check_termux() -> bool:
     if is_termux:
         print("📱 Termux environment detected")
         print(f"   Prefix: {termux_prefix}")
-        print(f"   Python: {os.path.realpath('/data/data/com.termux/files/usr/bin/python3')}")
+        print(
+            f"   Python: {os.path.realpath('/data/data/com.termux/files/usr/bin/python3')}"
+        )
     else:
         print("💻 Standard Linux/Unix environment detected")
     return is_termux
@@ -126,9 +124,7 @@ def main() -> None:
             unknown_count += 1
             continue
         old_name = file_path.stem
-        if not file_path.suffix:
-            new_name = f"{old_name}{extension}"
-        elif file_path.suffix != extension:
+        if not file_path.suffix or file_path.suffix != extension:
             new_name = f"{old_name}{extension}"
         else:
             skipped_count += 1
@@ -144,7 +140,9 @@ def main() -> None:
         print(f"   ❓ Unknown shebangs: {unknown_count} file(s)")
     print(f"{'=' * 42}")
     if unknown_count > 0:
-        print("\n💡 Tip: You can add new shebang patterns to the SHEBANG_MAPPING dictionary")
+        print(
+            "\n💡 Tip: You can add new shebang patterns to the SHEBANG_MAPPING dictionary"
+        )
 
 
 def dry_run() -> None:
@@ -176,7 +174,9 @@ if __name__ == "__main__":
         print("  --dry-run    Preview changes without renaming")
         print("  --help       Show this help message")
     else:
-        response = input("⚠️  This will rename files in the current directory. Continue? (y/N): ")
+        response = input(
+            "⚠️  This will rename files in the current directory. Continue? (y/N): "
+        )
         if response.lower() == "y":
             main()
         else:

@@ -1,12 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Extract text from PDF files, saving each page as a separate text file.
-Suppresses pdfminer warnings.
-"""
 
 import logging
 import sys
-import warnings
 from io import StringIO
 from pathlib import Path
 
@@ -35,12 +30,13 @@ def collect_pdf_files(inputs):
         elif path.is_dir():
             pdf_files.extend(path.rglob("*.pdf"))
         else:
-            print(f"Warning: {path} is not a valid PDF file or directory", file=sys.stderr)
+            print(
+                f"Warning: {path} is not a valid PDF file or directory", file=sys.stderr
+            )
     return pdf_files
 
 
 def extract_single_page(page_data):
-    """Extract text from a single page"""
     page_num, page, output_dir = page_data
     if page_num % 10 == 0:
         print(f"procrssing ... pagr {page_num}")
@@ -48,7 +44,9 @@ def extract_single_page(page_data):
         output_string = StringIO()
         rsrcmgr = pdfminer.pdfinterp.PDFResourceManager()
         laparams = pdfminer.convas.LAParams()
-        device = pdfminer.converter.TextConverter(rsrcmgr, output_string, laparams=laparams)
+        device = pdfminer.converter.TextConverter(
+            rsrcmgr, output_string, laparams=laparams
+        )
         interpreter = pdfminer.pdfinterp.PDFPageInterpreter(rsrcmgr, device)
         interpreter.process_page(page)
         text = output_string.getvalue()
@@ -64,7 +62,6 @@ def extract_single_page(page_data):
 
 
 def extract_pages_from_pdf(pdf_path, n_jobs=4):
-    """Extract all pages from a single PDF file, processing pages in parallel"""
     pdf_path = Path(pdf_path)
     output_dir = pdf_path.parent / pdf_path.stem
     output_dir.mkdir(exist_ok=True)
@@ -78,18 +75,17 @@ def extract_pages_from_pdf(pdf_path, n_jobs=4):
                 print(f"Warning: {pdf_path} is not extractable", file=sys.stderr)
                 return results
 
-            # Prepare page data for parallel processing
             pages_data = [
                 (page_num, page, output_dir)
-                for page_num, page in enumerate(pdfminer.pdfpage.PDFPage.create_pages(document), start=1)
+                for page_num, page in enumerate(
+                    pdfminer.pdfpage.PDFPage.create_pages(document), start=1
+                )
             ]
 
-            # Process pages in parallel using joblib
             page_results = Parallel(n_jobs=n_jobs, backend="threading")(
                 delayed(extract_single_page)(page_data) for page_data in pages_data
             )
 
-            # Filter out None results (errors)
             results = [result for result in page_results if result is not None]
 
     except Exception as e:
@@ -108,7 +104,6 @@ def main():
 
     print(f"Found {len(pdf_files)} PDF file(s) to process.")
 
-    # Process files one by one
     for i, pdf_file in enumerate(pdf_files, 1):
         print(f"Processing file {i}/{len(pdf_files)}: {pdf_file.name}")
         try:

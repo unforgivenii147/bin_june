@@ -13,7 +13,11 @@ FONT_SIZES = [14, 22]
 def find_fonts(cwd: Path = Path.cwd()):
     fonts = []
     for dirpath, _, filenames in cwd.walk():
-        fonts.extend(Path(dirpath) / filename for filename in filenames if filename.lower().endswith(FONT_EXTENSIONS))
+        fonts.extend(
+            Path(dirpath) / filename
+            for filename in filenames
+            if filename.lower().endswith(FONT_EXTENSIONS)
+        )
     return fonts
 
 
@@ -42,7 +46,9 @@ def generate_html(font_files) -> str:
             f"<h1 style='font-family: \"{font_name}\"; font-size: {size}px;'>هنر برتز از گوهر آمد پدید</h1>"
             for size in FONT_SIZES
         )
-        html.append(f"<div style='font-family: \"{font_name}\"; font-size: 12px;'>{font_name}</div><hr>")
+        html.append(
+            f"<div style='font-family: \"{font_name}\"; font-size: 12px;'>{font_name}</div><hr>"
+        )
         html.append("</div>")
     html.append("</body></html>")
     return "\n".join(html)

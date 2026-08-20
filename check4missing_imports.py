@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Check Python files recursively for missing imports.
-Supports parallel processing and optional auto-fix with -a flag.
-"""
 
 from __future__ import annotations
 
@@ -78,9 +74,11 @@ def fix_file(file_path: Path, missing_imports: list[str]) -> None:
         return
     insert_pos = 0
     for i, node in enumerate(tree.body):
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
-            insert_pos = i + 1
-        elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+        if (
+            isinstance(node, (ast.Import, ast.ImportFrom))
+            or isinstance(node, ast.Expr)
+            and isinstance(node.value, ast.Constant)
+        ):
             insert_pos = i + 1
         else:
             break
@@ -96,8 +94,15 @@ def fix_file(file_path: Path, missing_imports: list[str]) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Check Python files for missing imports recursively.")
-    parser.add_argument("-a", "--auto-fix", action="store_true", help="Automatically add missing imports to files")
+    parser = argparse.ArgumentParser(
+        description="Check Python files for missing imports recursively."
+    )
+    parser.add_argument(
+        "-a",
+        "--auto-fix",
+        action="store_true",
+        help="Automatically add missing imports to files",
+    )
     parser.add_argument(
         "-d",
         "--directory",
@@ -122,7 +127,9 @@ def main():
     if not python_files:
         print("No Python files found.")
         sys.exit(0)
-    print(f"Found {len(python_files)} Python file(s). Checking with {args.jobs} workers...")
+    print(
+        f"Found {len(python_files)} Python file(s). Checking with {args.jobs} workers..."
+    )
     files_with_issues = []
     with Pool(processes=args.jobs) as pool:
         results = pool.map(check_file, python_files)

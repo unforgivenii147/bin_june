@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Optimized version of transline2.py for Python 3.12.
-Parallel translation of text files in a directory or specified paths.
-"""
 
 from __future__ import annotations
 
@@ -21,7 +17,9 @@ from dh import get_files
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 MAX_WORKERS: Final[int] = 4
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(sys.stdout)]
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
 
@@ -30,7 +28,9 @@ def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
 
 
-def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ...] | None = None) -> list[Path]:
+def get_files(
+    path: Path, include_hidden: bool = True, extensions: tuple[str, ...] | None = None
+) -> list[Path]:
     if not path.exists():
         raise FileNotFoundError(f"Path does not exist: {path}")
     if not path.is_dir():
@@ -79,7 +79,9 @@ def translate_text(text: str) -> str:
 
 
 def safe_overwrite(filepath: Path, content: str) -> None:
-    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", delete=False, dir=filepath.parent
+    ) as tmp:
         tmp.write(content)
         tmp_path = Path(tmp.name)
     try:

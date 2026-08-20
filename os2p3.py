@@ -49,12 +49,20 @@ def refactor_file(file_path):
     content = re.sub(r"(\w+)\s*\.is_dir\(\)", "Path(\\1).is_dir()", content)
     content = re.sub(
         r"Path\(([^)]+)\)",
-        lambda m: f"Path({m.group(1)}).resolve()" if "abspath" in m.group(0) else m.group(0),
+        lambda m: (
+            f"Path({m.group(1)}).resolve()" if "abspath" in m.group(0) else m.group(0)
+        ),
         content,
     )
-    content = re.sub(r"(\w+)\s*\.stat\(\)\s*\.st_size", "Path(\\1).stat().st_size", content)
-    content = re.sub(r"(\w+)\s*\.stat\(\)\s*\.st_mtime", "Path(\\1).stat().st_mtime", content)
-    content = re.sub(r"(\w+)\s*\.stat\(\)\s*\.st_atime", "Path(\\1).stat().st_atime", content)
+    content = re.sub(
+        r"(\w+)\s*\.stat\(\)\s*\.st_size", "Path(\\1).stat().st_size", content
+    )
+    content = re.sub(
+        r"(\w+)\s*\.stat\(\)\s*\.st_mtime", "Path(\\1).stat().st_mtime", content
+    )
+    content = re.sub(
+        r"(\w+)\s*\.stat\(\)\s*\.st_atime", "Path(\\1).stat().st_atime", content
+    )
     if "from pathlib import Path" not in content and "import pathlib" not in content:
         content = "from pathlib import Path\n" + content
     if content != original_content:

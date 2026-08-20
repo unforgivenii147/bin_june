@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Convert pyproject.toml → setup.py, preserving setup.cfg & MANIFEST.in.
-Handles C-extensions: setuptools, scikit-build-core, meson-python.
-Usage:
-    python convert_pyproject_to_setup.py [--force] [pyproject.toml path]
-"""
 
 from __future__ import annotations
 
@@ -117,8 +111,12 @@ def generate_setup_py(
     dependencies = metadata["dependencies"]
     optional_deps = metadata["optional_dependencies"]
     include_package_data = str(metadata["include_package_data"]).lower()
-    install_requires = ",\n        ".join(f'"{d}"' for d in dependencies) if dependencies else ""
-    install_requires_str = f"[\n        {install_requires}\n    ]" if install_requires else "[]"
+    install_requires = (
+        ",\n        ".join(f'"{d}"' for d in dependencies) if dependencies else ""
+    )
+    install_requires_str = (
+        f"[\n        {install_requires}\n    ]" if install_requires else "[]"
+    )
     extras_parts = []
     for extra, deps in optional_deps.items():
         deps_str = ", ".join(f'"{d}"' for d in deps)
@@ -138,7 +136,11 @@ def generate_setup_py(
     keywords_str = ", ".join(f'"{k}"' for k in keywords) if keywords else "[]"
 
     def format_authors(auths) -> str:
-        return ", ".join(f"'{a.get('name', '')} <{a.get('email', '')}>'" for a in auths if a.get("name"))
+        return ", ".join(
+            f"'{a.get('name', '')} <{a.get('email', '')}>'"
+            for a in auths
+            if a.get("name")
+        )
 
     author_str = format_authors(authors)
     maintainer_str = format_authors(maintainers)
@@ -174,7 +176,9 @@ def generate_setup_py(
         for pkg, files in cfg["package_data"].items():
             files_list = [f.strip() for f in files.split(",") if f.strip()]
             pkg_data_lines.append(f'    "{pkg}": {files_list}')
-        package_data_str = "    package_data={\n" + ",\n".join(pkg_data_lines) + "\n    },\n"
+        package_data_str = (
+            "    package_data={\n" + ",\n".join(pkg_data_lines) + "\n    },\n"
+        )
     data_files_str = ""
     if "data_files" in cfg:
         df_lines = []
@@ -193,7 +197,9 @@ def generate_setup_py(
                 sources = ext.get("sources", [])
                 if name:
                     sources_str = ", ".join(f'"{s}"' for s in sources)
-                    ext_list.append(f'    Extension("{name}", sources=[{sources_str}]),')
+                    ext_list.append(
+                        f'    Extension("{name}", sources=[{sources_str}]),'
+                    )
             cext_imports = "from setuptools import Extension\n"
             cext_build = (
                 f"""    ext_modules=[{", ".join([f'''Extension("{e.get("name", "")}", sources={e.get("sources", [])})''' for e in ext_modules])}],\n"""
@@ -202,9 +208,7 @@ def generate_setup_py(
             )
         elif cext_method == "scikit-build":
             cext_imports = "from skbuild import setup\n"
-            cext_build = (
-                "    cmake_args=[\n        # '-DCMAKE_BUILD_TYPE=Debug',\n    ],\n    # cmake_install_dir='src',\n"
-            )
+            cext_build = "    cmake_args=[\n        # '-DCMAKE_BUILD_TYPE=Debug',\n    ],\n    # cmake_install_dir='src',\n"
         elif cext_method == "meson":
             cext_imports = "from setuptools import setup\n"
             cext_build = "    # meson-python backend handles C/C++ build\n"
@@ -218,7 +222,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Convert pyproject.toml → setup.py (preserving setup.cfg & MANIFEST.in)"
     )
-    parser.add_argument("--force", action="store_true", help="Overwrite existing setup.py")
+    parser.add_argument(
+        "--force", action="store_true", help="Overwrite existing setup.py"
+    )
     parser.add_argument(
         "toml_path",
         nargs="?",
@@ -239,7 +245,9 @@ def main() -> None:
     if setup_py_path.exists() and (not args.force):
         print(f"⚠️  {setup_py_path} already exists. Use --force to overwrite.")
         sys.exit(0)
-    setup_py_content = generate_setup_py(metadata, setup_cfg_text, manifest_text, args.force)
+    setup_py_content = generate_setup_py(
+        metadata, setup_cfg_text, manifest_text, args.force
+    )
     setup_py_path.write_text(setup_py_content, encoding="utf-8")
     print(f"✅ Generated {setup_py_path}")
     _has_cext, cext_method = has_c_extension(metadata["tool"])

@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Repack installed Python packages from system site-packages into wheel files.
-Skips pure Python packages and .pyc files, uses parallel processing.
-Updated for Python 3.12+ (no pkg_resources dependency).
-"""
 
 from __future__ import annotations
 
@@ -59,7 +54,9 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
         package_dir = site_path / alt_name
     if not package_dir.exists():
         for item in site_path.iterdir():
-            if item.is_dir() and item.name.lower().replace("-", "_") == package_name.lower().replace("-", "_"):
+            if item.is_dir() and item.name.lower().replace(
+                "-", "_"
+            ) == package_name.lower().replace("-", "_"):
                 package_dir = item
                 break
         else:
@@ -79,7 +76,9 @@ def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
         if pkg_path.exists() and pkg_path.is_dir():
             return pkg_path
         for item in site_path.iterdir():
-            if item.is_dir() and item.name.lower().replace("-", "_") == package_name.lower().replace("-", "_"):
+            if item.is_dir() and item.name.lower().replace(
+                "-", "_"
+            ) == package_name.lower().replace("-", "_"):
                 return item
     return None
 
@@ -120,7 +119,11 @@ def repack_package(
                     if item.is_dir() and item.name.endswith(".dist-info"):
                         try:
                             dist_name = importlib.metadata.Distribution.at(str(item))
-                            if dist_name and dist_name.metadata.get("Name", "").lower() == package_name.lower():
+                            if (
+                                dist_name
+                                and dist_name.metadata.get("Name", "").lower()
+                                == package_name.lower()
+                            ):
                                 dist_info_names.append(item.name)
                         except:
                             pass
@@ -136,7 +139,9 @@ def repack_package(
                     break
             if not metadata_copied:
                 metadata_file = metadata_dir / "METADATA"
-                metadata_file.write_text(f"Metadata-Version: 2.1\nName: {package_name}\nVersion: {version}\n")
+                metadata_file.write_text(
+                    f"Metadata-Version: 2.1\nName: {package_name}\nVersion: {version}\n"
+                )
                 wheel_file = metadata_dir / "WHEEL"
                 wheel_file.write_text(
                     "Wheel-Version: 1.0\n"
@@ -154,15 +159,21 @@ def repack_package(
                 str(temp_path),
             ]
             try:
-                result = subprocess.run(wheel_cmd, capture_output=True, text=True, check=False)
+                result = subprocess.run(
+                    wheel_cmd, capture_output=True, text=True, check=False
+                )
                 if result.returncode == 0:
-                    wheel_files = list(output_dir.glob(f"{package_name.replace('-', '_')}*.whl"))
+                    wheel_files = list(
+                        output_dir.glob(f"{package_name.replace('-', '_')}*.whl")
+                    )
                     if wheel_files:
                         return package_name, True, f"Created: {wheel_files[0].name}"
                     else:
                         return package_name, False, "Wheel created but not found"
                 else:
-                    error_msg = result.stderr[:200] if result.stderr else result.stdout[:200]
+                    error_msg = (
+                        result.stderr[:200] if result.stderr else result.stdout[:200]
+                    )
                     return package_name, False, f"Wheel command failed: {error_msg}"
             except Exception as e:
                 return package_name, False, f"Error running wheel: {e!s}"
@@ -190,7 +201,9 @@ def get_platform_tag() -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Repack installed Python packages into wheel files")
+    parser = argparse.ArgumentParser(
+        description="Repack installed Python packages into wheel files"
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -227,7 +240,9 @@ def main() -> int:
     all_packages = get_installed_packages()
     logger.info(f"Found {len(all_packages)} installed packages")
     if args.packages:
-        packages_to_process = [(pkg, ver) for pkg, ver in all_packages if pkg in args.packages]
+        packages_to_process = [
+            (pkg, ver) for pkg, ver in all_packages if pkg in args.packages
+        ]
     else:
         packages_to_process = []
         total = len(all_packages)
@@ -246,7 +261,9 @@ def main() -> int:
     if not packages_to_process:
         logger.info("No packages to process")
         return 0
-    process_args = [(pkg, ver, output_dir, site_paths) for pkg, ver in packages_to_process]
+    process_args = [
+        (pkg, ver, output_dir, site_paths) for pkg, ver in packages_to_process
+    ]
     successful = []
     failed = []
     skipped = []

@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Folderize files recursively by first letter.
-Files starting with 'a' go into folder 'a/', 'b' into 'b/', etc.
-Numbers and special chars go into '0-9/' folder.
-"""
 
 from __future__ import annotations
 
@@ -62,7 +57,9 @@ def folderize_files(root: Path = Path.cwd()) -> None:
             shutil.move(str(file_path), str(target_path))
             if counter > 1:
                 renamed_count += 1
-                print(f"Moved and renamed: {original_name} -> {target_path.name} (duplicate avoided)")
+                print(
+                    f"Moved and renamed: {original_name} -> {target_path.name} (duplicate avoided)"
+                )
             else:
                 print(f"Moved: {file_path} -> {target_path}")
     print("\nCleaning up empty directories...")
@@ -76,7 +73,9 @@ def folderize_files(root: Path = Path.cwd()) -> None:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Organize files recursively into alphabetical folders")
+    parser = argparse.ArgumentParser(
+        description="Organize files recursively into alphabetical folders"
+    )
     parser.add_argument(
         "directory",
         nargs="?",

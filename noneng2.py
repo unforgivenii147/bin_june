@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-find_noneng.py - Recursively find non-English files using pycld3
-Usage:
-  python find_noneng.py
-  python find_noneng.py -l
-  python find_noneng.py -l -o out.json
-"""
 
 from __future__ import annotations
 
@@ -118,7 +111,9 @@ def analyze_file(filepath: Path, detailed: bool = False) -> dict | None:
                                 "line_num": idx,
                                 "text": line[:200],
                                 "confidence": prob,
-                                "full_text": line if len(line) <= 200 else f"{line[:200]}...",
+                                "full_text": line
+                                if len(line) <= 200
+                                else f"{line[:200]}...",
                             }
                         )
                 if non_eng_lines:
@@ -139,7 +134,9 @@ def analyze_file(filepath: Path, detailed: bool = False) -> dict | None:
                             "line_num": idx,
                             "text": line[:200],
                             "confidence": prob,
-                            "full_text": line if len(line) <= 200 else f"{line[:200]}...",
+                            "full_text": line
+                            if len(line) <= 200
+                            else f"{line[:200]}...",
                         }
                     )
             if non_eng_lines:
@@ -158,7 +155,9 @@ def analyze_file(filepath: Path, detailed: bool = False) -> dict | None:
         return {"file": str(filepath), "error": str(e), "non_english_lines": []}
 
 
-def scan_files(root_dir: Path, detailed: bool = False, max_workers: int | None = None) -> list[dict]:
+def scan_files(
+    root_dir: Path, detailed: bool = False, max_workers: int | None = None
+) -> list[dict]:
     if max_workers is None:
         max_workers = min(cpu_count(), 8)
     files = []
@@ -186,11 +185,30 @@ def scan_files(root_dir: Path, detailed: bool = False, max_workers: int | None =
 
 def main():
     parser = argparse.ArgumentParser(description="Find non-English files recursively")
-    parser.add_argument("-l", "--detailed", action="store_true", help="Report non-English lines within each file")
-    parser.add_argument("-o", "--output", default="noneng.json", help="Output JSON file (default: noneng.json)")
-    parser.add_argument("-d", "--dir", default=".", help="Root directory to scan (default: current directory)")
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of parallel workers (default: CPU count, max 8)"
+        "-l",
+        "--detailed",
+        action="store_true",
+        help="Report non-English lines within each file",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="noneng.json",
+        help="Output JSON file (default: noneng.json)",
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        default=".",
+        help="Root directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers (default: CPU count, max 8)",
     )
     args = parser.parse_args()
     root_dir = Path(args.dir).resolve()

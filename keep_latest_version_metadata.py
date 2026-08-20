@@ -1,8 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Remove old versions of Python package metadata files, keeping only the latest version.
-Uses pathlib and parallel processing for efficiency.
-"""
 
 from __future__ import annotations
 
@@ -12,12 +8,11 @@ import shutil
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 from packaging.version import InvalidVersion, Version
 
 
-def parse_filename(filepath: Path) -> Tuple[str, Version, Path]:
+def parse_filename(filepath: Path) -> tuple[str, Version, Path]:
     name = filepath.stem
     match = re.match(r"^(.+?)-(\d[\d._]*[a-zA-Z]*[\d]*)$", name)
     if not match:
@@ -38,13 +33,13 @@ def normalize_package_name(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
-def find_metadata_files(directory: Path) -> List[Path]:
+def find_metadata_files(directory: Path) -> list[Path]:
     if not directory.exists():
         raise FileNotFoundError(f"Directory not found: {directory}")
     return list(directory.glob("*.metadata"))
 
 
-def process_file_batch(files: List[Path]) -> Dict[str, List[Tuple[Version, Path]]]:
+def process_file_batch(files: list[Path]) -> dict[str, list[tuple[Version, Path]]]:
     packages = defaultdict(list)
     for filepath in files:
         pkg_name, version, path = parse_filename(filepath)
@@ -53,7 +48,7 @@ def process_file_batch(files: List[Path]) -> Dict[str, List[Tuple[Version, Path]
     return packages
 
 
-def find_old_versions(package_files: List[Tuple[Version, Path]]) -> List[Path]:
+def find_old_versions(package_files: list[tuple[Version, Path]]) -> list[Path]:
     if len(package_files) <= 1:
         return []
     sorted_files = sorted(package_files, key=lambda x: x[0], reverse=True)
@@ -65,7 +60,9 @@ def find_old_versions(package_files: List[Tuple[Version, Path]]) -> List[Path]:
     return [path for version, path in old_versions]
 
 
-def merge_results(results: List[Dict[str, List[Tuple[Version, Path]]]]) -> Dict[str, List[Tuple[Version, Path]]]:
+def merge_results(
+    results: list[dict[str, list[tuple[Version, Path]]]],
+) -> dict[str, list[tuple[Version, Path]]]:
     merged = defaultdict(list)
     for result in results:
         for pkg_name, versions in result.items():
@@ -73,7 +70,9 @@ def merge_results(results: List[Dict[str, List[Tuple[Version, Path]]]]) -> Dict[
     return merged
 
 
-def delete_files(paths: List[Path], dry_run: bool = True, backup_dir: Path | None = None):
+def delete_files(
+    paths: list[Path], dry_run: bool = True, backup_dir: Path | None = None
+):
     for path in paths:
         if dry_run:
             print(f"  [DRY RUN] Would delete: {path.name}")
@@ -87,15 +86,36 @@ def delete_files(paths: List[Path], dry_run: bool = True, backup_dir: Path | Non
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Remove old versions of Python package metadata files")
-    parser.add_argument(
-        "directory", nargs="?", default=".", help="Directory containing metadata files (default: current directory)"
+    parser = argparse.ArgumentParser(
+        description="Remove old versions of Python package metadata files"
     )
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be deleted without actually deleting")
-    parser.add_argument("--backup-dir", type=str, help="Move old files to backup directory instead of deleting")
-    parser.add_argument("--workers", type=int, default=None, help="Number of worker processes (default: CPU count)")
     parser.add_argument(
-        "--batch-size", type=int, default=100, help="Number of files to process per batch (default: 100)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory containing metadata files (default: current directory)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be deleted without actually deleting",
+    )
+    parser.add_argument(
+        "--backup-dir",
+        type=str,
+        help="Move old files to backup directory instead of deleting",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count)",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=100,
+        help="Number of files to process per batch (default: 100)",
     )
     args = parser.parse_args()
     metadata_dir = Path(args.directory)
@@ -114,11 +134,18 @@ def main():
         print("No metadata files found")
         return 0
     batch_size = max(1, args.batch_size)
-    batches = [all_files[i : i + batch_size] for i in range(0, len(all_files), batch_size)]
-    print(f"Processing {len(batches)} batches using {args.workers or 'all available'} workers...")
+    batches = [
+        all_files[i : i + batch_size] for i in range(0, len(all_files), batch_size)
+    ]
+    print(
+        f"Processing {len(batches)} batches using {args.workers or 'all available'} workers..."
+    )
     batch_results = []
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        future_to_batch = {executor.submit(process_file_batch, batch): i for i, batch in enumerate(batches)}
+        future_to_batch = {
+            executor.submit(process_file_batch, batch): i
+            for i, batch in enumerate(batches)
+        }
         for future in as_completed(future_to_batch):
             batch_idx = future_to_batch[future]
             try:
@@ -137,7 +164,7 @@ def main():
             old_files = find_old_versions(versions)
             files_to_delete.extend(old_files)
     print(f"\n{'=' * 42}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Total metadata files: {len(all_files)}")
     print(f"  Unique packages: {len(all_packages)}")
     print(f"  Files to remove: {len(files_to_delete)}")
@@ -146,7 +173,9 @@ def main():
         print(f"Removing {len(files_to_delete)} old version files...")
         delete_files(files_to_delete, dry_run=args.dry_run, backup_dir=backup_dir)
         if args.dry_run:
-            print("\nThis was a dry run. Use without --dry-run to actually delete files.")
+            print(
+                "\nThis was a dry run. Use without --dry-run to actually delete files."
+            )
     else:
         print("\nNo duplicate versions found. All packages have single versions.")
     return 0

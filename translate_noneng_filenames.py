@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-translates filenames that are not english
-"""
 
 from __future__ import annotations
 
